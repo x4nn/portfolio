@@ -1,12 +1,13 @@
 const portfolioProfile = {
-    name: "Xander",
-    role: "Front-end Developer",
-    email: "hello@xander.dev",
-    linkedinUrl: "https://www.linkedin.com/in/xander",
-    linkedinLabel: "linkedin.com/in/xander",
-    githubUrl: "https://github.com/xander",
-    githubLabel: "github.com/xander",
-    location: "Belgie, beschikbaar voor remote en hybride",
+    name: "Xander Detruyer",
+    title: "Junior Software Engineer",
+    diploma: "Professionele bachelor Software Engineering",
+    email: "xander.detruyer@gmail.com",
+    linkedinUrl: "https://www.linkedin.com/in/xander-detruyer-6b0bb9297",
+    linkedinLabel: "linkedin.com/in/xander-detruyer-6b0bb9297",
+    githubUrl: "https://github.com/x4nn",
+    githubLabel: "github.com/x4nn",
+    location: "België, beschikbaar voor remote en hybride",
     cvUrl: "https://example.com/xander-cv.pdf"
 };
 
@@ -47,6 +48,8 @@ const updateLinkNodes = (selector, href, label) => {
 
 const bindProfileContent = () => {
     updateTextNodes("[data-profile-name]", portfolioProfile.name);
+    updateTextNodes("[data-profile-title]", portfolioProfile.title);
+    updateTextNodes("[data-profile-diploma]", portfolioProfile.diploma);
     updateTextNodes("[data-profile-email]", portfolioProfile.email);
     updateTextNodes("[data-profile-location]", portfolioProfile.location);
 
