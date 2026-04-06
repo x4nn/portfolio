@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Python-projecten van Xander Detruyer - Game development, algoritmes en simulaties.">
+    <title>Python Projecten | Xander Detruyer Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .projects-hero {
+            background: linear-gradient(135deg, rgba(23, 105, 232, 0.08) 0%, rgba(17, 169, 135, 0.06) 100%);
+            padding: 60px 0;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(15, 20, 30, 0.08);
+        }
+
+        .project-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 60px;
+        }
+
+        .project-details-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .project-details-content h3 {
+            font-family: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
+            font-size: 1.4rem;
+            line-height: 1.3;
+        }
+
+        .project-details-content p {
+            color: var(--text-soft);
+            line-height: 1.7;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tech-badge {
+            background: rgba(17, 169, 135, 0.15);
+            color: #0e8a6f;
+            border: 1px solid rgba(17, 169, 135, 0.25);
+            border-radius: 999px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .demo-placeholder {
+            background: linear-gradient(135deg, rgba(23, 105, 232, 0.12) 0%, rgba(17, 169, 135, 0.08) 100%);
+            border: 2px dashed rgba(23, 105, 232, 0.22);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            text-align: center;
+            color: var(--text-soft);
+            font-size: 0.95rem;
+        }
+
+        .demo-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+
+        .github-link {
+            color: var(--brand-strong);
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--brand-strong);
+            font-weight: 700;
+            margin-bottom: 40px;
+            transition: transform 0.2s ease;
+        }
+
+        .back-link:hover {
+            transform: translateX(-4px);
+        }
+
+        @media (max-width: 768px) {
+            .project-details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .projects-hero {
+                padding: 40px 0;
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#projects" class="skip-link">Ga direct naar projecten</a>
+
+    <header class="site-header" data-site-header>
+        <div class="container header-inner">
+            <a class="brand" href="index.html" aria-label="Ga naar Home"><span data-profile-name>Xander</span><span>.</span></a>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigatie" data-nav-toggle>
+                <span class="nav-toggle-line"></span>
+            </button>
+
+            <nav id="site-nav" class="site-nav" aria-label="Hoofd navigatie" data-site-nav>
+                <ul class="nav-list">
+                    <li><a class="nav-link" href="index.html#home">Home</a></li>
+                    <li><a class="nav-link" href="index.html#over-mij">Over Mij</a></li>
+                    <li><a class="nav-link" href="index.html#skills">Skills</a></li>
+                    <li><a class="nav-link active" href="projects.html">Projecten</a></li>
+                    <li><a class="nav-link" href="index.html#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding-top: 74px;">
+        <section class="projects-hero" id="projects">
+            <div class="container">
+                <a href="index.html#projecten" class="back-link">← Terug naar Home</a>
+                <header class="section-header reveal">
+                    <h1 class="section-title">Python Projecten</h1>
+                    <p class="section-intro">
+                        Een persoonlijke verzameling van Python-projecten: van game development tot algoritmes en simulaties. Elk project een kans om te experimenteren en mijn vaardigheden te versterken.
+                    </p>
+                </header>
+            </div>
+        </section>
+
+        <!-- PyPong Project -->
+        <section class="section">
+            <div class="container">
+                <div class="project-details-grid">
+                    <div class="project-details-content glass-card reveal" style="padding: 28px;">
+                        <span class="project-tag">Game Development</span>
+                        <h3>PyPong</h3>
+                        <p>
+                            Een klassieke Pong-game volledig in Python. Het bijzondere: volledig multiplayer op hetzelfde scherm. Je speelt tegen elkaar op één computer, perfect voor een uurtje plezier en een mooie manier om Python-basis weer op te frissen.
+                        </p>
+                        <div>
+                            <strong style="display: block; margin-bottom: 8px;">Gebruikte technologie:</strong>
+                            <div class="tech-stack">
+                                <span class="tech-badge">Python</span>
+                                <span class="tech-badge">Pygame</span>
+                                <span class="tech-badge">Game Loop</span>
+                            </div>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-soft);">
+                            Kijk voor de broncode op mijn GitHub (link volgt).
+                        </p>
+                    </div>
+                    <div class="demo-placeholder reveal">
+                        <div class="demo-icon">🕹️</div>
+                        <p>Demo: Python game met real-time input, score tracking en multiplayer meerpeler gameplay</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PyMazeSolver Project -->
+        <section class="section">
+            <div class="container">
+                <div class="project-details-grid">
+                    <div class="demo-placeholder reveal">
+                        <div class="demo-icon">🧩</div>
+                        <p>Demo: Maze generator en solver met pathfinding-algoritmen</p>
+                    </div>
+                    <div class="project-details-content glass-card reveal" style="padding: 28px;">
+                        <span class="project-tag">Algoritmes</span>
+                        <h3>PyMazeSolver</h3>
+                        <p>
+                            Een uitdagend project waarbij ik zelf een doolhof-generator en doolhof-solver heb gebouwd. Dit was een mooie oefening om mijn skills te testen waarbij ik zonder hulp moest bewijzen dat ik pathfinding-algoritmen snap. Het project genereert willekeurige doolhoven en lost ze vervolgens automatisch op.
+                        </p>
+                        <div>
+                            <strong style="display: block; margin-bottom: 8px;">Gebruikte technologie:</strong>
+                            <div class="tech-stack">
+                                <span class="tech-badge">Python</span>
+                                <span class="tech-badge">Pathfinding</span>
+                                <span class="tech-badge">Recursion</span>
+                                <span class="tech-badge">Visualization</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rabbit Fox Simulatie Project -->
+        <section class="section">
+            <div class="container">
+                <div class="project-details-grid">
+                    <div class="project-details-content glass-card reveal" style="padding: 28px;">
+                        <span class="project-tag">Simulatie</span>
+                        <h3>Rabbit-Fox Simulatie</h3>
+                        <p>
+                            Een ecologische simulatie die de predator-prooi dynamiek modelleert tussen konijnen en vossen. In het systeem groeien konijnen, jagen vossen op konijnen, en beide kunnen sterven. De simulatie toont interessante patronen: periodes van groei gevolgd door collapse en herstel. Ideaal om klassieke predator-prooi cycli te begrijpen.
+                        </p>
+                        <div>
+                            <strong style="display: block; margin-bottom: 8px;">Gebruikte technologie:</strong>
+                            <div class="tech-stack">
+                                <span class="tech-badge">Python</span>
+                                <span class="tech-badge">Simulation</span>
+                                <span class="tech-badge">Agent-based</span>
+                                <span class="tech-badge">Data Visualization</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-placeholder reveal">
+                        <div class="demo-icon">🐰🦊</div>
+                        <p>Demo: Ecologische simulatie met predator-prooi dynamiek in real-time</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conway's Game of Life Project -->
+        <section class="section">
+            <div class="container">
+                <div class="project-details-grid">
+                    <div class="demo-placeholder reveal">
+                        <div class="demo-icon">🔲</div>
+                        <p>Demo: Cellular automaton met dynamische evolutie van levende cellen</p>
+                    </div>
+                    <div class="project-details-content glass-card reveal" style="padding: 28px;">
+                        <span class="project-tag">Cellular Automaton</span>
+                        <h3>Conway's Game of Life</h3>
+                        <p>
+                            Een beroemde cellulaire automaton van John Horton Conway. Het is eigenlijk geen "game", maar een fascinerende simulatie met eenvoudige regels: cellen kunnen geboren worden, overleven of sterven op basis van hun buren. Ondanks de simpele regels ontstaan er complexe, soms bijzonder mooie patronen. Een klein project, groot effect.
+                        </p>
+                        <div>
+                            <strong style="display: block; margin-bottom: 8px;">Gebruikte technologie:</strong>
+                            <div class="tech-stack">
+                                <span class="tech-badge">Python</span>
+                                <span class="tech-badge">Cellular Automata</span>
+                                <span class="tech-badge">Grid System</span>
+                                <span class="tech-badge">Visualization</span>
+                            </div>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-soft);">
+                            <strong>Wie/wat is John Horton Conway?</strong> Een Brits wiskundige (1937-2020) bekend om zijn werk in groepentheorie, maar vooral beroemd voor dit elegante "game". Het toont hoe eenvoudige deterministische regels ongelooflijk complexe gedrag kunnen veroorzaken.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Langton's Ant Project -->
+        <section class="section">
+            <div class="container">
+                <div class="project-details-grid">
+                    <div class="project-details-content glass-card reveal" style="padding: 28px;">
+                        <span class="project-tag">Cellular Automaton</span>
+                        <h3>Langton's Ant</h3>
+                        <p>
+                            Een nog elegantere maar minder bekende cellulaire automaton. Een enkele "mier" loopt over een oneindige grid met simpele regels: draai links op witte cellen, rechts op zwarte, en verander de kleur. Het interessante? Na chaos komt structuur: de mier bouwt uiteindelijk een herhalend patroon (een "highway") dat eindeloos voortgaat. Fascinerend voorbeeld van emergent behavior.
+                        </p>
+                        <div>
+                            <strong style="display: block; margin-bottom: 8px;">Gebruikte technologie:</strong>
+                            <div class="tech-stack">
+                                <span class="tech-badge">Python</span>
+                                <span class="tech-badge">Cellular Automata</span>
+                                <span class="tech-badge">State Machine</span>
+                                <span class="tech-badge">Visualization</span>
+                            </div>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-soft);">
+                            <strong>Wie is Christopher Langton?</strong> Een uitstekend artificial life onderzoeker (1949) die dit eenvoudige maar briljante systeem heeft bedacht. His werk toont hoe systemen zelf orde kunnen creëren vanuit ruis.
+                        </p>
+                    </div>
+                    <div class="demo-placeholder reveal">
+                        <div class="demo-icon">🐜</div>
+                        <p>Demo: Mier-simulatie die chaotische patronen in ordening omzet</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Call-to-Action -->
+        <section class="section glass-card reveal" style="padding: 40px; text-align: center;">
+            <h2 style="font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif; font-size: 1.8rem; margin-bottom: 12px;">Interesse in python?</h2>
+            <p style="color: var(--text-soft); margin-bottom: 24px; font-size: 1.05rem;">
+                Deze projecten laten zien hoe ik concepten test en mijn skills scherp houd. Wil je meer weten of samenwerken?
+            </p>
+            <a class="button button-primary" href="index.html#contact">Neem contact op</a>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; <span data-year></span> <span data-profile-name>Xander</span>. Ontwikkeld met focus op kwaliteit, snelheid en gebruikservaring.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js" defer></script>
+</body>
+</html>

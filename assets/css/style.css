@@ -665,6 +665,28 @@ body.motion-active .hero-panel {
     }
 }
 
+.featured-projects {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+.featured-projects .glass-card {
+    padding: 32px;
+    transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.featured-projects .glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.featured-project-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
