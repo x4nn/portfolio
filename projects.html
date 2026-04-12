@@ -9,106 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        .projects-hero {
-            background: linear-gradient(135deg, rgba(23, 105, 232, 0.08) 0%, rgba(17, 169, 135, 0.06) 100%);
-            padding: 60px 0;
-            margin-bottom: 40px;
-            border-bottom: 1px solid rgba(15, 20, 30, 0.08);
-        }
-
-        .project-details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            margin-bottom: 60px;
-        }
-
-        .project-details-content {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .project-details-content h3 {
-            font-family: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
-            font-size: 1.4rem;
-            line-height: 1.3;
-        }
-
-        .project-details-content p {
-            color: var(--text-soft);
-            line-height: 1.7;
-        }
-
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .tech-badge {
-            background: rgba(17, 169, 135, 0.15);
-            color: #0e8a6f;
-            border: 1px solid rgba(17, 169, 135, 0.25);
-            border-radius: 999px;
-            padding: 5px 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .demo-placeholder {
-            background: linear-gradient(135deg, rgba(23, 105, 232, 0.12) 0%, rgba(17, 169, 135, 0.08) 100%);
-            border: 2px dashed rgba(23, 105, 232, 0.22);
-            border-radius: var(--radius-lg);
-            padding: 40px;
-            text-align: center;
-            color: var(--text-soft);
-            font-size: 0.95rem;
-        }
-
-        .demo-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-            opacity: 0.6;
-        }
-
-        .github-link {
-            color: var(--brand-strong);
-            font-weight: 700;
-            text-decoration: underline;
-        }
-
-        .section {
-            margin-bottom: 80px;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--brand-strong);
-            font-weight: 700;
-            margin-bottom: 40px;
-            transition: transform 0.2s ease;
-        }
-
-        .back-link:hover {
-            transform: translateX(-4px);
-        }
-
-        @media (max-width: 768px) {
-            .project-details-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .projects-hero {
-                padding: 40px 0;
-                margin-bottom: 30px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/pages/projects.css">
 </head>
 <body>
     <a href="#projects" class="skip-link">Ga direct naar projecten</a>
@@ -165,12 +66,14 @@
                             </div>
                         </div>
                         <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-soft);">
-                            Kijk voor de broncode op mijn GitHub (link volgt).
+                            <a href="https://github.com/x4nn/PyPong" target="_blank" rel="noopener noreferrer" class="github-link">Bekijk de broncode op GitHub →</a>
                         </p>
                     </div>
-                    <div class="demo-placeholder reveal">
-                        <div class="demo-icon">🕹️</div>
-                        <p>Demo: Python game met real-time input, score tracking en multiplayer meerpeler gameplay</p>
+                    <div class="video-container reveal">
+                        <video class="demo-video" controls preload="metadata">
+                            <source src="assets/media/vids/pypong-gameplay.mp4" type="video/mp4">
+                            Je browser ondersteunt video niet. <a href="assets/media/vids/pypong-gameplay.mp4">Download de video hier</a>
+                        </video>
                     </div>
                 </div>
             </div>
@@ -180,15 +83,17 @@
         <section class="section">
             <div class="container">
                 <div class="project-details-grid">
-                    <div class="demo-placeholder reveal">
-                        <div class="demo-icon">🧩</div>
-                        <p>Demo: Maze generator en solver met pathfinding-algoritmen</p>
+                    <div class="video-container reveal">
+                        <video class="demo-video" controls preload="metadata">
+                            <source src="assets/media/vids/maze-solver-gameplay.mp4" type="video/mp4">
+                            Je browser ondersteunt video niet. <a href="assets/media/vids/maze-solver-gameplay.mp4">Download de video hier</a>
+                        </video>
                     </div>
                     <div class="project-details-content glass-card reveal" style="padding: 28px;">
                         <span class="project-tag">Algoritmes</span>
                         <h3>PyMazeSolver</h3>
                         <p>
-                            Een uitdagend project waarbij ik zelf een doolhof-generator en doolhof-solver heb gebouwd. Dit was een mooie oefening om mijn skills te testen waarbij ik zonder hulp moest bewijzen dat ik pathfinding-algoritmen snap. Het project genereert willekeurige doolhoven en lost ze vervolgens automatisch op.
+                            Een uitdagend project waarbij ik een doolhof-solver heb gebouwd. Je tekent zelf een doolhof en de solver gaat aan het werk: je ziet real-time hoe hij exploreert, waar hij probeert heen te gaan, en hoe hij terugkrabbelt wanneer hij een dood spoor ontdekt. Dit geeft echt inzicht in hoe pathfinding-algoritmen werken. Het mooie is dat je het hele proces ziet—niet alleen het eindresultaat. (Vertraag de video als je hem beter wilt volgen!)
                         </p>
                         <div>
                             <strong style="display: block; margin-bottom: 8px;">Gebruikte technologie:</strong>
@@ -224,9 +129,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="demo-placeholder reveal">
-                        <div class="demo-icon">🐰🦊</div>
-                        <p>Demo: Ecologische simulatie met predator-prooi dynamiek in real-time</p>
+                    <div class="video-container reveal">
+                        <video class="demo-video" controls preload="metadata">
+                            <source src="assets/media/vids/rabbit-fox-sim.mp4" type="video/mp4">
+                            Je browser ondersteunt video niet. <a href="assets/media/vids/rabbit-fox-sim.mp4">Download de video hier</a>
+                        </video>
                     </div>
                 </div>
             </div>
@@ -236,9 +143,11 @@
         <section class="section">
             <div class="container">
                 <div class="project-details-grid">
-                    <div class="demo-placeholder reveal">
-                        <div class="demo-icon">🔲</div>
-                        <p>Demo: Cellular automaton met dynamische evolutie van levende cellen</p>
+                    <div class="video-container reveal">
+                        <video class="demo-video" controls preload="metadata">
+                            <source src="assets/media/vids/conway-gameplay.mp4" type="video/mp4">
+                            Je browser ondersteunt video niet. <a href="assets/media/vids/conway-gameplay.mp4">Download de video hier</a>
+                        </video>
                     </div>
                     <div class="project-details-content glass-card reveal" style="padding: 28px;">
                         <span class="project-tag">Cellular Automaton</span>
@@ -286,9 +195,11 @@
                             <strong>Wie is Christopher Langton?</strong> Een uitstekend artificial life onderzoeker (1949) die dit eenvoudige maar briljante systeem heeft bedacht. His werk toont hoe systemen zelf orde kunnen creëren vanuit ruis.
                         </p>
                     </div>
-                    <div class="demo-placeholder reveal">
-                        <div class="demo-icon">🐜</div>
-                        <p>Demo: Mier-simulatie die chaotische patronen in ordening omzet</p>
+                    <div class="video-container reveal">
+                        <video class="demo-video" controls preload="metadata">
+                            <source src="assets/media/vids/langtons-ant-gameplay.mp4" type="video/mp4">
+                            Je browser ondersteunt video niet. <a href="assets/media/vids/langtons-ant-gameplay.mp4">Download de video hier</a>
+                        </video>
                     </div>
                 </div>
             </div>
@@ -311,5 +222,6 @@
     </footer>
 
     <script src="assets/js/main.js" defer></script>
+    <script src="assets/js/pages/projects.js" defer></script>
 </body>
 </html>
