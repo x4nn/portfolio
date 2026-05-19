@@ -318,6 +318,26 @@ const initializeContactForm = () => {
     });
 };
 
+function initTheme() {
+    const $themeToggleButton = document.getElementById("theme-toggle");
+    const $body = document.body;
+    const theme = localStorage.getItem("theme") || "light";
+    $body.setAttribute("data-theme", theme);
+
+    if (theme === "dark") $themeToggleButton.innerText = "🌙";
+    else $themeToggleButton.innerText = "☀️";
+
+    $themeToggleButton.addEventListener("click", () => {
+        const currentTheme = localStorage.getItem("theme") || "light";
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+        localStorage.setItem("theme", newTheme);
+        $body.setAttribute("data-theme", newTheme);
+
+        if (newTheme === "dark") $themeToggleButton.innerText = "🌙";
+        else $themeToggleButton.innerText = "☀️";
+    });
+}
+
 bindProfileContent();
 initializeYear();
 initializeNavigation();
@@ -329,3 +349,4 @@ initializeHeroParallax();
 initializeMagneticButtons();
 initializeIntroMotion();
 initializeContactForm();
+initTheme();
