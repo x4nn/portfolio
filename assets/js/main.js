@@ -8,7 +8,7 @@ const portfolioProfile = {
     githubUrl: "https://github.com/x4nn",
     githubLabel: "github.com/x4nn",
     location: "België, beschikbaar voor remote en hybride",
-    cvUrl: "https://example.com/xander-cv.pdf"
+    cvUrl: "assets/pdf/cv_xanderdetruyer.pdf"
 };
 
 const state = {
@@ -60,6 +60,9 @@ const bindProfileContent = () => {
 
     updateTextNodes("[data-profile-linkedin-label]", portfolioProfile.linkedinLabel);
     updateTextNodes("[data-profile-github-label]", portfolioProfile.githubLabel);
+
+    // Setup CV download functionality
+    initializeCVDownload();
 };
 
 const initializeYear = () => {
@@ -94,6 +97,21 @@ const initializeNavigation = () => {
         if (event.key === "Escape") {
             closeNavigation();
         }
+    });
+};
+
+const initializeCVDownload = () => {
+    const cvLinks = document.querySelectorAll("[data-profile-cv]");
+    cvLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+            event.preventDefault();
+            const link = document.createElement("a");
+            link.href = portfolioProfile.cvUrl;
+            link.download = "cv_xanderdetruyer.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
     });
 };
 
