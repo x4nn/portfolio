@@ -285,6 +285,11 @@ select {
     background: #fcf7f9;
 }
 
+.calendar-day.is-today {
+    border: 2px solid #8c5b7a;
+    box-shadow: 0 0 0 2px rgba(140, 91, 122, 0.16);
+}
+
 .calendar-day.is-you {
     background: rgba(143, 181, 255, 0.24);
     border-color: rgba(143, 181, 255, 0.4);

@@ -208,6 +208,9 @@ function renderCalendar() {
         html.push(`<div class="calendar-day is-muted" aria-hidden="true"></div>`);
     }
 
+    const today = new Date();
+    const isCurrentMonth = monthDate.getFullYear() === today.getFullYear() && monthDate.getMonth() === today.getMonth();
+
     for (let dayNumber = 1; dayNumber <= daysInMonth; dayNumber += 1) {
         const assignment = getAssignment(monthKey, dayNumber);
         const label = assignment ? ROLE_LABELS[assignment] : "Open";
@@ -215,6 +218,9 @@ function renderCalendar() {
         const classes = ["calendar-day"];
         if (assignment) {
             classes.push(`is-${assignment}`);
+        }
+        if (isCurrentMonth && dayNumber === today.getDate()) {
+            classes.push("is-today");
         }
 
         const buttonLabel = assignment
