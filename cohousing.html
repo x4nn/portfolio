@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Simple dashboard for tracking shared stays and weekly costs between family members.">
+    <title>Cohousing Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/pages/cohousing.css">
+</head>
+<body data-active-role="you">
+    <div class="page-shell">
+        <header class="hero-card">
+            <div class="hero-copy">
+                <p class="hero-kicker">Cohousing helper</p>
+                <h1>Cohousing Calculator</h1>
+                <p class="hero-text">
+                    Mark a day for Mom, Dad, or xan, then see the monthly totals and what is owed at the end of the month.
+                </p>
+            </div>
+
+            <div class="hero-panel">
+                <p class="panel-label">Open as</p>
+                <div class="role-switcher" role="tablist" aria-label="Choose who is editing" data-role-switcher></div>
+                <p class="panel-status" data-role-status>Currently editing as you.</p>
+                <p class="sync-status" data-sync-status>Connecting to shared database…</p>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <section class="card" aria-labelledby="calendar-heading">
+                <div class="card-header">
+                    <div>
+                        <p class="card-eyebrow">Calendar</p>
+                        <h2 id="calendar-heading">Tap days to mark stays</h2>
+                    </div>
+                    <label class="month-picker" for="month-select">
+                        <span>Month</span>
+                        <select id="month-select" data-month-select></select>
+                    </label>
+                </div>
+
+                <div class="legend" aria-label="Legend for calendar colors">
+                    <span class="legend-item"><span class="legend-swatch legend-you"></span>You</span>
+                    <span class="legend-item"><span class="legend-swatch legend-mom"></span>Mom</span>
+                    <span class="legend-item"><span class="legend-swatch legend-dad"></span>Dad</span>
+                </div>
+
+                <div class="calendar-grid" data-calendar-grid></div>
+            </section>
+
+            <section class="card" aria-labelledby="summary-heading">
+                <div class="card-header">
+                    <div>
+                        <p class="card-eyebrow">Calculations</p>
+                        <h2 id="summary-heading">Monthly overview</h2>
+                    </div>
+                </div>
+
+                <div class="amount-form">
+                    <label class="amount-field">
+                        <span>Monthly budget</span>
+                        <input type="number" min="0" step="1" value="400" data-budget-input="monthlyBudget">
+                    </label>
+                </div>
+
+                <div class="summary-list" data-summary-list></div>
+            </section>
+
+            <section class="card history-card" aria-labelledby="history-heading">
+                <div class="card-header">
+                    <div>
+                        <p class="card-eyebrow">History</p>
+                        <h2 id="history-heading">Recent months</h2>
+                    </div>
+                </div>
+
+                <div class="history-list" data-history-list></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="assets/js/cohousing-data.js"></script>
+    <script src="assets/js/pages/cohousing.js"></script>
+</body>
+</html>
