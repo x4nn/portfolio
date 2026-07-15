@@ -6,9 +6,9 @@ const ROLE_LABELS = {
 };
 
 const defaultState = {
-    activeRole: "you",
+    activeRole: "xan",
     selectedMonthKey: getMonthKey(new Date()),
-    monthlyBudget: 400,
+    weeklyBudget: 100,
     assignments: {},
     users: structuredClone(DEFAULT_USERS)
 };
@@ -54,7 +54,7 @@ function normalizeState(parsedState) {
     return {
         activeRole: parsedState.activeRole || defaultState.activeRole,
         selectedMonthKey: parsedState.selectedMonthKey || defaultState.selectedMonthKey,
-        monthlyBudget: Number(parsedState.monthlyBudget) || Number(defaultState.monthlyBudget) || 0,
+        weeklyBudget: Number(parsedState.weeklyBudget) || Number(defaultState.weeklyBudget) || 0,
         assignments: parsedState.assignments || {},
         users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS)
     };
@@ -123,7 +123,7 @@ function bindEvents() {
 
     amountInputs.forEach((input) => {
         input.addEventListener("change", async () => {
-            state.monthlyBudget = Number(input.value) || 0;
+            state.weeklyBudget = Number(input.value) || 0;
             await saveState();
             renderSummary();
             renderHistory();
@@ -287,13 +287,13 @@ function renderSummary() {
     const monthKey = state.selectedMonthKey;
     const monthDate = parseMonthKey(monthKey);
     const paymentBreakdown = getPaymentBreakdown(monthKey);
-    const monthlyBudget = paymentBreakdown.monthlyBudget;
+    const weeklyBudget = paymentBreakdown.weeklyBudget;
 
     const summaryCards = [
         {
             title: "Per-day rate",
             value: formatCurrency(paymentBreakdown.dailyRate),
-            copy: `${paymentBreakdown.totalPaidDays} paid day${paymentBreakdown.totalPaidDays === 1 ? "" : "s"} • €${monthlyBudget} monthly budget`
+            copy: `${paymentBreakdown.totalPaidDays} paid day${paymentBreakdown.totalPaidDays === 1 ? "" : "s"} • €${weeklyBudget} weekly budget`
         },
         {
             title: "Mom share",
@@ -306,8 +306,8 @@ function renderSummary() {
             copy: `${paymentBreakdown.counts.dad} day${paymentBreakdown.counts.dad === 1 ? "" : "s"} × ${formatCurrency(paymentBreakdown.dailyRate)}`
         },
         {
-            title: "Monthly budget",
-            value: formatCurrency(monthlyBudget),
+            title: "Weekly budget",
+            value: formatCurrency(weeklyBudget),
             copy: `${formatMonthLabel(monthKey)} for ${monthDate.toLocaleDateString("en", { month: "long", year: "numeric" })}`
         }
     ];
@@ -364,16 +364,14 @@ function countAssignmentsForMonth(monthKey) {
 
 function getPaymentBreakdown(monthKey) {
     const counts = countAssignmentsForMonth(monthKey);
-    const monthDate = parseMonthKey(monthKey);
-    const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
     const billableDays = counts.mom + counts.dad;
-    const monthlyBudget = Number(state.monthlyBudget) || 0;
-    const dailyRate = daysInMonth > 0 ? monthlyBudget / daysInMonth : 0;
+    const weeklyBudget = Number(state.weeklyBudget) || 0;
+    const dailyRate = weeklyBudget > 0 ? weeklyBudget / 7 : 0;
 
     return {
         counts,
         totalPaidDays: billableDays,
-        monthlyBudget,
+        weeklyBudget,
         dailyRate,
         momShare: counts.mom * dailyRate,
         dadShare: counts.dad * dailyRate

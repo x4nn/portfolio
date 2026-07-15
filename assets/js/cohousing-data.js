@@ -39,7 +39,7 @@ function getRoleFromIndex(index) {
         return "mom";
     }
 
-    return "you";
+    return "xan";
 }
 
 async function loadDashboardData() {
