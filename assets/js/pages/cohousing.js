@@ -397,7 +397,7 @@ function renderSummary() {
 }
 
 function renderHistory() {
-    const historyMonths = getRecentMonthOptions().slice(0, HISTORY_MONTH_COUNT);
+    const historyMonths = getHistoryMonthOptions();
 
     if (!historyMonths.length) {
         historyList.innerHTML = '<p class="summary-copy">No history yet.</p>';
@@ -486,6 +486,18 @@ function getRecentMonthOptions() {
     }
 
     return options;
+}
+
+function getHistoryMonthOptions() {
+    const referenceMonth = parseMonthKey(state.selectedMonthKey || getMonthKey(new Date()));
+    const historyMonths = [];
+
+    for (let step = 1; step <= HISTORY_MONTH_COUNT; step += 1) {
+        const previousMonthDate = addMonths(referenceMonth, -step);
+        historyMonths.push(getMonthKey(previousMonthDate));
+    }
+
+    return historyMonths;
 }
 
 function getMonthKey(date) {
