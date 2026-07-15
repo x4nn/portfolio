@@ -1,4 +1,6 @@
 const STORAGE_KEY = "cohousing-dashboard-state-v1";
+const ACCESS_PASSWORD = "xxx";
+const ACCESS_STORAGE_KEY = "cohousing-access-granted";
 const DAYS_IN_WEEK = 7;
 const MONTHS_TO_DISPLAY = 12;
 const MONTHS_BEFORE_CURRENT = Math.floor(MONTHS_TO_DISPLAY / 2);
@@ -23,6 +25,10 @@ let state = structuredClone(defaultState);
 
 const monthSelect = document.querySelector("[data-month-select]");
 const roleSwitcher = document.querySelector("[data-role-switcher]");
+const accessOverlay = document.querySelector("[data-access-overlay]");
+const accessForm = document.querySelector("[data-access-form]");
+const accessInput = document.querySelector("[data-access-input]");
+const accessError = document.querySelector("[data-access-error]");
 const roleStatus = document.querySelector("[data-role-status]");
 const syncStatus = document.querySelector("[data-sync-status]");
 const calendarGrid = document.querySelector("[data-calendar-grid]");
@@ -30,9 +36,16 @@ const summaryList = document.querySelector("[data-summary-list]");
 const historyList = document.querySelector("[data-history-list]");
 const amountInputs = document.querySelectorAll("[data-budget-input]");
 
-initialize();
+let pageInitialized = false;
+
+initializeAccessControl();
 
 async function initialize() {
+    if (pageInitialized) {
+        return;
+    }
+
+    pageInitialized = true;
     await loadRemoteState();
     ensureStateHasData();
     renderRoleButtons();
@@ -116,6 +129,50 @@ function updateSyncStatus(message) {
     if (syncStatus) {
         syncStatus.textContent = message;
     }
+}
+
+function initializeAccessControl() {
+    if (isAccessGranted()) {
+        hideAccessOverlay();
+        void initialize();
+        return;
+    }
+
+    if (!accessForm) {
+        return;
+    }
+
+    accessForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const enteredPassword = accessInput?.value?.trim() || "";
+
+        if (enteredPassword !== ACCESS_PASSWORD) {
+            if (accessError) {
+                accessError.textContent = "Wrong password. Try again.";
+            }
+            return;
+        }
+
+        grantAccess();
+        if (accessError) {
+            accessError.textContent = "";
+        }
+        hideAccessOverlay();
+        await initialize();
+    });
+}
+
+function isAccessGranted() {
+    return sessionStorage.getItem(ACCESS_STORAGE_KEY) === "true" || localStorage.getItem(ACCESS_STORAGE_KEY) === "true";
+}
+
+function grantAccess() {
+    sessionStorage.setItem(ACCESS_STORAGE_KEY, "true");
+    localStorage.setItem(ACCESS_STORAGE_KEY, "true");
+}
+
+function hideAccessOverlay() {
+    accessOverlay?.classList.add("is-hidden");
 }
 
 function ensureStateHasData() {

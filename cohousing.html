@@ -11,6 +11,22 @@
     <link rel="stylesheet" href="assets/css/pages/cohousing.css">
 </head>
 <body data-active-role="you">
+    <div class="access-overlay" data-access-overlay>
+        <form class="access-card" data-access-form>
+            <p class="hero-kicker">Private access</p>
+            <h1>Enter password</h1>
+            <p class="access-copy">This dashboard is only for your household.</p>
+
+            <label class="access-field" for="access-password">
+                <span>Password</span>
+                <input id="access-password" type="password" name="password" autocomplete="current-password" data-access-input>
+            </label>
+
+            <button class="access-button" type="submit">Open dashboard</button>
+            <p class="access-error" data-access-error></p>
+        </form>
+    </div>
+
     <div class="page-shell">
         <header class="hero-card">
             <div class="hero-copy">
