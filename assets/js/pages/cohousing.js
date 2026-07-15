@@ -1,4 +1,10 @@
 const STORAGE_KEY = "cohousing-dashboard-state-v1";
+const DAYS_IN_WEEK = 7;
+const MONTHS_TO_DISPLAY = 12;
+const MONTHS_BEFORE_CURRENT = Math.floor(MONTHS_TO_DISPLAY / 2);
+const HISTORY_MONTH_COUNT = 4;
+const WEEKLY_DAYS = 7;
+const DEFAULT_WEEKLY_BUDGET = 100;
 const ROLE_LABELS = {
     you: "xan",
     mom: "Mom",
@@ -6,9 +12,9 @@ const ROLE_LABELS = {
 };
 
 const defaultState = {
-    activeRole: "xan",
+    activeRole: "you",
     selectedMonthKey: getMonthKey(new Date()),
-    weeklyBudget: 100,
+    weeklyBudget: DEFAULT_WEEKLY_BUDGET,
     assignments: {},
     users: structuredClone(DEFAULT_USERS)
 };
@@ -52,12 +58,20 @@ function loadLocalState() {
 
 function normalizeState(parsedState) {
     return {
-        activeRole: parsedState.activeRole || defaultState.activeRole,
+        activeRole: normalizeRoleKey(parsedState.activeRole || defaultState.activeRole),
         selectedMonthKey: parsedState.selectedMonthKey || defaultState.selectedMonthKey,
         weeklyBudget: Number(parsedState.weeklyBudget) || Number(defaultState.weeklyBudget) || 0,
         assignments: parsedState.assignments || {},
         users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS)
     };
+}
+
+function normalizeRoleKey(roleKey) {
+    if (roleKey === "xan") {
+        return "you";
+    }
+
+    return roleKey;
 }
 
 async function loadRemoteState() {
@@ -194,9 +208,9 @@ function renderCalendar() {
     const monthDate = parseMonthKey(monthKey);
     const firstDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
     const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
-    const startingOffset = firstDay.getDay();
+    const startingOffset = (firstDay.getDay() + DAYS_IN_WEEK - 1) % DAYS_IN_WEEK;
 
-    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
     const html = [];
 
@@ -326,7 +340,7 @@ function renderSummary() {
 }
 
 function renderHistory() {
-    const historyMonths = getRecentMonthOptions().slice(0, 4);
+    const historyMonths = getRecentMonthOptions().slice(0, HISTORY_MONTH_COUNT);
 
     if (!historyMonths.length) {
         historyList.innerHTML = '<p class="summary-copy">No history yet.</p>';
@@ -366,7 +380,7 @@ function getPaymentBreakdown(monthKey) {
     const counts = countAssignmentsForMonth(monthKey);
     const billableDays = counts.mom + counts.dad;
     const weeklyBudget = Number(state.weeklyBudget) || 0;
-    const dailyRate = weeklyBudget > 0 ? weeklyBudget / 7 : 0;
+    const dailyRate = weeklyBudget > 0 ? weeklyBudget / WEEKLY_DAYS : 0;
 
     return {
         counts,
@@ -409,8 +423,9 @@ function getRecentMonthOptions() {
     const options = [];
     const startDate = new Date();
 
-    for (let step = 0; step < 6; step += 1) {
-        options.push(getMonthKey(addMonths(startDate, -step)));
+    for (let step = 0; step < MONTHS_TO_DISPLAY; step += 1) {
+        const monthOffset = step - MONTHS_BEFORE_CURRENT;
+        options.push(getMonthKey(addMonths(startDate, monthOffset)));
     }
 
     return options;

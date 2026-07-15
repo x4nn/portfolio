@@ -1,4 +1,8 @@
 const DATABASE_URL = "https://co-housing-e2c00-default-rtdb.europe-west1.firebasedatabase.app/co-housing.json";
+const ROLE_INDEX_BY_ROLE = {
+    dad: 1,
+    mom: 2
+};
 const ROLE_TO_USER_NAME = {
     you: "xan",
     mom: "mom",
@@ -12,7 +16,8 @@ const DEFAULT_USERS = [
 ];
 
 function getRoleIndex(role, users = DEFAULT_USERS) {
-    const userName = ROLE_TO_USER_NAME[role];
+    const normalizedRole = role === "xan" ? "you" : role;
+    const userName = ROLE_TO_USER_NAME[normalizedRole];
     const index = (users || []).findIndex((user) => user?.name === userName);
 
     if (index >= 0) {
@@ -20,26 +25,26 @@ function getRoleIndex(role, users = DEFAULT_USERS) {
     }
 
     if (role === "dad") {
-        return 1;
+        return ROLE_INDEX_BY_ROLE.dad;
     }
 
     if (role === "mom") {
-        return 2;
+        return ROLE_INDEX_BY_ROLE.mom;
     }
 
     return 0;
 }
 
 function getRoleFromIndex(index) {
-    if (Number(index) === 1) {
+    if (Number(index) === ROLE_INDEX_BY_ROLE.dad) {
         return "dad";
     }
 
-    if (Number(index) === 2) {
+    if (Number(index) === ROLE_INDEX_BY_ROLE.mom) {
         return "mom";
     }
 
-    return "xan";
+    return "you";
 }
 
 async function loadDashboardData() {
