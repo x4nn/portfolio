@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Simple dashboard for tracking shared stays and weekly costs between family members.">
-    <title>Cohousing Dashboard</title>
+    <meta name="description" content="Eenvoudig dashboard voor het bijhouden van gedeelde verblijven en wekelijkse kosten tussen gezinsleden.">
+    <title>Cohousing dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,12 +13,12 @@
 <body data-active-role="you">
     <div class="access-overlay" data-access-overlay>
         <form class="access-card" data-access-form>
-            <p class="hero-kicker">Private access</p>
-            <h1>Enter password</h1>
-            <p class="access-copy">This dashboard is only for your household.</p>
+            <p class="hero-kicker">Prive toegang</p>
+            <h1>Voer wachtwoord in</h1>
+            <p class="access-copy">Dit dashboard is alleen voor jouw huishouden.</p>
 
             <label class="access-field" for="access-password">
-                <span>Password</span>
+                <span>Wachtwoord</span>
                 <input id="access-password" type="password" name="password" autocomplete="current-password" data-access-input>
             </label>
 
@@ -30,18 +30,18 @@
     <div class="page-shell">
         <header class="hero-card">
             <div class="hero-copy">
-                <p class="hero-kicker">Cohousing helper</p>
-                <h1>Cohousing Calculator</h1>
+                <p class="hero-kicker">Cohousing hulpmiddel</p>
+                <h1>Cohousing rekenmachine</h1>
                 <p class="hero-text">
-                    Mark a day for Mom, Dad, or xan, then see the monthly totals and what is owed at the end of the month.
+                    Mark een dag voor Mama, Papa of Xan, en bekijk daarna de maandtotalen en wat er aan het einde van de maand verschuldigd is.
                 </p>
             </div>
 
             <div class="hero-panel">
-                <p class="panel-label">Open as</p>
-                <div class="role-switcher" role="tablist" aria-label="Choose who is editing" data-role-switcher></div>
-                <p class="panel-status" data-role-status>Currently editing as you.</p>
-                <p class="sync-status" data-sync-status>Connecting to shared database…</p>
+                <p class="panel-label">Open als</p>
+                <div class="role-switcher" role="tablist" aria-label="Kies wie bewerkt" data-role-switcher></div>
+                <p class="panel-status" data-role-status>Je bewerkt nu als jij.</p>
+                <p class="sync-status" data-sync-status>Verbinden met gedeelde database…</p>
             </div>
         </header>
 
@@ -49,19 +49,19 @@
             <section class="card" aria-labelledby="calendar-heading">
                 <div class="card-header">
                     <div>
-                        <p class="card-eyebrow">Calendar</p>
-                        <h2 id="calendar-heading">Tap days to mark stays</h2>
+                        <p class="card-eyebrow">Kalender</p>
+                        <h2 id="calendar-heading">Tik op dagen om verblijven te markeren</h2>
                     </div>
                     <label class="month-picker" for="month-select">
-                        <span>Month</span>
+                        <span>Maand</span>
                         <select id="month-select" data-month-select></select>
                     </label>
                 </div>
 
-                <div class="legend" aria-label="Legend for calendar colors">
-                    <span class="legend-item"><span class="legend-swatch legend-you"></span>You</span>
-                    <span class="legend-item"><span class="legend-swatch legend-mom"></span>Mom</span>
-                    <span class="legend-item"><span class="legend-swatch legend-dad"></span>Dad</span>
+                <div class="legend" aria-label="Legenda voor kalenderkleuren">
+                    <span class="legend-item"><span class="legend-swatch legend-you"></span>Jij</span>
+                    <span class="legend-item"><span class="legend-swatch legend-mom"></span>Mama</span>
+                    <span class="legend-item"><span class="legend-swatch legend-dad"></span>Papa</span>
                 </div>
 
                 <div class="calendar-grid" data-calendar-grid></div>
@@ -70,14 +70,14 @@
             <section class="card" aria-labelledby="summary-heading">
                 <div class="card-header">
                     <div>
-                        <p class="card-eyebrow">Calculations</p>
-                        <h2 id="summary-heading">Monthly overview</h2>
+                        <p class="card-eyebrow">Berekeningen</p>
+                        <h2 id="summary-heading">Maandelijks overzicht</h2>
                     </div>
                 </div>
 
                 <div class="amount-form">
                     <label class="amount-field">
-                        <span>Weekly budget</span>
+                        <span>Wekelijks budget</span>
                         <input type="number" min="0" step="1" value="100" data-budget-input="weeklyBudget">
                     </label>
                 </div>
@@ -88,8 +88,8 @@
             <section class="card history-card" aria-labelledby="history-heading">
                 <div class="card-header">
                     <div>
-                        <p class="card-eyebrow">History</p>
-                        <h2 id="history-heading">Recent months</h2>
+                        <p class="card-eyebrow">Geschiedenis</p>
+                        <h2 id="history-heading">Recente maanden</h2>
                     </div>
                 </div>
 

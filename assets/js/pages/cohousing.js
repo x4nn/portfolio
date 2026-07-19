@@ -8,9 +8,9 @@ const HISTORY_MONTH_COUNT = 4;
 const WEEKLY_DAYS = 7;
 const DEFAULT_WEEKLY_BUDGET = 100;
 const ROLE_LABELS = {
-    you: "xan",
-    mom: "Mom",
-    dad: "Dad"
+    you: "Xan",
+    mom: "Mama",
+    dad: "Papa"
 };
 
 const defaultState = {
@@ -80,11 +80,21 @@ function normalizeState(parsedState) {
 }
 
 function normalizeRoleKey(roleKey) {
-    if (roleKey === "xan") {
+    const normalizedRole = String(roleKey || "").toLowerCase();
+
+    if (normalizedRole === "xan" || normalizedRole === "jij" || normalizedRole === "you") {
         return "you";
     }
 
-    return roleKey;
+    if (normalizedRole === "mama" || normalizedRole === "mom") {
+        return "mom";
+    }
+
+    if (normalizedRole === "papa" || normalizedRole === "dad") {
+        return "dad";
+    }
+
+    return normalizedRole;
 }
 
 async function loadRemoteState() {
@@ -100,28 +110,28 @@ async function refreshRemoteState() {
         if (remoteData) {
             state = hydrateStateFromRemoteData(remoteData, state);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            updateSyncStatus("Connected to shared database");
+            updateSyncStatus("Verbonden met gedeelde database");
         } else {
-            updateSyncStatus("Using local draft until you save");
+            updateSyncStatus("Lokaal concept gebruikt tot je opslaat");
         }
     } catch (error) {
         console.warn("Could not load shared data", error);
-        updateSyncStatus("Offline draft only");
+        updateSyncStatus("Alleen offline concept");
     }
 }
 
 async function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    updateSyncStatus("Saving…");
+    updateSyncStatus("Opslaan…");
 
     try {
         const payload = buildRemotePayload(state.assignments, state.users);
         await saveDashboardData(payload);
         await refreshRemoteState();
-        updateSyncStatus("Saved to shared database");
+        updateSyncStatus("Opgeslagen in gedeelde database");
     } catch (error) {
         console.warn("Could not save to database", error);
-        updateSyncStatus("Saved locally, sync pending");
+        updateSyncStatus("Lokaal opgeslagen, synchronisatie in behandeling");
     }
 }
 
@@ -148,7 +158,7 @@ function initializeAccessControl() {
 
         if (enteredPassword !== ACCESS_PASSWORD) {
             if (accessError) {
-                accessError.textContent = "Wrong password. Try again.";
+                accessError.textContent = "Wachtwoord ongeldig. Probeer opnieuw.";
             }
             return;
         }
@@ -229,7 +239,7 @@ function renderRoleButtons() {
         .map((user) => {
             const roleKey = getRoleKeyFromUser(user);
             const isActive = roleKey === state.activeRole;
-            const label = user?.name || roleKey;
+            const label = getRoleLabel(roleKey);
             return `<button class="role-button${isActive ? " is-active" : ""}" type="button" data-role-option="${roleKey}">${label}</button>`;
         })
         .join("");
@@ -245,7 +255,7 @@ function renderRoleButtons() {
     });
 
     document.body.setAttribute("data-active-role", state.activeRole);
-    roleStatus.textContent = `Currently editing as ${getRoleLabel(state.activeRole)}.`;
+    roleStatus.textContent = `Je bewerkt nu als ${getRoleLabel(state.activeRole)}.`;
 }
 
 function renderMonthSelector() {
@@ -267,7 +277,7 @@ function renderCalendar() {
     const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
     const startingOffset = (firstDay.getDay() + DAYS_IN_WEEK - 1) % DAYS_IN_WEEK;
 
-    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const dayNames = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 
     const html = [];
 
@@ -284,7 +294,7 @@ function renderCalendar() {
 
     for (let dayNumber = 1; dayNumber <= daysInMonth; dayNumber += 1) {
         const assignment = getAssignment(monthKey, dayNumber);
-        const label = assignment ? ROLE_LABELS[assignment] : "Open";
+        const label = assignment ? ROLE_LABELS[assignment] : "Vrij";
 
         const classes = ["calendar-day"];
         if (assignment) {
@@ -295,8 +305,8 @@ function renderCalendar() {
         }
 
         const buttonLabel = assignment
-            ? `${ROLE_LABELS[assignment]} stay on ${formatMonthLabel(monthKey)} ${dayNumber}`
-            : `Mark ${ROLE_LABELS[state.activeRole]} stay on ${formatMonthLabel(monthKey)} ${dayNumber}`;
+            ? `${ROLE_LABELS[assignment]} verblijf op ${formatMonthLabel(monthKey)} ${dayNumber}`
+            : `Markeer ${ROLE_LABELS[state.activeRole]} voor ${formatMonthLabel(monthKey)} ${dayNumber}`;
 
         html.push(`
             <button
@@ -362,24 +372,24 @@ function renderSummary() {
 
     const summaryCards = [
         {
-            title: "Per-day rate",
+            title: "Prijs per dag",
             value: formatCurrency(paymentBreakdown.dailyRate),
-            copy: `${paymentBreakdown.totalPaidDays} paid day${paymentBreakdown.totalPaidDays === 1 ? "" : "s"} • €${weeklyBudget} weekly budget`
+            copy: `${paymentBreakdown.totalPaidDays} betaalde dag${paymentBreakdown.totalPaidDays === 1 ? "" : "en"} • €${weeklyBudget} per week`
         },
         {
-            title: "Mom share",
+            title: "Aandeel Mama",
             value: formatCurrency(paymentBreakdown.momShare),
-            copy: `${paymentBreakdown.counts.mom} day${paymentBreakdown.counts.mom === 1 ? "" : "s"} × ${formatCurrency(paymentBreakdown.dailyRate)}`
+            copy: `${paymentBreakdown.counts.mom} dag${paymentBreakdown.counts.mom === 1 ? "" : "en"} × ${formatCurrency(paymentBreakdown.dailyRate)}`
         },
         {
-            title: "Dad share",
+            title: "Aandeel Papa",
             value: formatCurrency(paymentBreakdown.dadShare),
-            copy: `${paymentBreakdown.counts.dad} day${paymentBreakdown.counts.dad === 1 ? "" : "s"} × ${formatCurrency(paymentBreakdown.dailyRate)}`
+            copy: `${paymentBreakdown.counts.dad} dag${paymentBreakdown.counts.dad === 1 ? "" : "en"} × ${formatCurrency(paymentBreakdown.dailyRate)}`
         },
         {
-            title: "Weekly budget",
+            title: "Wekelijks budget",
             value: formatCurrency(weeklyBudget),
-            copy: `${formatMonthLabel(monthKey)} for ${monthDate.toLocaleDateString("en", { month: "long", year: "numeric" })}`
+            copy: `${formatMonthLabel(monthKey)} voor ${monthDate.toLocaleDateString("nl", { month: "long", year: "numeric" })}`
         }
     ];
 
@@ -400,7 +410,7 @@ function renderHistory() {
     const historyMonths = getHistoryMonthOptions();
 
     if (!historyMonths.length) {
-        historyList.innerHTML = '<p class="summary-copy">No history yet.</p>';
+        historyList.innerHTML = '<p class="summary-copy">Nog geen geschiedenis beschikbaar.</p>';
         return;
     }
 
@@ -411,9 +421,9 @@ function renderHistory() {
                 <article class="history-item">
                     <div>
                         <strong>${formatMonthLabel(monthKey)}</strong>
-                        <div class="history-meta">Mom: ${paymentBreakdown.counts.mom} • Dad: ${paymentBreakdown.counts.dad} • You: ${paymentBreakdown.counts.you}</div>
+                        <div class="history-meta">Mama: ${paymentBreakdown.counts.mom} • Papa: ${paymentBreakdown.counts.dad} • Jij: ${paymentBreakdown.counts.you}</div>
                     </div>
-                    <div class="history-meta">Mom ${formatCurrency(paymentBreakdown.momShare)} • Dad ${formatCurrency(paymentBreakdown.dadShare)}</div>
+                    <div class="history-meta">Mama ${formatCurrency(paymentBreakdown.momShare)} • Papa ${formatCurrency(paymentBreakdown.dadShare)}</div>
                 </article>
             `;
         })
@@ -454,26 +464,13 @@ function formatCurrency(value) {
 }
 
 function getRoleKeyFromUser(user) {
-    const name = String(user?.name || "").toLowerCase();
-
-    if (name === "xan") {
-        return "you";
-    }
-
-    if (name === "mom") {
-        return "mom";
-    }
-
-    if (name === "dad") {
-        return "dad";
-    }
-
-    return name;
+    return normalizeRoleKey(user?.name || user?.role || "");
 }
 
 function getRoleLabel(roleKey) {
-    const user = (state.users || []).find((entry) => getRoleKeyFromUser(entry) === roleKey);
-    return user?.name || ROLE_LABELS[roleKey] || roleKey;
+    const normalizedRole = normalizeRoleKey(roleKey);
+    const user = (state.users || []).find((entry) => getRoleKeyFromUser(entry) === normalizedRole);
+    return ROLE_LABELS[normalizedRole] || user?.name || normalizedRole;
 }
 
 function getRecentMonthOptions() {
@@ -519,5 +516,5 @@ function addMonths(date, amount) {
 
 function formatMonthLabel(monthKey) {
     const monthDate = parseMonthKey(monthKey);
-    return monthDate.toLocaleDateString("en", { month: "long", year: "numeric" });
+    return monthDate.toLocaleDateString("nl", { month: "long", year: "numeric" });
 }
