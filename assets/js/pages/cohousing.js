@@ -1,23 +1,18 @@
 const STORAGE_KEY = "cohousing-dashboard-state-v1";
-const ACCESS_PASSWORD = "xxx";
-const ACCESS_STORAGE_KEY = "cohousing-access-granted";
+const ACCESS_IDENTITY_STORAGE_KEY = "cohousing-access-identity";
 const DAYS_IN_WEEK = 7;
 const MONTHS_TO_DISPLAY = 12;
 const MONTHS_BEFORE_CURRENT = Math.floor(MONTHS_TO_DISPLAY / 2);
 const HISTORY_MONTH_COUNT = 4;
 const WEEKLY_DAYS = 7;
 const DEFAULT_WEEKLY_BUDGET = 100;
-const ROLE_LABELS = {
-    you: "Xan",
-    mom: "Mama",
-    dad: "Papa"
-};
 
 const defaultState = {
     activeRole: "you",
     selectedMonthKey: getMonthKey(new Date()),
     weeklyBudget: DEFAULT_WEEKLY_BUDGET,
     assignments: {},
+    assignmentMeta: {},
     users: structuredClone(DEFAULT_USERS)
 };
 
@@ -37,6 +32,7 @@ const historyList = document.querySelector("[data-history-list]");
 const amountInputs = document.querySelectorAll("[data-budget-input]");
 
 let pageInitialized = false;
+let loggedInIdentityRoleKey = null;
 
 initializeAccessControl();
 
@@ -75,31 +71,18 @@ function normalizeState(parsedState) {
         selectedMonthKey: parsedState.selectedMonthKey || defaultState.selectedMonthKey,
         weeklyBudget: Number(parsedState.weeklyBudget) || Number(defaultState.weeklyBudget) || 0,
         assignments: parsedState.assignments || {},
+        assignmentMeta: parsedState.assignmentMeta || {},
         users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS)
     };
-}
-
-function normalizeRoleKey(roleKey) {
-    const normalizedRole = String(roleKey || "").toLowerCase();
-
-    if (normalizedRole === "xan" || normalizedRole === "jij" || normalizedRole === "you") {
-        return "you";
-    }
-
-    if (normalizedRole === "mama" || normalizedRole === "mom") {
-        return "mom";
-    }
-
-    if (normalizedRole === "papa" || normalizedRole === "dad") {
-        return "dad";
-    }
-
-    return normalizedRole;
 }
 
 async function loadRemoteState() {
     const localState = loadLocalState();
     state = localState;
+
+    if (loggedInIdentityRoleKey) {
+        state.activeRole = loggedInIdentityRoleKey;
+    }
 
     await refreshRemoteState();
 }
@@ -125,7 +108,7 @@ async function saveState() {
     updateSyncStatus("Opslaan…");
 
     try {
-        const payload = buildRemotePayload(state.assignments, state.users);
+        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta);
         await saveDashboardData(payload);
         await refreshRemoteState();
         updateSyncStatus("Opgeslagen in gedeelde database");
@@ -142,7 +125,10 @@ function updateSyncStatus(message) {
 }
 
 function initializeAccessControl() {
-    if (isAccessGranted()) {
+    const storedIdentityRoleKey = getStoredIdentityRoleKey();
+
+    if (storedIdentityRoleKey) {
+        loggedInIdentityRoleKey = storedIdentityRoleKey;
         hideAccessOverlay();
         void initialize();
         return;
@@ -156,29 +142,59 @@ function initializeAccessControl() {
         event.preventDefault();
         const enteredPassword = accessInput?.value?.trim() || "";
 
-        if (enteredPassword !== ACCESS_PASSWORD) {
-            if (accessError) {
-                accessError.textContent = "Wachtwoord ongeldig. Probeer opnieuw.";
-            }
+        if (!enteredPassword) {
             return;
         }
 
-        grantAccess();
         if (accessError) {
             accessError.textContent = "";
         }
-        hideAccessOverlay();
-        await initialize();
+        setAccessFormBusy(true);
+
+        try {
+            const candidateUsers = await loadUsersForLogin();
+            const matchedUser = candidateUsers.find((user) => user.password === enteredPassword);
+
+            if (!matchedUser) {
+                if (accessError) {
+                    accessError.textContent = "Wachtwoord ongeldig. Probeer opnieuw.";
+                }
+                return;
+            }
+
+            loggedInIdentityRoleKey = getRoleKeyFromUser(matchedUser);
+            grantAccess(loggedInIdentityRoleKey);
+            hideAccessOverlay();
+            await initialize();
+        } catch (error) {
+            console.warn("Could not verify password", error);
+            if (accessError) {
+                accessError.textContent = "Kon niet inloggen, controleer je internetverbinding.";
+            }
+        } finally {
+            setAccessFormBusy(false);
+        }
     });
 }
 
-function isAccessGranted() {
-    return sessionStorage.getItem(ACCESS_STORAGE_KEY) === "true" || localStorage.getItem(ACCESS_STORAGE_KEY) === "true";
+function setAccessFormBusy(isBusy) {
+    const submitButton = accessForm?.querySelector("button[type=submit]");
+    if (submitButton) {
+        submitButton.disabled = isBusy;
+    }
+    if (accessInput) {
+        accessInput.disabled = isBusy;
+    }
 }
 
-function grantAccess() {
-    sessionStorage.setItem(ACCESS_STORAGE_KEY, "true");
-    localStorage.setItem(ACCESS_STORAGE_KEY, "true");
+function getStoredIdentityRoleKey() {
+    const storedValue = sessionStorage.getItem(ACCESS_IDENTITY_STORAGE_KEY) || localStorage.getItem(ACCESS_IDENTITY_STORAGE_KEY);
+    return storedValue ? normalizeRoleKey(storedValue) : null;
+}
+
+function grantAccess(identityRoleKey) {
+    sessionStorage.setItem(ACCESS_IDENTITY_STORAGE_KEY, identityRoleKey);
+    localStorage.setItem(ACCESS_IDENTITY_STORAGE_KEY, identityRoleKey);
 }
 
 function hideAccessOverlay() {
@@ -188,6 +204,10 @@ function hideAccessOverlay() {
 function ensureStateHasData() {
     if (!state.assignments) {
         state.assignments = {};
+    }
+
+    if (!state.assignmentMeta) {
+        state.assignmentMeta = {};
     }
 
     if (!state.selectedMonthKey) {
@@ -235,7 +255,9 @@ function renderRoleButtons() {
         return;
     }
 
-    roleSwitcher.innerHTML = state.users
+    const calendarPageUsers = (state.users || []).filter((user) => user.showOnCalendarPage !== false);
+
+    roleSwitcher.innerHTML = calendarPageUsers
         .map((user) => {
             const roleKey = getRoleKeyFromUser(user);
             const isActive = roleKey === state.activeRole;
@@ -255,6 +277,7 @@ function renderRoleButtons() {
     });
 
     document.body.setAttribute("data-active-role", state.activeRole);
+    applyUserColorTheme(state.users, state.activeRole);
     roleStatus.textContent = `Je bewerkt nu als ${getRoleLabel(state.activeRole)}.`;
 }
 
@@ -304,8 +327,13 @@ function renderCalendar() {
             classes.push("is-today");
         }
 
+        const assignmentMeta = assignment ? getAssignmentMeta(monthKey, dayNumber) : null;
+        const lastChangedTitle = assignmentMeta
+            ? `Laatst gewijzigd door ${getRoleLabel(assignmentMeta.lastChangedByRole)} op ${formatDateTime(assignmentMeta.lastChangedAt)}`
+            : "";
+
         const buttonLabel = assignment
-            ? `${ROLE_LABELS[assignment]} verblijf op ${formatMonthLabel(monthKey)} ${dayNumber}`
+            ? `${ROLE_LABELS[assignment]} verblijf op ${formatMonthLabel(monthKey)} ${dayNumber}${lastChangedTitle ? `, ${lastChangedTitle.toLowerCase()}` : ""}`
             : `Markeer ${ROLE_LABELS[state.activeRole]} voor ${formatMonthLabel(monthKey)} ${dayNumber}`;
 
         html.push(`
@@ -314,6 +342,7 @@ function renderCalendar() {
                 type="button"
                 data-calendar-day="${dayNumber}"
                 aria-label="${buttonLabel}"
+                ${lastChangedTitle ? `title="${lastChangedTitle}"` : ""}
             >
                 <span class="calendar-day-number">${dayNumber}</span>
                 <span class="calendar-day-label">${label}</span>
@@ -346,11 +375,20 @@ async function toggleAssignment(monthKey, dayNumber, shouldPersist = true) {
 function setAssignment(monthKey, dayNumber, role) {
     const assignments = getAssignmentsForMonth(monthKey);
     assignments[dayNumber] = role;
+
+    const assignmentMetaForMonth = getAssignmentMetaForMonth(monthKey);
+    assignmentMetaForMonth[dayNumber] = {
+        lastChangedByRole: loggedInIdentityRoleKey || state.activeRole,
+        lastChangedAt: Date.now()
+    };
 }
 
 function removeAssignment(monthKey, dayNumber) {
     const assignments = getAssignmentsForMonth(monthKey);
     delete assignments[dayNumber];
+
+    const assignmentMetaForMonth = getAssignmentMetaForMonth(monthKey);
+    delete assignmentMetaForMonth[dayNumber];
 }
 
 function getAssignment(monthKey, dayNumber) {
@@ -362,6 +400,17 @@ function getAssignmentsForMonth(monthKey) {
         state.assignments[monthKey] = {};
     }
     return state.assignments[monthKey];
+}
+
+function getAssignmentMeta(monthKey, dayNumber) {
+    return getAssignmentMetaForMonth(monthKey)[dayNumber];
+}
+
+function getAssignmentMetaForMonth(monthKey) {
+    if (!state.assignmentMeta[monthKey]) {
+        state.assignmentMeta[monthKey] = {};
+    }
+    return state.assignmentMeta[monthKey];
 }
 
 function renderSummary() {
@@ -463,8 +512,17 @@ function formatCurrency(value) {
     return `€${Number(value || 0).toFixed(2)}`;
 }
 
-function getRoleKeyFromUser(user) {
-    return normalizeRoleKey(user?.name || user?.role || "");
+function formatDateTime(timestampMs) {
+    if (!timestampMs) {
+        return "onbekend tijdstip";
+    }
+
+    return new Date(timestampMs).toLocaleDateString("nl", {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
 }
 
 function getRoleLabel(roleKey) {

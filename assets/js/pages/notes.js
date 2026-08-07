@@ -1,17 +1,10 @@
 const STORAGE_KEY = "cohousing-notes-state-v1";
-const ACCESS_PASSWORD = "xxx";
-const ACCESS_STORAGE_KEY = "cohousing-access-granted";
-const ROLE_LABELS = {
-    you: "Xan",
-    mom: "Mama",
-    dad: "Papa",
-    luna: "Luna"
-};
-const ROLE_ORDER = ["you", "mom", "dad", "luna"];
+const ACCESS_IDENTITY_STORAGE_KEY = "cohousing-access-identity";
 
 const defaultState = {
     activeRole: "you",
-    items: []
+    items: [],
+    users: structuredClone(DEFAULT_USERS)
 };
 
 let state = structuredClone(defaultState);
@@ -28,6 +21,7 @@ const notesInput = document.querySelector("[data-notes-input]");
 const notesList = document.querySelector("[data-notes-list]");
 
 let pageInitialized = false;
+let loggedInIdentityRoleKey = null;
 
 initializeAccessControl();
 
@@ -61,38 +55,36 @@ function loadLocalState() {
 function normalizeState(parsedState) {
     return {
         activeRole: normalizeRoleKey(parsedState.activeRole || defaultState.activeRole),
-        items: Array.isArray(parsedState.items) ? parsedState.items : []
+        items: Array.isArray(parsedState.items) ? parsedState.items : [],
+        users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS)
     };
-}
-
-function normalizeRoleKey(roleKey) {
-    const normalizedRole = String(roleKey || "").toLowerCase();
-
-    if (normalizedRole === "xan" || normalizedRole === "jij" || normalizedRole === "you") {
-        return "you";
-    }
-
-    if (normalizedRole === "mama" || normalizedRole === "mom") {
-        return "mom";
-    }
-
-    if (normalizedRole === "papa" || normalizedRole === "dad") {
-        return "dad";
-    }
-
-    return normalizedRole;
 }
 
 async function loadRemoteState() {
     state = loadLocalState();
+
+    if (loggedInIdentityRoleKey) {
+        state.activeRole = loggedInIdentityRoleKey;
+    }
+
     await refreshRemoteState();
 }
 
 async function refreshRemoteState() {
     try {
-        const remoteData = await loadNotesData();
-        if (remoteData) {
-            state.items = Array.isArray(remoteData.items) ? remoteData.items : [];
+        const [remoteNotesData, remoteHouseholdData] = await Promise.all([
+            loadNotesData(),
+            loadDashboardData()
+        ]);
+
+        if (remoteHouseholdData) {
+            state.users = Array.isArray(remoteHouseholdData.users) && remoteHouseholdData.users.length
+                ? remoteHouseholdData.users
+                : structuredClone(DEFAULT_USERS);
+        }
+
+        if (remoteNotesData) {
+            state.items = Array.isArray(remoteNotesData.items) ? remoteNotesData.items : [];
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             updateSyncStatus("Verbonden met gedeelde database");
         } else {
@@ -125,7 +117,10 @@ function updateSyncStatus(message) {
 }
 
 function initializeAccessControl() {
-    if (isAccessGranted()) {
+    const storedIdentityRoleKey = getStoredIdentityRoleKey();
+
+    if (storedIdentityRoleKey) {
+        loggedInIdentityRoleKey = storedIdentityRoleKey;
         hideAccessOverlay();
         void initialize();
         return;
@@ -139,29 +134,59 @@ function initializeAccessControl() {
         event.preventDefault();
         const enteredPassword = accessInput?.value?.trim() || "";
 
-        if (enteredPassword !== ACCESS_PASSWORD) {
-            if (accessError) {
-                accessError.textContent = "Wachtwoord ongeldig. Probeer opnieuw.";
-            }
+        if (!enteredPassword) {
             return;
         }
 
-        grantAccess();
         if (accessError) {
             accessError.textContent = "";
         }
-        hideAccessOverlay();
-        await initialize();
+        setAccessFormBusy(true);
+
+        try {
+            const candidateUsers = await loadUsersForLogin();
+            const matchedUser = candidateUsers.find((user) => user.password === enteredPassword);
+
+            if (!matchedUser) {
+                if (accessError) {
+                    accessError.textContent = "Wachtwoord ongeldig. Probeer opnieuw.";
+                }
+                return;
+            }
+
+            loggedInIdentityRoleKey = getRoleKeyFromUser(matchedUser);
+            grantAccess(loggedInIdentityRoleKey);
+            hideAccessOverlay();
+            await initialize();
+        } catch (error) {
+            console.warn("Could not verify password", error);
+            if (accessError) {
+                accessError.textContent = "Kon niet inloggen, controleer je internetverbinding.";
+            }
+        } finally {
+            setAccessFormBusy(false);
+        }
     });
 }
 
-function isAccessGranted() {
-    return sessionStorage.getItem(ACCESS_STORAGE_KEY) === "true" || localStorage.getItem(ACCESS_STORAGE_KEY) === "true";
+function setAccessFormBusy(isBusy) {
+    const submitButton = accessForm?.querySelector("button[type=submit]");
+    if (submitButton) {
+        submitButton.disabled = isBusy;
+    }
+    if (accessInput) {
+        accessInput.disabled = isBusy;
+    }
 }
 
-function grantAccess() {
-    sessionStorage.setItem(ACCESS_STORAGE_KEY, "true");
-    localStorage.setItem(ACCESS_STORAGE_KEY, "true");
+function getStoredIdentityRoleKey() {
+    const storedValue = sessionStorage.getItem(ACCESS_IDENTITY_STORAGE_KEY) || localStorage.getItem(ACCESS_IDENTITY_STORAGE_KEY);
+    return storedValue ? normalizeRoleKey(storedValue) : null;
+}
+
+function grantAccess(identityRoleKey) {
+    sessionStorage.setItem(ACCESS_IDENTITY_STORAGE_KEY, identityRoleKey);
+    localStorage.setItem(ACCESS_IDENTITY_STORAGE_KEY, identityRoleKey);
 }
 
 function hideAccessOverlay() {
@@ -230,10 +255,13 @@ function renderRoleButtons() {
         return;
     }
 
-    roleSwitcher.innerHTML = ROLE_ORDER
-        .map((roleKey) => {
+    const reminderPageUsers = (state.users || []).filter((user) => user.showOnReminderPage !== false);
+
+    roleSwitcher.innerHTML = reminderPageUsers
+        .map((user) => {
+            const roleKey = getRoleKeyFromUser(user);
             const isActive = roleKey === state.activeRole;
-            const label = ROLE_LABELS[roleKey];
+            const label = getRoleLabel(roleKey);
             return `<button class="role-button${isActive ? " is-active" : ""}" type="button" data-role-option="${roleKey}">${label}</button>`;
         })
         .join("");
@@ -248,9 +276,16 @@ function renderRoleButtons() {
     });
 
     document.body.setAttribute("data-active-role", state.activeRole);
+    applyUserColorTheme(state.users, state.activeRole);
     if (roleStatus) {
-        roleStatus.textContent = `Je voegt items toe als ${ROLE_LABELS[state.activeRole]}.`;
+        roleStatus.textContent = `Je voegt items toe als ${getRoleLabel(state.activeRole)}.`;
     }
+}
+
+function getRoleLabel(roleKey) {
+    const normalizedRole = normalizeRoleKey(roleKey);
+    const user = (state.users || []).find((entry) => getRoleKeyFromUser(entry) === normalizedRole);
+    return ROLE_LABELS[normalizedRole] || user?.name || normalizedRole;
 }
 
 function renderNotesList() {

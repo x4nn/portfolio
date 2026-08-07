@@ -14,41 +14,9 @@
     --accent-soft: rgba(166, 93, 125, 0.15);
 }
 
-body[data-active-role="you"] {
-    --page-bg: #f4f8ff;
-    --surface: #ffffff;
-    --surface-strong: #eef5ff;
-    --text: #1f2d44;
-    --text-soft: #5c6e87;
-    --line: #dfeaff;
-    --shadow: 0 20px 45px rgba(76, 108, 162, 0.16);
-    --accent: #4c78c4;
-    --accent-soft: rgba(76, 120, 196, 0.16);
-}
-
-body[data-active-role="mom"] {
-    --page-bg: #fff5f8;
-    --surface: #ffffff;
-    --surface-strong: #fff0f4;
-    --text: #4a2531;
-    --text-soft: #8a5a6d;
-    --line: #f6dbe3;
-    --shadow: 0 20px 45px rgba(159, 78, 115, 0.16);
-    --accent: #c96f90;
-    --accent-soft: rgba(201, 111, 144, 0.16);
-}
-
-body[data-active-role="dad"] {
-    --page-bg: #f4fdf8;
-    --surface: #ffffff;
-    --surface-strong: #edfdf4;
-    --text: #274636;
-    --text-soft: #5f7869;
-    --line: #dff4e7;
-    --shadow: 0 20px 45px rgba(81, 128, 101, 0.16);
-    --accent: #4f906d;
-    --accent-soft: rgba(79, 144, 109, 0.16);
-}
+/* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
+   (see assets/js/user-theme.js) overrides these same custom properties, computed from that
+   user's `color` field in the database - so there's no separate per-role block to keep in sync. */
 
 * {
     box-sizing: border-box;
@@ -372,18 +340,18 @@ select {
 }
 
 .calendar-day.is-you {
-    background: rgba(143, 181, 255, 0.24);
-    border-color: rgba(143, 181, 255, 0.4);
+    background: color-mix(in srgb, var(--you-color) 24%, transparent);
+    border-color: color-mix(in srgb, var(--you-color) 40%, transparent);
 }
 
 .calendar-day.is-mom {
-    background: rgba(245, 184, 200, 0.30);
-    border-color: rgba(245, 184, 200, 0.5);
+    background: color-mix(in srgb, var(--mom-color) 30%, transparent);
+    border-color: color-mix(in srgb, var(--mom-color) 50%, transparent);
 }
 
 .calendar-day.is-dad {
-    background: rgba(158, 216, 191, 0.30);
-    border-color: rgba(158, 216, 191, 0.5);
+    background: color-mix(in srgb, var(--dad-color) 30%, transparent);
+    border-color: color-mix(in srgb, var(--dad-color) 50%, transparent);
 }
 
 .calendar-day-number {
