@@ -1,3 +1,5 @@
+/* ---------- Shared tokens (base values kept in sync with cohousing.css; --luna-color and the "luna" role theme below are notes-only, since Luna only exists on this page) ---------- */
+
 :root {
     color-scheme: light;
     --page-bg: #fff8fb;
@@ -10,6 +12,7 @@
     --you-color: #8fb5ff;
     --mom-color: #f5b8c8;
     --dad-color: #9ed8bf;
+    --luna-color: #caa6f5;
     --accent: #a65d7d;
     --accent-soft: rgba(166, 93, 125, 0.15);
 }
@@ -50,6 +53,18 @@ body[data-active-role="dad"] {
     --accent-soft: rgba(79, 144, 109, 0.16);
 }
 
+body[data-active-role="luna"] {
+    --page-bg: #f9f4ff;
+    --surface: #ffffff;
+    --surface-strong: #f5edff;
+    --text: #2f2140;
+    --text-soft: #7c6e93;
+    --line: #ece0fa;
+    --shadow: 0 20px 45px rgba(140, 100, 190, 0.16);
+    --accent: #8c5fc9;
+    --accent-soft: rgba(140, 95, 201, 0.16);
+}
+
 * {
     box-sizing: border-box;
 }
@@ -70,6 +85,8 @@ input,
 select {
     font: inherit;
 }
+
+/* ---------- Access overlay ---------- */
 
 .access-overlay {
     position: fixed;
@@ -139,8 +156,10 @@ select {
     font-weight: 600;
 }
 
+/* ---------- Page shell / hero ---------- */
+
 .page-shell {
-    max-width: 1200px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 28px 18px 48px;
 }
@@ -248,16 +267,6 @@ select {
     font-weight: 700;
 }
 
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 1.4fr 0.95fr;
-    gap: 20px;
-}
-
-.history-card {
-    grid-column: 1 / -1;
-}
-
 .card {
     padding: 22px;
 }
@@ -275,207 +284,147 @@ select {
     font-size: 1.24rem;
 }
 
-.month-picker {
+/* ---------- Checklist ---------- */
+
+.notes-form {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 0.9rem;
-    color: var(--text-soft);
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
-.month-picker select {
+.notes-form input {
+    flex: 1;
     border: 1px solid var(--line);
-    background: #fff;
     border-radius: 999px;
-    padding: 8px 12px;
+    padding: 11px 16px;
+    background: #fff;
     color: var(--text);
 }
 
-.legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 16px;
-    color: var(--text-soft);
-    font-size: 0.95rem;
-}
-
-.legend-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.legend-swatch {
-    width: 12px;
-    height: 12px;
+.notes-form-button {
+    border: 0;
     border-radius: 999px;
-    display: inline-block;
-}
-
-.legend-you {
-    background: var(--you-color);
-}
-
-.legend-mom {
-    background: var(--mom-color);
-}
-
-.legend-dad {
-    background: var(--dad-color);
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 8px;
-}
-
-.calendar-day-name {
-    text-align: center;
-    color: var(--text-soft);
-    font-size: 0.82rem;
+    padding: 11px 20px;
+    background: var(--accent);
+    color: white;
     font-weight: 700;
-    padding-bottom: 2px;
-}
-
-.calendar-day {
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 10px 0;
-    min-height: 54px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     cursor: pointer;
-    background: #fff;
-    color: var(--text);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
 }
 
-.calendar-day:hover,
-.calendar-day:focus-visible {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 20px rgba(95, 48, 74, 0.08);
-    outline: none;
-}
-
-.calendar-day.is-muted {
-    color: #b5a4ae;
-    background: #fcf7f9;
-}
-
-.calendar-day.is-today {
-    border: 2px solid #8c5b7a;
-    box-shadow: 0 0 0 2px rgba(140, 91, 122, 0.16);
-}
-
-.calendar-day.is-you {
-    background: rgba(143, 181, 255, 0.24);
-    border-color: rgba(143, 181, 255, 0.4);
-}
-
-.calendar-day.is-mom {
-    background: rgba(245, 184, 200, 0.30);
-    border-color: rgba(245, 184, 200, 0.5);
-}
-
-.calendar-day.is-dad {
-    background: rgba(158, 216, 191, 0.30);
-    border-color: rgba(158, 216, 191, 0.5);
-}
-
-.calendar-day-number {
-    font-weight: 700;
-}
-
-.calendar-day-label {
-    font-size: 0.72rem;
-    margin-top: 4px;
-    color: var(--text-soft);
-}
-
-.amount-form {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.amount-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    color: var(--text-soft);
-    font-size: 0.92rem;
-}
-
-.amount-field input {
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 10px 12px;
-    background: #fff;
-    color: var(--text);
-}
-
-.summary-list {
+.notes-list {
     display: grid;
     gap: 10px;
 }
 
-.summary-card {
-    background: var(--surface-strong);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 14px 16px;
-}
-
-.summary-title {
-    margin: 0 0 6px;
-    font-size: 1rem;
-}
-
-.summary-value {
-    font-size: 1.35rem;
-    font-weight: 800;
-}
-
-.summary-copy {
-    margin: 4px 0 0;
+.notes-empty-message {
+    margin: 0;
     color: var(--text-soft);
-    font-size: 0.92rem;
 }
 
-.history-list {
-    display: grid;
-    gap: 12px;
-}
-
-.history-item {
+.notes-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 12px;
-    padding: 14px 16px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #fff;
+    padding: 12px 14px;
 }
 
-.history-item strong {
-    display: block;
-    margin-bottom: 4px;
+.notes-item.is-you {
+    background: rgba(143, 181, 255, 0.24);
+    border-color: rgba(143, 181, 255, 0.4);
 }
 
-.history-meta {
+.notes-item.is-mom {
+    background: rgba(245, 184, 200, 0.30);
+    border-color: rgba(245, 184, 200, 0.5);
+}
+
+.notes-item.is-dad {
+    background: rgba(158, 216, 191, 0.30);
+    border-color: rgba(158, 216, 191, 0.5);
+}
+
+.notes-item.is-luna {
+    background: rgba(202, 166, 245, 0.28);
+    border-color: rgba(202, 166, 245, 0.5);
+}
+
+.notes-item-checkbox {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.notes-item-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notes-item-text {
+    margin: 0;
+    word-break: break-word;
+}
+
+.notes-item.is-done .notes-item-text {
+    text-decoration: line-through;
     color: var(--text-soft);
-    font-size: 0.92rem;
+}
+
+.notes-item-meta {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+}
+
+.notes-item-author-swatch {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    margin-right: 6px;
+}
+
+.notes-item-author-swatch.is-you {
+    background: var(--you-color);
+}
+
+.notes-item-author-swatch.is-mom {
+    background: var(--mom-color);
+}
+
+.notes-item-author-swatch.is-dad {
+    background: var(--dad-color);
+}
+
+.notes-item-author-swatch.is-luna {
+    background: var(--luna-color);
+}
+
+.notes-item-remove-button {
+    border: 0;
+    background: transparent;
+    color: var(--text-soft);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 999px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.notes-item-remove-button:hover,
+.notes-item-remove-button:focus-visible {
+    background: var(--accent-soft);
+    color: var(--accent);
+    outline: none;
 }
 
 @media (max-width: 900px) {
-    .hero-card,
-    .dashboard-grid {
+    .hero-card {
         grid-template-columns: 1fr;
     }
 }
@@ -490,20 +439,7 @@ select {
         padding: 18px;
     }
 
-    .card-header {
+    .notes-form {
         flex-direction: column;
-    }
-
-    .amount-form {
-        grid-template-columns: 1fr;
-    }
-
-    .calendar-grid {
-        gap: 6px;
-    }
-
-    .calendar-day {
-        min-height: 46px;
-        padding: 8px 0;
     }
 }
