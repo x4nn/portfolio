@@ -24,6 +24,7 @@ const accessOverlay = document.querySelector("[data-access-overlay]");
 const accessForm = document.querySelector("[data-access-form]");
 const accessInput = document.querySelector("[data-access-input]");
 const accessError = document.querySelector("[data-access-error]");
+const accessDeniedCard = document.querySelector("[data-access-denied]");
 const roleStatus = document.querySelector("[data-role-status]");
 const syncStatus = document.querySelector("[data-sync-status]");
 const calendarGrid = document.querySelector("[data-calendar-grid]");
@@ -129,8 +130,7 @@ function initializeAccessControl() {
 
     if (storedIdentityRoleKey) {
         loggedInIdentityRoleKey = storedIdentityRoleKey;
-        hideAccessOverlay();
-        void initialize();
+        void proceedIfCalendarAccessAllowed();
         return;
     }
 
@@ -164,6 +164,12 @@ function initializeAccessControl() {
 
             loggedInIdentityRoleKey = getRoleKeyFromUser(matchedUser);
             grantAccess(loggedInIdentityRoleKey);
+
+            if (matchedUser.showOnCalendarPage === false) {
+                showCalendarAccessDenied();
+                return;
+            }
+
             hideAccessOverlay();
             await initialize();
         } catch (error) {
@@ -175,6 +181,48 @@ function initializeAccessControl() {
             setAccessFormBusy(false);
         }
     });
+}
+
+// Runs for a device that's already logged in from a previous visit. The logged-in identity
+// (not whatever role the switcher happens to show) decides calendar access, so this always
+// re-checks the person's showOnCalendarPage flag before rendering anything.
+async function proceedIfCalendarAccessAllowed() {
+    try {
+        const candidateUsers = await getUsersForAccessCheck();
+        const matchedUser = candidateUsers.find((user) => getRoleKeyFromUser(user) === loggedInIdentityRoleKey);
+
+        if (matchedUser?.showOnCalendarPage === false) {
+            showCalendarAccessDenied();
+            return;
+        }
+
+        hideAccessOverlay();
+        await initialize();
+    } catch (error) {
+        // Can't verify the flag at all (offline, no cache) - fail open rather than locking out
+        // an already-approved device over a connectivity hiccup.
+        console.warn("Could not verify calendar access, allowing through", error);
+        hideAccessOverlay();
+        await initialize();
+    }
+}
+
+async function getUsersForAccessCheck() {
+    try {
+        return await loadUsersForLogin();
+    } catch (error) {
+        const cachedState = loadLocalState();
+        if (Array.isArray(cachedState.users) && cachedState.users.length) {
+            return cachedState.users;
+        }
+        throw error;
+    }
+}
+
+function showCalendarAccessDenied() {
+    accessOverlay?.classList.remove("is-hidden");
+    accessForm?.classList.add("is-hidden");
+    accessDeniedCard?.classList.remove("is-hidden");
 }
 
 function setAccessFormBusy(isBusy) {

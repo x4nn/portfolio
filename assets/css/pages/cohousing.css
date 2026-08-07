@@ -54,6 +54,10 @@ select {
     display: none;
 }
 
+.access-card.is-hidden {
+    display: none;
+}
+
 .access-card {
     width: min(420px, 100%);
     background: var(--surface);

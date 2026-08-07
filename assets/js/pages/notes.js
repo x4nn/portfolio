@@ -2,14 +2,12 @@ const STORAGE_KEY = "cohousing-notes-state-v1";
 const ACCESS_IDENTITY_STORAGE_KEY = "cohousing-access-identity";
 
 const defaultState = {
-    activeRole: "you",
     items: [],
     users: structuredClone(DEFAULT_USERS)
 };
 
 let state = structuredClone(defaultState);
 
-const roleSwitcher = document.querySelector("[data-role-switcher]");
 const accessOverlay = document.querySelector("[data-access-overlay]");
 const accessForm = document.querySelector("[data-access-form]");
 const accessInput = document.querySelector("[data-access-input]");
@@ -18,7 +16,9 @@ const roleStatus = document.querySelector("[data-role-status]");
 const syncStatus = document.querySelector("[data-sync-status]");
 const notesForm = document.querySelector("[data-notes-form]");
 const notesInput = document.querySelector("[data-notes-input]");
+const notesForSelect = document.querySelector("[data-notes-for-select]");
 const notesList = document.querySelector("[data-notes-list]");
+const EVERYONE_FOR_ROLE_VALUE = "";
 
 let pageInitialized = false;
 let loggedInIdentityRoleKey = null;
@@ -32,7 +32,7 @@ async function initialize() {
 
     pageInitialized = true;
     await loadRemoteState();
-    renderRoleButtons();
+    renderActiveIdentity();
     bindEvents();
     renderAll();
 }
@@ -54,7 +54,6 @@ function loadLocalState() {
 
 function normalizeState(parsedState) {
     return {
-        activeRole: normalizeRoleKey(parsedState.activeRole || defaultState.activeRole),
         items: Array.isArray(parsedState.items) ? parsedState.items : [],
         users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS)
     };
@@ -62,11 +61,6 @@ function normalizeState(parsedState) {
 
 async function loadRemoteState() {
     state = loadLocalState();
-
-    if (loggedInIdentityRoleKey) {
-        state.activeRole = loggedInIdentityRoleKey;
-    }
-
     await refreshRemoteState();
 }
 
@@ -207,15 +201,21 @@ async function addItem(rawText) {
         return;
     }
 
+    const selectedForRoleValue = notesForSelect?.value || EVERYONE_FOR_ROLE_VALUE;
+
     state.items.push({
         id: generateItemId(),
         text,
-        authorRole: state.activeRole,
+        authorRole: loggedInIdentityRoleKey,
+        forRole: selectedForRoleValue === EVERYONE_FOR_ROLE_VALUE ? null : normalizeRoleKey(selectedForRoleValue),
         isDone: false,
         createdAt: Date.now()
     });
 
     notesInput.value = "";
+    if (notesForSelect) {
+        notesForSelect.value = EVERYONE_FOR_ROLE_VALUE;
+    }
     await saveState();
     renderNotesList();
 }
@@ -246,40 +246,67 @@ function generateItemId() {
 }
 
 function renderAll() {
-    renderRoleButtons();
+    renderActiveIdentity();
     renderNotesList();
 }
 
-function renderRoleButtons() {
-    if (!roleSwitcher) {
+function getReminderPageUsers() {
+    return (state.users || []).filter((user) => user.showOnReminderPage !== false);
+}
+
+const EVERYONE_SWATCH_FALLBACK_COLOR = "#cccccc";
+
+function buildEveryoneSwatchBackground() {
+    const reminderPageUsers = getReminderPageUsers();
+
+    if (!reminderPageUsers.length) {
+        return EVERYONE_SWATCH_FALLBACK_COLOR;
+    }
+
+    const sliceSizePercent = 100 / reminderPageUsers.length;
+    const gradientSlices = reminderPageUsers.map((user, userIndex) => {
+        const sliceStartPercent = sliceSizePercent * userIndex;
+        const sliceEndPercent = sliceSizePercent * (userIndex + 1);
+        const userColor = user.color || EVERYONE_SWATCH_FALLBACK_COLOR;
+        return `${userColor} ${sliceStartPercent}% ${sliceEndPercent}%`;
+    });
+
+    return `conic-gradient(${gradientSlices.join(", ")})`;
+}
+
+// Who you add items as is always the identity you logged in with - there's no switcher here
+// (unlike the calendar page, adding a reminder "as" someone else isn't a real use case).
+function renderActiveIdentity() {
+    document.body.setAttribute("data-active-role", loggedInIdentityRoleKey);
+    applyUserColorTheme(state.users, loggedInIdentityRoleKey);
+    if (roleStatus) {
+        roleStatus.textContent = `Je voegt items toe als ${getRoleLabel(loggedInIdentityRoleKey)}.`;
+    }
+
+    renderForSelectOptions(getReminderPageUsers());
+}
+
+function renderForSelectOptions(reminderPageUsers) {
+    if (!notesForSelect) {
         return;
     }
 
-    const reminderPageUsers = (state.users || []).filter((user) => user.showOnReminderPage !== false);
+    const previouslySelectedValue = notesForSelect.value;
 
-    roleSwitcher.innerHTML = reminderPageUsers
-        .map((user) => {
-            const roleKey = getRoleKeyFromUser(user);
-            const isActive = roleKey === state.activeRole;
-            const label = getRoleLabel(roleKey);
-            return `<button class="role-button${isActive ? " is-active" : ""}" type="button" data-role-option="${roleKey}">${label}</button>`;
-        })
+    const optionsHtml = [`<option value="${EVERYONE_FOR_ROLE_VALUE}">Iedereen</option>`]
+        .concat(
+            reminderPageUsers.map((user) => {
+                const roleKey = getRoleKeyFromUser(user);
+                return `<option value="${roleKey}">${getRoleLabel(roleKey)}</option>`;
+            })
+        )
         .join("");
 
-    const buttons = roleSwitcher.querySelectorAll("[data-role-option]");
-    buttons.forEach((button) => {
-        button.addEventListener("click", async () => {
-            state.activeRole = button.getAttribute("data-role-option");
-            await saveState();
-            renderRoleButtons();
-        });
-    });
+    notesForSelect.innerHTML = optionsHtml;
 
-    document.body.setAttribute("data-active-role", state.activeRole);
-    applyUserColorTheme(state.users, state.activeRole);
-    if (roleStatus) {
-        roleStatus.textContent = `Je voegt items toe als ${getRoleLabel(state.activeRole)}.`;
-    }
+    const previousValueStillValid = Array.from(notesForSelect.options)
+        .some((option) => option.value === previouslySelectedValue);
+    notesForSelect.value = previousValueStillValid ? previouslySelectedValue : EVERYONE_FOR_ROLE_VALUE;
 }
 
 function getRoleLabel(roleKey) {
@@ -299,11 +326,16 @@ function renderNotesList() {
     }
 
     const sortedItems = [...state.items].sort((firstItem, secondItem) => firstItem.createdAt - secondItem.createdAt);
+    const everyoneSwatchBackground = buildEveryoneSwatchBackground();
 
     notesList.innerHTML = sortedItems
         .map((item) => {
             const authorLabel = ROLE_LABELS[item.authorRole] || item.authorRole;
+            const forRoleLabel = item.forRole ? (ROLE_LABELS[item.forRole] || item.forRole) : null;
             const escapedText = escapeHtml(item.text);
+            const forSwatchHtml = forRoleLabel
+                ? `<span class="notes-item-author-swatch is-${item.forRole}"></span>Voor ${forRoleLabel}`
+                : `<span class="notes-item-author-swatch is-everyone" style="background: ${everyoneSwatchBackground};"></span>Voor iedereen`;
             return `
                 <article class="notes-item is-${item.authorRole}${item.isDone ? " is-done" : ""}">
                     <input
@@ -315,9 +347,14 @@ function renderNotesList() {
                     >
                     <div class="notes-item-body">
                         <p class="notes-item-text">${escapedText}</p>
-                        <p class="notes-item-meta">
-                            <span class="notes-item-author-swatch is-${item.authorRole}"></span>${authorLabel}
-                        </p>
+                        <div class="notes-item-meta-row">
+                            <span class="notes-item-meta">
+                                <span class="notes-item-author-swatch is-${item.authorRole}"></span>Toegevoegd door ${authorLabel}
+                            </span>
+                            <span class="notes-item-meta">
+                                ${forSwatchHtml}
+                            </span>
+                        </div>
                     </div>
                     <button
                         type="button"

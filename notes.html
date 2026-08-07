@@ -39,8 +39,7 @@
             </div>
 
             <div class="hero-panel">
-                <p class="panel-label">Toevoegen als</p>
-                <div class="role-switcher" role="tablist" aria-label="Kies wie toevoegt" data-role-switcher></div>
+                <p class="panel-label">Ingelogd als</p>
                 <p class="panel-status" data-role-status>Je voegt items toe als jij.</p>
                 <p class="sync-status" data-sync-status>Verbinden met gedeelde database…</p>
             </div>
@@ -63,6 +62,10 @@
                         aria-label="Nieuw item toevoegen"
                         required
                     >
+                    <label class="notes-form-for-field" for="notes-for-select">
+                        <span class="notes-form-for-caption">Voor</span>
+                        <select id="notes-for-select" data-notes-for-select aria-label="Voor wie is dit item"></select>
+                    </label>
                     <button class="notes-form-button" type="submit">Toevoegen</button>
                 </form>
 
