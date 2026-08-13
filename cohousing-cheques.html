@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gedeelde checklist om niets te vergeten binnen het huishouden.">
-    <title>Checklist - Cohousing</title>
+    <meta name="description" content="Eenvoudig overzicht van hoeveel Mama en Papa je verschuldigd zijn voor de cheques, op basis van de kalender.">
+    <title>Cheques - Cohousing</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/pages/notes.css">
+    <link rel="stylesheet" href="assets/css/pages/cohousing-cheques.css">
 </head>
 <body data-active-role="you">
     <div class="access-overlay" data-access-overlay>
@@ -22,7 +22,7 @@
                 <input id="access-password" type="password" name="password" autocomplete="current-password" data-access-input>
             </label>
 
-            <button class="access-button" type="submit">Open checklist</button>
+            <button class="access-button" type="submit">Open overzicht</button>
             <p class="access-error" data-access-error></p>
         </form>
     </div>
@@ -31,55 +31,54 @@
         <header class="hero-card">
             <div class="hero-copy">
                 <p class="hero-kicker">Cohousing hulpmiddel</p>
-                <h1>Dingen om niet te vergeten</h1>
+                <h1>Cheques verdelen</h1>
                 <p class="hero-text">
-                    Voeg iets toe zodra je eraan denkt, en vink het af zodra het geregeld is. Iedereen in het huishouden ziet dezelfde lijst.
+                    Elke maand staat er geld aan cheques op de kaart. Dit bedrag wordt verdeeld tussen Mama en Papa,
+                    op basis van hoeveel dagen je bij elk van hen was volgens de kalender.
                 </p>
                 <div class="hero-nav-links">
                     <a class="hero-nav-link" href="cohousing.html">&larr; Naar kalender</a>
-                    <a class="hero-nav-link" href="cohousing-cheques.html">Cheques verdelen &rarr;</a>
+                    <a class="hero-nav-link" href="notes.html">Reminders openen &rarr;</a>
                 </div>
             </div>
 
             <div class="hero-panel">
                 <p class="panel-label">Ingelogd als</p>
-                <p class="panel-status" data-role-status>Je voegt items toe als jij.</p>
+                <p class="panel-status" data-role-status>Bezig met inloggen…</p>
                 <p class="sync-status" data-sync-status>Verbinden met gedeelde database…</p>
             </div>
         </header>
 
         <main>
-            <section class="card" aria-labelledby="checklist-heading">
+            <section class="card" aria-labelledby="cheques-heading">
                 <div class="card-header">
                     <div>
-                        <p class="card-eyebrow">Checklist</p>
-                        <h2 id="checklist-heading">Gedeelde lijst</h2>
+                        <p class="card-eyebrow">Cheques</p>
+                        <h2 id="cheques-heading">Hoeveel krijgt Mama, hoeveel krijgt Papa?</h2>
                     </div>
+                    <label class="month-picker" for="cheques-month-select">
+                        <span>Maand</span>
+                        <select id="cheques-month-select" data-month-select></select>
+                    </label>
                 </div>
 
-                <form class="notes-form" data-notes-form>
-                    <input
-                        type="text"
-                        data-notes-input
-                        placeholder="Bijv. 2 miljoen euro storten op Xan zijn rekening"
-                        aria-label="Nieuw item toevoegen"
-                        required
-                    >
-                    <label class="notes-form-for-field" for="notes-for-select">
-                        <span class="notes-form-for-caption">Voor</span>
-                        <select id="notes-for-select" data-notes-for-select aria-label="Voor wie is dit item"></select>
-                    </label>
-                    <button class="notes-form-button" type="submit">Toevoegen</button>
-                </form>
+                <label class="cheques-amount-field" for="cheques-amount-input">
+                    <span>Bedrag aan cheques deze maand</span>
+                    <div class="cheques-amount-input-wrap">
+                        <span class="cheques-amount-currency" aria-hidden="true">&euro;</span>
+                        <input id="cheques-amount-input" type="number" min="0" step="1" inputmode="numeric" data-cheques-amount-input>
+                    </div>
+                </label>
 
-                <div class="notes-list" data-notes-list></div>
+                <div class="cheques-share-list" data-cheques-share-list></div>
+
+                <p class="cheques-explainer" data-cheques-explainer></p>
             </section>
         </main>
     </div>
 
     <script src="assets/js/cohousing-data.js"></script>
     <script src="assets/js/user-theme.js"></script>
-    <script src="assets/js/notes-data.js"></script>
-    <script src="assets/js/pages/notes.js"></script>
+    <script src="assets/js/pages/cohousing-cheques.js"></script>
 </body>
 </html>

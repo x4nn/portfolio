@@ -1,4 +1,4 @@
-/* ---------- Shared tokens (base values kept in sync with cohousing.css; --luna-color is notes-only, since Luna only exists on this page) ---------- */
+/* ---------- Shared tokens (base values kept in sync with cohousing.css/notes.css) ---------- */
 
 :root {
     color-scheme: light;
@@ -12,7 +12,6 @@
     --you-color: #8fb5ff;
     --mom-color: #f5b8c8;
     --dad-color: #9ed8bf;
-    --luna-color: #caa6f5;
     --accent: #a65d7d;
     --accent-soft: rgba(166, 93, 125, 0.15);
 }
@@ -20,6 +19,12 @@
 /* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
    (see assets/js/user-theme.js) overrides these same custom properties, computed from that
    user's `color` field in the database - so there's no separate per-role block to keep in sync. */
+
+/* This page is meant to be read by Mama and Papa without any help, so the whole page runs at a
+   larger base size than the other cohousing pages - bigger text throughout, not just on the totals. */
+html {
+    font-size: 118%;
+}
 
 * {
     box-sizing: border-box;
@@ -89,7 +94,7 @@ select {
 .access-field input {
     border: 1px solid var(--line);
     border-radius: 999px;
-    padding: 10px 14px;
+    padding: 12px 16px;
     background: #fff;
     color: var(--text);
 }
@@ -98,7 +103,7 @@ select {
     width: 100%;
     border: 0;
     border-radius: 999px;
-    padding: 11px 14px;
+    padding: 13px 14px;
     background: var(--accent);
     color: white;
     font-weight: 700;
@@ -115,7 +120,7 @@ select {
 /* ---------- Page shell / hero ---------- */
 
 .page-shell {
-    max-width: 900px;
+    max-width: 780px;
     margin: 0 auto;
     padding: 28px 18px 48px;
 }
@@ -200,7 +205,7 @@ select {
 }
 
 .card {
-    padding: 22px;
+    padding: 26px;
 }
 
 .card-header {
@@ -208,194 +213,142 @@ select {
     justify-content: space-between;
     align-items: start;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .card-header h2 {
     margin: 0;
-    font-size: 1.24rem;
+    font-size: 1.3rem;
+    line-height: 1.3;
 }
 
-/* ---------- Checklist ---------- */
-
-.notes-form {
+.month-picker {
     display: flex;
-    gap: 10px;
-    margin-bottom: 18px;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--text-soft);
 }
 
-.notes-form input {
-    flex: 1;
+.month-picker select {
     border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 11px 16px;
     background: #fff;
+    border-radius: 999px;
+    padding: 10px 14px;
     color: var(--text);
 }
 
-.notes-form-for-field {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    color: var(--text-soft);
-    white-space: nowrap;
-}
+/* ---------- Cheques ---------- */
 
-.notes-form-for-caption {
+.cheques-amount-field {
+    display: block;
+    margin-bottom: 24px;
+    color: var(--text-soft);
     font-weight: 600;
 }
 
-.notes-form-for-field select {
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 9px 14px;
-    background: #fff;
-    color: var(--text);
+.cheques-amount-field > span {
+    display: block;
+    margin-bottom: 8px;
 }
 
-.notes-form-button {
-    border: 0;
-    border-radius: 999px;
-    padding: 11px 20px;
-    background: var(--accent);
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.notes-list {
-    display: grid;
-    gap: 10px;
-}
-
-.notes-empty-message {
-    margin: 0;
-    color: var(--text-soft);
-}
-
-.notes-item {
+.cheques-amount-input-wrap {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 12px 14px;
+    border-radius: 18px;
+    background: #fff;
+    padding: 10px 18px;
 }
 
-.notes-item.is-you {
-    background: color-mix(in srgb, var(--you-color) 24%, transparent);
-    border-color: color-mix(in srgb, var(--you-color) 40%, transparent);
+.cheques-amount-currency {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--accent);
 }
 
-.notes-item.is-mom {
-    background: color-mix(in srgb, var(--mom-color) 30%, transparent);
-    border-color: color-mix(in srgb, var(--mom-color) 50%, transparent);
-}
-
-.notes-item.is-dad {
-    background: color-mix(in srgb, var(--dad-color) 30%, transparent);
-    border-color: color-mix(in srgb, var(--dad-color) 50%, transparent);
-}
-
-.notes-item.is-luna {
-    background: color-mix(in srgb, var(--luna-color) 28%, transparent);
-    border-color: color-mix(in srgb, var(--luna-color) 50%, transparent);
-}
-
-.notes-item-checkbox {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    accent-color: var(--accent);
-    cursor: pointer;
-}
-
-.notes-item-body {
+.cheques-amount-input-wrap input {
     flex: 1;
+    border: 0;
+    background: transparent;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text);
     min-width: 0;
 }
 
-.notes-item-text {
-    margin: 0;
-    word-break: break-word;
-}
-
-.notes-item.is-done .notes-item-text {
-    text-decoration: line-through;
-    color: var(--text-soft);
-}
-
-.notes-item-meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 14px;
-    margin: 4px 0 0;
-}
-
-.notes-item-meta {
-    font-size: 0.82rem;
-    color: var(--text-soft);
-}
-
-.notes-item-author-swatch {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    margin-right: 6px;
-}
-
-.notes-item-author-swatch.is-everyone {
-    width: 11px;
-    height: 11px;
-    vertical-align: -1px;
-}
-
-.notes-item-author-swatch.is-you {
-    background: var(--you-color);
-}
-
-.notes-item-author-swatch.is-mom {
-    background: var(--mom-color);
-}
-
-.notes-item-author-swatch.is-dad {
-    background: var(--dad-color);
-}
-
-.notes-item-author-swatch.is-luna {
-    background: var(--luna-color);
-}
-
-.notes-item-remove-button {
-    border: 0;
-    background: transparent;
-    color: var(--text-soft);
-    font-size: 1.3rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 999px;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.notes-item-remove-button:hover,
-.notes-item-remove-button:focus-visible {
-    background: var(--accent-soft);
-    color: var(--accent);
+.cheques-amount-input-wrap input:focus {
     outline: none;
 }
 
-@media (max-width: 900px) {
-    .hero-card {
-        grid-template-columns: 1fr;
-    }
+.cheques-share-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.cheques-share-card {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 20px 16px;
+    text-align: center;
+    background: var(--surface-strong);
+}
+
+.cheques-share-card.is-mom {
+    background: color-mix(in srgb, var(--mom-color) 30%, white);
+    border-color: color-mix(in srgb, var(--mom-color) 55%, transparent);
+}
+
+.cheques-share-card.is-dad {
+    background: color-mix(in srgb, var(--dad-color) 30%, white);
+    border-color: color-mix(in srgb, var(--dad-color) 55%, transparent);
+}
+
+.cheques-share-name {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.cheques-share-amount {
+    margin: 0 0 6px;
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.cheques-share-days {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 0.95rem;
+}
+
+.cheques-empty-message {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 18px;
+    text-align: center;
+    color: var(--text-soft);
+    border: 1px dashed var(--line);
+    border-radius: 18px;
+}
+
+.cheques-explainer {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: center;
 }
 
 @media (max-width: 640px) {
+    html {
+        font-size: 112%;
+    }
+
     .page-shell {
         padding: 16px 12px 32px;
     }
@@ -405,7 +358,19 @@ select {
         padding: 18px;
     }
 
-    .notes-form {
+    .hero-card {
+        grid-template-columns: 1fr;
+    }
+
+    .card-header {
         flex-direction: column;
+    }
+
+    .cheques-share-list {
+        grid-template-columns: 1fr;
+    }
+
+    .cheques-share-amount {
+        font-size: 2.2rem;
     }
 }
