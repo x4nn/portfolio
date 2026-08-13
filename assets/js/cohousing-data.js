@@ -117,7 +117,7 @@ async function loadUsersForLogin() {
     return remoteData.users;
 }
 
-function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta = {}) {
+function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta = {}, weeklyBudget = 0) {
     const selectedDays = {};
 
     Object.entries(assignments || {}).forEach(([monthKey, monthAssignments]) => {
@@ -147,7 +147,8 @@ function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta =
 
     return {
         selectedDays,
-        users: Array.isArray(users) && users.length ? users : DEFAULT_USERS
+        users: Array.isArray(users) && users.length ? users : DEFAULT_USERS,
+        weeklyBudget: Number(weeklyBudget) || 0
     };
 }
 
@@ -158,6 +159,10 @@ function hydrateStateFromRemoteData(remoteData, localState) {
     const users = Array.isArray(remoteData?.users) && remoteData.users.length ? remoteData.users : DEFAULT_USERS;
 
     nextState.users = users;
+
+    if (Number.isFinite(Number(remoteData?.weeklyBudget))) {
+        nextState.weeklyBudget = Number(remoteData.weeklyBudget);
+    }
 
     const selectedDays = remoteData?.selectedDays || {};
 

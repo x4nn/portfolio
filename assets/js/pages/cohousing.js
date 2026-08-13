@@ -109,7 +109,7 @@ async function saveState() {
     updateSyncStatus("Opslaan…");
 
     try {
-        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta);
+        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta, state.weeklyBudget);
         await saveDashboardData(payload);
         await refreshRemoteState();
         updateSyncStatus("Opgeslagen in gedeelde database");

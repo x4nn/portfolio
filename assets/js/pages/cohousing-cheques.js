@@ -3,10 +3,13 @@ const ACCESS_IDENTITY_STORAGE_KEY = "cohousing-access-identity";
 const MONTHS_TO_DISPLAY = 12;
 const MONTHS_BEFORE_CURRENT = Math.floor(MONTHS_TO_DISPLAY / 2);
 const DEFAULT_MONTHLY_CHEQUES_AMOUNT = 200;
+const DEFAULT_WEEKLY_BUDGET = 100;
+const WEEKLY_DAYS = 7;
 
 const defaultState = {
     selectedMonthKey: getMonthKey(new Date()),
     monthlyChequesAmount: DEFAULT_MONTHLY_CHEQUES_AMOUNT,
+    weeklyBudget: DEFAULT_WEEKLY_BUDGET,
     assignments: {},
     assignmentMeta: {},
     users: structuredClone(DEFAULT_USERS)
@@ -62,6 +65,9 @@ function normalizeState(parsedState) {
         monthlyChequesAmount: Number.isFinite(Number(parsedState.monthlyChequesAmount))
             ? Number(parsedState.monthlyChequesAmount)
             : DEFAULT_MONTHLY_CHEQUES_AMOUNT,
+        weeklyBudget: Number.isFinite(Number(parsedState.weeklyBudget))
+            ? Number(parsedState.weeklyBudget)
+            : DEFAULT_WEEKLY_BUDGET,
         assignments: parsedState.assignments || {},
         assignmentMeta: parsedState.assignmentMeta || {},
         users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS)
@@ -240,29 +246,51 @@ function renderChequesShare() {
         return;
     }
 
-    const momShare = monthlyChequesAmount * (counts.mom / totalPaidDays);
-    const dadShare = monthlyChequesAmount * (counts.dad / totalPaidDays);
+    const momChequesShare = monthlyChequesAmount * (counts.mom / totalPaidDays);
+    const dadChequesShare = monthlyChequesAmount * (counts.dad / totalPaidDays);
+
+    const weeklyBudget = Number(state.weeklyBudget) || 0;
+    const dailyRate = weeklyBudget > 0 ? weeklyBudget / WEEKLY_DAYS : 0;
+    const momAmountOwed = dailyRate * counts.mom;
+    const dadAmountOwed = dailyRate * counts.dad;
 
     const shareCards = [
-        { role: "mom", label: "Mama krijgt", days: counts.mom, amount: momShare },
-        { role: "dad", label: "Papa krijgt", days: counts.dad, amount: dadShare }
+        { role: "mom", label: "Mama krijgt", days: counts.mom, chequesShare: momChequesShare, amountOwed: momAmountOwed },
+        { role: "dad", label: "Papa krijgt", days: counts.dad, chequesShare: dadChequesShare, amountOwed: dadAmountOwed }
     ];
 
-    chequesShareList.innerHTML = shareCards
-        .map(
-            (entry) => `
-                <article class="cheques-share-card is-${entry.role}">
-                    <p class="cheques-share-name">${entry.label}</p>
-                    <p class="cheques-share-amount">${formatCurrency(entry.amount)}</p>
-                    <p class="cheques-share-days">${entry.days} dag${entry.days === 1 ? "" : "en"} bij ${entry.role === "mom" ? "Mama" : "Papa"}</p>
-                </article>
-            `
-        )
-        .join("");
+    chequesShareList.innerHTML = shareCards.map(buildChequesShareCardHtml).join("");
+
+    const totalAmountOwed = momAmountOwed + dadAmountOwed;
+    const totalRemaining = Math.max(totalAmountOwed - monthlyChequesAmount, 0);
 
     chequesExplainerText.textContent =
         `Van de ${formatCurrency(monthlyChequesAmount)} aan cheques voor ${formatMonthLabel(monthKey)} was je ${counts.mom} dag${counts.mom === 1 ? "" : "en"} bij Mama ` +
-        `en ${counts.dad} dag${counts.dad === 1 ? "" : "en"} bij Papa, dus wordt het zo verdeeld.`;
+        `en ${counts.dad} dag${counts.dad === 1 ? "" : "en"} bij Papa, dus wordt het zo verdeeld. In totaal is er ${formatCurrency(totalAmountOwed)} verschuldigd op basis ` +
+        `van het wekelijks budget${totalRemaining > 0 ? `, dus blijft er ${formatCurrency(totalRemaining)} over om buiten de cheques te betalen.` : ", en de cheques dekken dit volledig."}`;
+}
+
+function buildChequesShareCardHtml(entry) {
+    const remaining = Math.max(entry.amountOwed - entry.chequesShare, 0);
+    const coveragePercentage = entry.amountOwed > 0
+        ? Math.min(Math.round((entry.chequesShare / entry.amountOwed) * 100), 100)
+        : 100;
+    const personLabel = entry.role === "mom" ? "Mama" : "Papa";
+
+    return `
+        <article class="cheques-share-card is-${entry.role}">
+            <p class="cheques-share-name">${entry.label}</p>
+            <p class="cheques-share-amount">${formatCurrency(entry.chequesShare)}</p>
+            <p class="cheques-share-days">${entry.days} dag${entry.days === 1 ? "" : "en"} bij ${personLabel}</p>
+            <div class="cheques-coverage-bar" role="img" aria-label="${coveragePercentage}% van het verschuldigde bedrag gedekt door de cheques">
+                <div class="cheques-coverage-bar-fill" style="width: ${coveragePercentage}%"></div>
+            </div>
+            <p class="cheques-coverage-label">${coveragePercentage}% gedekt door cheques</p>
+            <p class="cheques-remaining-amount${remaining > 0 ? " is-outstanding" : ""}">
+                ${remaining > 0 ? `Nog ${formatCurrency(remaining)} te betalen buiten de cheques` : "Volledig gedekt door de cheques"}
+            </p>
+        </article>
+    `;
 }
 
 function countAssignmentsForMonth(monthKey) {
