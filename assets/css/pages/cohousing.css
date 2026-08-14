@@ -1,17 +1,19 @@
 :root {
     color-scheme: light;
-    --page-bg: #fff8fb;
+    --page-bg: #f2faf9;
     --surface: #ffffff;
-    --surface-strong: #fdf4f8;
-    --text: #241523;
-    --text-soft: #7c6471;
-    --line: #f0dce4;
-    --shadow: 0 20px 45px rgba(95, 48, 74, 0.12);
+    --surface-strong: #e7f5f2;
+    --text: #142e2c;
+    --text-soft: #52716c;
+    --line: #d3ebe6;
+    --shadow: 0 20px 45px rgba(19, 92, 82, 0.12);
     --you-color: #8fb5ff;
     --mom-color: #f5b8c8;
     --dad-color: #9ed8bf;
-    --accent: #a65d7d;
-    --accent-soft: rgba(166, 93, 125, 0.15);
+    --accent: #1f8a76;
+    --accent-soft: rgba(31, 138, 118, 0.15);
+    --payment-paid-color: #3fa66b;
+    --payment-unpaid-color: #c3d6d1;
 }
 
 /* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
@@ -27,7 +29,7 @@ body {
     font-family: "Inter", "Segoe UI", sans-serif;
     background:
         radial-gradient(circle at top left, var(--accent-soft), transparent 24%),
-        linear-gradient(135deg, #fffafc 0%, var(--page-bg) 100%);
+        linear-gradient(135deg, #fbfffe 0%, var(--page-bg) 100%);
     color: var(--text);
     min-height: 100vh;
     transition: background 0.25s ease, color 0.25s ease;
@@ -203,7 +205,7 @@ select {
 .role-button:hover,
 .role-button:focus-visible {
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(95, 48, 74, 0.08);
+    box-shadow: 0 8px 20px rgba(19, 92, 82, 0.08);
     outline: none;
 }
 
@@ -335,18 +337,18 @@ select {
 .calendar-day:hover,
 .calendar-day:focus-visible {
     transform: translateY(-1px);
-    box-shadow: 0 10px 20px rgba(95, 48, 74, 0.08);
+    box-shadow: 0 10px 20px rgba(19, 92, 82, 0.08);
     outline: none;
 }
 
 .calendar-day.is-muted {
-    color: #b5a4ae;
-    background: #fcf7f9;
+    color: #6f938c;
+    background: #eef7f5;
 }
 
 .calendar-day.is-today {
-    border: 2px solid #8c5b7a;
-    box-shadow: 0 0 0 2px rgba(140, 91, 122, 0.16);
+    border: 2px solid #14766a;
+    box-shadow: 0 0 0 2px rgba(20, 118, 106, 0.16);
 }
 
 .calendar-day.is-you {
@@ -425,6 +427,26 @@ select {
     font-size: 0.92rem;
 }
 
+.payment-status-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-strong);
+}
+
+.payment-status-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
 .history-list {
     display: grid;
     gap: 12px;
@@ -434,6 +456,7 @@ select {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
     padding: 14px 16px;
     border: 1px solid var(--line);
@@ -449,6 +472,46 @@ select {
 .history-meta {
     color: var(--text-soft);
     font-size: 0.92rem;
+}
+
+.history-payment-status {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.payment-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
+.payment-status-dot {
+    display: inline-flex;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--payment-unpaid-color);
+    flex-shrink: 0;
+}
+
+.payment-status-dot.is-paid {
+    background: var(--payment-paid-color);
+}
+
+.history-payment-edit-link {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.history-payment-edit-link:hover,
+.history-payment-edit-link:focus-visible {
+    text-decoration: underline;
 }
 
 @media (max-width: 900px) {
@@ -483,5 +546,13 @@ select {
     .calendar-day {
         min-height: 46px;
         padding: 8px 0;
+    }
+
+    .history-item {
+        align-items: flex-start;
+    }
+
+    .history-payment-status {
+        flex-wrap: wrap;
     }
 }
