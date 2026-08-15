@@ -69,6 +69,8 @@ body {
     border-radius: 8px;
     box-shadow: 0 12px 26px -12px var(--luna-shadow);
     pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
 }
 
 @media (max-width: 520px) {
@@ -458,6 +460,7 @@ body {
     font-size: 30px;
     cursor: pointer;
     user-select: none;
+    -webkit-user-drag: none;
     transition: transform 0.1s ease;
     will-change: transform;
 }

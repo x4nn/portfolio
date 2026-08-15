@@ -104,12 +104,19 @@ const ALBUM_COVER_IMAGE_PATHS = [
 ];
 const SCATTERED_COVER_COUNT = 36;
 
-// ✏️ EDIT: selfies for Track 03 (the catch game). Drop image files into
-// assets/images/luna/click-game/ and add their filenames here — she'll tap
-// selfies instead of note emojis. Leave this empty to keep the emoji game.
+// ✏️ EDIT: selfies for Track 03 (the catch game). Drop more image files into
+// assets/images/luna/click-game/ and add their filenames here any time — she
+// taps a mix of these and the note emojis below. Leave this empty to fall
+// back to emoji-only.
 const SELFIE_IMAGE_PATHS = [
-    // "assets/images/luna/click-game/selfie-1.jpg",
-    // "assets/images/luna/click-game/selfie-2.jpg",
+    "assets/images/luna/click-game/selfie-1.jpeg",
+    "assets/images/luna/click-game/selfie-2.jpeg",
+    "assets/images/luna/click-game/selfie-3.jpeg",
+    "assets/images/luna/click-game/selfie-4.jpeg",
+    "assets/images/luna/click-game/selfie-5.jpeg",
+    "assets/images/luna/click-game/selfie-6.jpeg",
+    "assets/images/luna/click-game/selfie-7.jpeg",
+    "assets/images/luna/click-game/selfie-8.jpeg",
 ];
 
 // ---------------------------------------------------------------
@@ -125,6 +132,11 @@ const GAME_SCORE_GREAT_THRESHOLD = 25;
 const GAME_SCORE_GOOD_THRESHOLD = 12;
 const FLOATING_NOTE_EMOJIS = ["🎵", "🎶", "🎼", "💚", "🌿", "🎧"];
 const FLOATING_NOTE_SIZE_PX = 46;
+
+// ✏️ EDIT: chance a spawned note is an emoji vs. a selfie — 1/3 emoji, 2/3
+// selfie. A fixed ratio (not just pooling both arrays together) so it stays
+// 1/3 - 2/3 no matter how many selfies end up in SELFIE_IMAGE_PATHS.
+const EMOJI_SPAWN_PROBABILITY = 1 / 3;
 
 // -- Scattered album covers --
 const COVER_WIDTH_MIN_PX = 50;
@@ -149,6 +161,7 @@ function scatterAlbumCovers() {
         cover.className = "luna-cover";
         cover.src = ALBUM_COVER_IMAGE_PATHS[coverIndex % ALBUM_COVER_IMAGE_PATHS.length];
         cover.alt = "";
+        cover.draggable = false;
 
         const evenlySpacedTopPercent = (coverIndex / SCATTERED_COVER_COUNT) * 100;
         cover.style.top = evenlySpacedTopPercent + randomBetween(-COVER_TOP_JITTER_PERCENT, COVER_TOP_JITTER_PERCENT) + "%";
@@ -224,11 +237,12 @@ function startGame() {
 
 function spawnFloatingNote() {
     const board = document.getElementById("luna-game-board");
-    const usingSelfies = SELFIE_IMAGE_PATHS.length > 0;
+    const isSelfie = SELFIE_IMAGE_PATHS.length > 0 && Math.random() >= EMOJI_SPAWN_PROBABILITY;
 
-    const floatingNote = document.createElement(usingSelfies ? "img" : "div");
-    floatingNote.className = usingSelfies ? "luna-float-note luna-float-note--selfie" : "luna-float-note";
-    if (usingSelfies) {
+    const floatingNote = document.createElement(isSelfie ? "img" : "div");
+    floatingNote.className = isSelfie ? "luna-float-note luna-float-note--selfie" : "luna-float-note";
+    floatingNote.draggable = false;
+    if (isSelfie) {
         floatingNote.src = SELFIE_IMAGE_PATHS[Math.floor(Math.random() * SELFIE_IMAGE_PATHS.length)];
         floatingNote.alt = "";
     } else {
@@ -242,9 +256,13 @@ function spawnFloatingNote() {
     const flightDuration = NOTE_FLIGHT_DURATION_MIN_MS + Math.random() * NOTE_FLIGHT_DURATION_RANDOM_RANGE_MS;
     floatingNote.style.transition = "top " + flightDuration + "ms linear, transform .1s ease";
     board.appendChild(floatingNote);
-    requestAnimationFrame(() => {
-        floatingNote.style.top = "-42px";
-    });
+    // Force the browser to commit the starting "top" (bottom of board) to layout
+    // before changing it, instead of relying on requestAnimationFrame timing —
+    // an <img> that's still loading over the network can eat that timing
+    // window, so the transition gets skipped and the photo just appears at
+    // its end position (the top) instead of floating up.
+    void floatingNote.offsetHeight;
+    floatingNote.style.top = -FLOATING_NOTE_SIZE_PX + "px";
 
     const catchNote = (event) => {
         event.stopPropagation();
