@@ -16,6 +16,14 @@ const ROLE_LABELS = {
     luna: "Luna"
 };
 
+// Shared month/budget constants - used by the calendar and cheques/payments pages so the
+// "recent months" range and default amounts always stay in sync.
+const MONTHS_TO_DISPLAY = 12;
+const MONTHS_BEFORE_CURRENT = Math.floor(MONTHS_TO_DISPLAY / 2);
+const WEEKLY_DAYS = 7;
+const DEFAULT_WEEKLY_BUDGET = 100;
+const DEFAULT_MONTHLY_CHEQUES_AMOUNT = 200;
+
 // Placeholder shown only before the app has ever successfully reached the shared database
 // (very first load, or the database being unreachable) - real names/colors/flags/passwords
 // always come from the database once it's reachable. Deliberately has no `password` field:
@@ -81,6 +89,12 @@ function getRoleFromIndex(index) {
     return "you";
 }
 
+function getRoleLabel(roleKey, users = DEFAULT_USERS) {
+    const normalizedRole = normalizeRoleKey(roleKey);
+    const user = (users || []).find((entry) => getRoleKeyFromUser(entry) === normalizedRole);
+    return ROLE_LABELS[normalizedRole] || user?.name || normalizedRole;
+}
+
 async function loadDashboardData() {
     const response = await fetch(DATABASE_URL);
 
@@ -117,7 +131,7 @@ async function loadUsersForLogin() {
     return remoteData.users;
 }
 
-function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta = {}) {
+function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta = {}, weeklyBudget = 0, monthlyChequesAmounts = {}, singlePayerTracking = {}) {
     const selectedDays = {};
 
     Object.entries(assignments || {}).forEach(([monthKey, monthAssignments]) => {
@@ -147,7 +161,10 @@ function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta =
 
     return {
         selectedDays,
-        users: Array.isArray(users) && users.length ? users : DEFAULT_USERS
+        users: Array.isArray(users) && users.length ? users : DEFAULT_USERS,
+        weeklyBudget: Number(weeklyBudget) || 0,
+        monthlyChequesAmounts: monthlyChequesAmounts && typeof monthlyChequesAmounts === "object" ? monthlyChequesAmounts : {},
+        singlePayerTracking: singlePayerTracking && typeof singlePayerTracking === "object" ? singlePayerTracking : {}
     };
 }
 
@@ -158,6 +175,18 @@ function hydrateStateFromRemoteData(remoteData, localState) {
     const users = Array.isArray(remoteData?.users) && remoteData.users.length ? remoteData.users : DEFAULT_USERS;
 
     nextState.users = users;
+
+    if (Number.isFinite(Number(remoteData?.weeklyBudget))) {
+        nextState.weeklyBudget = Number(remoteData.weeklyBudget);
+    }
+
+    nextState.monthlyChequesAmounts = remoteData?.monthlyChequesAmounts && typeof remoteData.monthlyChequesAmounts === "object"
+        ? remoteData.monthlyChequesAmounts
+        : {};
+
+    nextState.singlePayerTracking = remoteData?.singlePayerTracking && typeof remoteData.singlePayerTracking === "object"
+        ? remoteData.singlePayerTracking
+        : {};
 
     const selectedDays = remoteData?.selectedDays || {};
 
@@ -201,4 +230,136 @@ function hydrateStateFromRemoteData(remoteData, localState) {
     nextState.assignments = assignments;
     nextState.assignmentMeta = assignmentMeta;
     return nextState;
+}
+
+// ---------- Month helpers (shared across the calendar, cheques and payments pages) ----------
+
+function getMonthKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+}
+
+function parseMonthKey(monthKey) {
+    const [year, month] = monthKey.split("-").map(Number);
+    return new Date(year, month - 1, 1);
+}
+
+function addMonths(date, amount) {
+    const nextDate = new Date(date);
+    nextDate.setMonth(nextDate.getMonth() + amount);
+    return nextDate;
+}
+
+function formatMonthLabel(monthKey) {
+    const monthDate = parseMonthKey(monthKey);
+    return monthDate.toLocaleDateString("nl", { month: "long", year: "numeric" });
+}
+
+function formatCurrency(value) {
+    return `€${Number(value || 0).toFixed(2)}`;
+}
+
+// Money amounts derived from division (e.g. a weekly budget split over 7 days) can end up with
+// long floating-point tails (100 / 7 = 14.285714285714286) - round those to whole cents as soon
+// as they're computed, so every downstream calculation and saved value stays exact to the cent.
+function roundToCents(value) {
+    return Math.round((Number(value) || 0) * 100) / 100;
+}
+
+function getRecentMonthOptions() {
+    const options = [];
+    const startDate = new Date();
+
+    for (let step = 0; step < MONTHS_TO_DISPLAY; step += 1) {
+        const monthOffset = step - MONTHS_BEFORE_CURRENT;
+        options.push(getMonthKey(addMonths(startDate, monthOffset)));
+    }
+
+    return options;
+}
+
+// ---------- Payment breakdown helpers (how many days, how much is owed, how much cheques cover) ----------
+
+function countAssignmentsForMonth(assignments, monthKey) {
+    const monthAssignments = assignments?.[monthKey] || {};
+    const counts = { you: 0, mom: 0, dad: 0 };
+
+    Object.values(monthAssignments).forEach((assignment) => {
+        if (counts[assignment] !== undefined) {
+            counts[assignment] += 1;
+        }
+    });
+
+    return counts;
+}
+
+function getPaymentBreakdown(assignments, monthKey, weeklyBudget) {
+    const counts = countAssignmentsForMonth(assignments, monthKey);
+    const totalPaidDays = counts.mom + counts.dad;
+    const normalizedWeeklyBudget = Number(weeklyBudget) || 0;
+    const dailyRate = normalizedWeeklyBudget > 0 ? normalizedWeeklyBudget / WEEKLY_DAYS : 0;
+
+    return {
+        counts,
+        totalPaidDays,
+        weeklyBudget: normalizedWeeklyBudget,
+        dailyRate,
+        momShare: roundToCents(counts.mom * dailyRate),
+        dadShare: roundToCents(counts.dad * dailyRate)
+    };
+}
+
+function getMonthlyChequesAmount(monthlyChequesAmounts, monthKey) {
+    const storedValue = monthlyChequesAmounts?.[monthKey];
+    return Number.isFinite(Number(storedValue)) && storedValue !== undefined && storedValue !== null
+        ? Number(storedValue)
+        : DEFAULT_MONTHLY_CHEQUES_AMOUNT;
+}
+
+// How much of a person's amount owed for the month is covered by the cheques budget, based on
+// their share of the total paid days. Used by both the cheques page and the payments page so the
+// "cheques share" number always means the same thing in both places.
+function getChequesShareForRole(paymentBreakdown, monthlyChequesAmount, role) {
+    const { counts, totalPaidDays } = paymentBreakdown;
+    const amountOwed = role === "mom" ? paymentBreakdown.momShare : paymentBreakdown.dadShare;
+    const chequesShare = roundToCents(totalPaidDays > 0 ? monthlyChequesAmount * (counts[role] / totalPaidDays) : 0);
+    const remaining = roundToCents(Math.max(amountOwed - chequesShare, 0));
+    const coveragePercentage = amountOwed > 0 ? Math.min(Math.round((chequesShare / amountOwed) * 100), 100) : 100;
+
+    return { role, days: counts[role], chequesShare, amountOwed, remaining, coveragePercentage };
+}
+
+// ---------- Single-payer tracking (Mama gets all the cheques and self-reports how much she has
+// used and how much netto has already been paid to her and to Papa) ----------
+
+function getSinglePayerTrackingForMonth(singlePayerTracking, monthKey) {
+    const monthTracking = singlePayerTracking?.[monthKey] || {};
+    const momTracking = monthTracking.mom || {};
+    const dadTracking = monthTracking.dad || {};
+
+    return {
+        mom: {
+            chequesUsed: roundToCents(momTracking.chequesUsed),
+            nettoPaid: roundToCents(momTracking.nettoPaid)
+        },
+        dad: {
+            nettoPaid: roundToCents(dadTracking.nettoPaid)
+        }
+    };
+}
+
+// A role only counts as "tracked" for a month once one of its fields has actually been saved -
+// this is what lets the history badge tell "nothing filled in yet" apart from "filled in as €0",
+// since both would otherwise look like a zero balance.
+function isSinglePayerRoleTrackedForMonth(singlePayerTracking, monthKey, role) {
+    return Boolean(singlePayerTracking?.[monthKey]?.[role]);
+}
+
+// What's still owed netto (outside the cheques) to a person for the month: their calendar share,
+// minus cheques already used (Mama only - Papa can't use cheques), minus netto already paid.
+function getSinglePayerNettoRemaining(paymentBreakdown, role, tracking) {
+    const amountOwed = role === "mom" ? paymentBreakdown.momShare : paymentBreakdown.dadShare;
+    const chequesUsed = role === "mom" ? tracking.chequesUsed : 0;
+    return roundToCents(Math.max(amountOwed - chequesUsed - tracking.nettoPaid, 0));
 }

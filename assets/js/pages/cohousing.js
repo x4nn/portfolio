@@ -1,11 +1,7 @@
 const STORAGE_KEY = "cohousing-dashboard-state-v1";
 const ACCESS_IDENTITY_STORAGE_KEY = "cohousing-access-identity";
 const DAYS_IN_WEEK = 7;
-const MONTHS_TO_DISPLAY = 12;
-const MONTHS_BEFORE_CURRENT = Math.floor(MONTHS_TO_DISPLAY / 2);
 const HISTORY_MONTH_COUNT = 4;
-const WEEKLY_DAYS = 7;
-const DEFAULT_WEEKLY_BUDGET = 100;
 
 const defaultState = {
     activeRole: "you",
@@ -13,7 +9,9 @@ const defaultState = {
     weeklyBudget: DEFAULT_WEEKLY_BUDGET,
     assignments: {},
     assignmentMeta: {},
-    users: structuredClone(DEFAULT_USERS)
+    users: structuredClone(DEFAULT_USERS),
+    monthlyChequesAmounts: {},
+    singlePayerTracking: {}
 };
 
 let state = structuredClone(defaultState);
@@ -73,7 +71,9 @@ function normalizeState(parsedState) {
         weeklyBudget: Number(parsedState.weeklyBudget) || Number(defaultState.weeklyBudget) || 0,
         assignments: parsedState.assignments || {},
         assignmentMeta: parsedState.assignmentMeta || {},
-        users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS)
+        users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS),
+        monthlyChequesAmounts: parsedState.monthlyChequesAmounts || {},
+        singlePayerTracking: parsedState.singlePayerTracking || {}
     };
 }
 
@@ -109,7 +109,7 @@ async function saveState() {
     updateSyncStatus("Opslaan…");
 
     try {
-        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta);
+        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta, state.weeklyBudget, state.monthlyChequesAmounts, state.singlePayerTracking);
         await saveDashboardData(payload);
         await refreshRemoteState();
         updateSyncStatus("Opgeslagen in gedeelde database");
@@ -309,7 +309,7 @@ function renderRoleButtons() {
         .map((user) => {
             const roleKey = getRoleKeyFromUser(user);
             const isActive = roleKey === state.activeRole;
-            const label = getRoleLabel(roleKey);
+            const label = getRoleLabel(roleKey, state.users);
             return `<button class="role-button${isActive ? " is-active" : ""}" type="button" data-role-option="${roleKey}">${label}</button>`;
         })
         .join("");
@@ -326,7 +326,7 @@ function renderRoleButtons() {
 
     document.body.setAttribute("data-active-role", state.activeRole);
     applyUserColorTheme(state.users, state.activeRole);
-    roleStatus.textContent = `Je bewerkt nu als ${getRoleLabel(state.activeRole)}.`;
+    roleStatus.textContent = `Je bewerkt nu als ${getRoleLabel(state.activeRole, state.users)}.`;
 }
 
 function renderMonthSelector() {
@@ -377,7 +377,7 @@ function renderCalendar() {
 
         const assignmentMeta = assignment ? getAssignmentMeta(monthKey, dayNumber) : null;
         const lastChangedTitle = assignmentMeta
-            ? `Laatst gewijzigd door ${getRoleLabel(assignmentMeta.lastChangedByRole)} op ${formatDateTime(assignmentMeta.lastChangedAt)}`
+            ? `Laatst gewijzigd door ${getRoleLabel(assignmentMeta.lastChangedByRole, state.users)} op ${formatDateTime(assignmentMeta.lastChangedAt)}`
             : "";
 
         const buttonLabel = assignment
@@ -464,7 +464,7 @@ function getAssignmentMetaForMonth(monthKey) {
 function renderSummary() {
     const monthKey = state.selectedMonthKey;
     const monthDate = parseMonthKey(monthKey);
-    const paymentBreakdown = getPaymentBreakdown(monthKey);
+    const paymentBreakdown = getPaymentBreakdown(state.assignments, monthKey, state.weeklyBudget);
     const weeklyBudget = paymentBreakdown.weeklyBudget;
 
     const summaryCards = [
@@ -513,51 +513,52 @@ function renderHistory() {
 
     historyList.innerHTML = historyMonths
         .map((monthKey) => {
-            const paymentBreakdown = getPaymentBreakdown(monthKey);
+            const paymentBreakdown = getPaymentBreakdown(state.assignments, monthKey, state.weeklyBudget);
+
             return `
                 <article class="history-item">
-                    <div>
+                    <div class="history-item-info">
                         <strong>${formatMonthLabel(monthKey)}</strong>
                         <div class="history-meta">Mama: ${paymentBreakdown.counts.mom} • Papa: ${paymentBreakdown.counts.dad} • Jij: ${paymentBreakdown.counts.you}</div>
+                        <div class="history-meta">Mama ${formatCurrency(paymentBreakdown.momShare)} • Papa ${formatCurrency(paymentBreakdown.dadShare)}</div>
                     </div>
-                    <div class="history-meta">Mama ${formatCurrency(paymentBreakdown.momShare)} • Papa ${formatCurrency(paymentBreakdown.dadShare)}</div>
+                    <div class="history-payment-status">
+                        ${buildPaymentStatusBadgeHtml("mom", monthKey)}
+                        ${buildPaymentStatusBadgeHtml("dad", monthKey)}
+                        <a class="history-payment-edit-link" href="${buildPaymentsPageUrl(monthKey)}">Bewerk &rarr;</a>
+                    </div>
                 </article>
             `;
         })
         .join("");
 }
 
-function countAssignmentsForMonth(monthKey) {
-    const monthAssignments = getAssignmentsForMonth(monthKey);
-    const counts = { you: 0, mom: 0, dad: 0 };
+// A gray dot means "still owed"; green means either nothing was ever owed for that month (0
+// days on the calendar) or the netto amount has actually been brought down to €0 on the
+// cheques/betalingen page.
+function buildPaymentStatusBadgeHtml(role, monthKey) {
+    const personLabel = getRoleLabel(role, state.users);
+    const isTracked = isSinglePayerRoleTrackedForMonth(state.singlePayerTracking, monthKey, role);
+    const paymentBreakdown = getPaymentBreakdown(state.assignments, monthKey, state.weeklyBudget);
+    const tracking = getSinglePayerTrackingForMonth(state.singlePayerTracking, monthKey)[role];
+    const nettoRemaining = getSinglePayerNettoRemaining(paymentBreakdown, role, tracking);
+    const isPaid = nettoRemaining <= 0;
+    const detailLabel = isPaid
+        ? "Volledig betaald"
+        : !isTracked
+            ? "Nog niet ingevuld"
+            : `Nog ${formatCurrency(nettoRemaining)} netto te betalen`;
 
-    Object.values(monthAssignments).forEach((assignment) => {
-        if (counts[assignment] !== undefined) {
-            counts[assignment] += 1;
-        }
-    });
-
-    return counts;
+    return `
+        <div class="payment-status-badge" title="${personLabel}: ${detailLabel}">
+            <span class="payment-status-dot${isPaid ? " is-paid" : ""}" aria-hidden="true"></span>
+            <span class="payment-status-badge-label">${personLabel}</span>
+        </div>
+    `;
 }
 
-function getPaymentBreakdown(monthKey) {
-    const counts = countAssignmentsForMonth(monthKey);
-    const billableDays = counts.mom + counts.dad;
-    const weeklyBudget = Number(state.weeklyBudget) || 0;
-    const dailyRate = weeklyBudget > 0 ? weeklyBudget / WEEKLY_DAYS : 0;
-
-    return {
-        counts,
-        totalPaidDays: billableDays,
-        weeklyBudget,
-        dailyRate,
-        momShare: counts.mom * dailyRate,
-        dadShare: counts.dad * dailyRate
-    };
-}
-
-function formatCurrency(value) {
-    return `€${Number(value || 0).toFixed(2)}`;
+function buildPaymentsPageUrl(monthKey) {
+    return `cohousing-cheques.html?month=${encodeURIComponent(monthKey)}`;
 }
 
 function formatDateTime(timestampMs) {
@@ -573,26 +574,10 @@ function formatDateTime(timestampMs) {
     });
 }
 
-function getRoleLabel(roleKey) {
-    const normalizedRole = normalizeRoleKey(roleKey);
-    const user = (state.users || []).find((entry) => getRoleKeyFromUser(entry) === normalizedRole);
-    return ROLE_LABELS[normalizedRole] || user?.name || normalizedRole;
-}
-
-function getRecentMonthOptions() {
-    const options = [];
-    const startDate = new Date();
-
-    for (let step = 0; step < MONTHS_TO_DISPLAY; step += 1) {
-        const monthOffset = step - MONTHS_BEFORE_CURRENT;
-        options.push(getMonthKey(addMonths(startDate, monthOffset)));
-    }
-
-    return options;
-}
-
+// Always anchored to today's real date, not state.selectedMonthKey - otherwise browsing the
+// calendar to check a different month would shift "recent months" along with it.
 function getHistoryMonthOptions() {
-    const referenceMonth = parseMonthKey(state.selectedMonthKey || getMonthKey(new Date()));
+    const referenceMonth = parseMonthKey(getMonthKey(new Date()));
     const historyMonths = [];
 
     for (let step = 1; step <= HISTORY_MONTH_COUNT; step += 1) {
@@ -601,26 +586,4 @@ function getHistoryMonthOptions() {
     }
 
     return historyMonths;
-}
-
-function getMonthKey(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-}
-
-function parseMonthKey(monthKey) {
-    const [year, month] = monthKey.split("-").map(Number);
-    return new Date(year, month - 1, 1);
-}
-
-function addMonths(date, amount) {
-    const nextDate = new Date(date);
-    nextDate.setMonth(nextDate.getMonth() + amount);
-    return nextDate;
-}
-
-function formatMonthLabel(monthKey) {
-    const monthDate = parseMonthKey(monthKey);
-    return monthDate.toLocaleDateString("nl", { month: "long", year: "numeric" });
 }

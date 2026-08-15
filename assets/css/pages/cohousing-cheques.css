@@ -2,18 +2,18 @@
 
 :root {
     color-scheme: light;
-    --page-bg: #fff8fb;
+    --page-bg: #f2faf9;
     --surface: #ffffff;
-    --surface-strong: #fdf4f8;
-    --text: #241523;
-    --text-soft: #7c6471;
-    --line: #f0dce4;
-    --shadow: 0 20px 45px rgba(95, 48, 74, 0.12);
+    --surface-strong: #e7f5f2;
+    --text: #142e2c;
+    --text-soft: #52716c;
+    --line: #d3ebe6;
+    --shadow: 0 20px 45px rgba(19, 92, 82, 0.12);
     --you-color: #8fb5ff;
     --mom-color: #f5b8c8;
     --dad-color: #9ed8bf;
-    --accent: #a65d7d;
-    --accent-soft: rgba(166, 93, 125, 0.15);
+    --accent: #1f8a76;
+    --accent-soft: rgba(31, 138, 118, 0.15);
 }
 
 /* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
@@ -35,7 +35,7 @@ body {
     font-family: "Inter", "Segoe UI", sans-serif;
     background:
         radial-gradient(circle at top left, var(--accent-soft), transparent 24%),
-        linear-gradient(135deg, #fffafc 0%, var(--page-bg) 100%);
+        linear-gradient(135deg, #fbfffe 0%, var(--page-bg) 100%);
     color: var(--text);
     min-height: 100vh;
     transition: background 0.25s ease, color 0.25s ease;
@@ -238,6 +238,176 @@ select {
     color: var(--text);
 }
 
+/* ---------- Mode tabs ---------- */
+
+.mode-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.mode-tab-button {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-soft);
+    cursor: pointer;
+}
+
+.mode-tab-button:hover {
+    border-color: var(--accent);
+}
+
+.mode-tab-button.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.mode-tab-panel.is-hidden {
+    display: none;
+}
+
+.mode-tab-intro {
+    margin: 0 0 18px;
+    color: var(--text-soft);
+    font-size: 0.94rem;
+    line-height: 1.5;
+}
+
+/* ---------- Single payer tracking (one parent gets all the cheques) ---------- */
+
+.single-payer-card-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.single-payer-card {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 20px;
+    background: var(--surface-strong);
+}
+
+.single-payer-card.is-mom {
+    background: color-mix(in srgb, var(--mom-color) 25%, white);
+    border-color: color-mix(in srgb, var(--mom-color) 50%, transparent);
+}
+
+.single-payer-card.is-dad {
+    background: color-mix(in srgb, var(--dad-color) 25%, white);
+    border-color: color-mix(in srgb, var(--dad-color) 50%, transparent);
+}
+
+.single-payer-card h3 {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+}
+
+.single-payer-owed-hint {
+    margin: 0 0 16px;
+    color: var(--text-soft);
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.single-payer-computed-stat {
+    margin: 0 0 14px;
+    font-size: 0.86rem;
+    color: var(--text-soft);
+}
+
+.single-payer-computed-stat strong {
+    color: var(--text);
+}
+
+.single-payer-field {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.single-payer-field-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-soft);
+}
+
+.single-payer-field-label > span {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.single-payer-mark-paid-button {
+    display: inline-block;
+    margin-top: 6px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.single-payer-mark-paid-button:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.single-payer-computed-stat--netto {
+    font-size: 0.95rem;
+}
+
+.single-payer-field-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    padding: 8px 12px;
+}
+
+.single-payer-field-input-wrap span {
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.single-payer-field-input-wrap input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    min-width: 0;
+}
+
+.single-payer-field-input-wrap input:focus {
+    outline: none;
+}
+
+.single-payer-field--netto {
+    margin-bottom: 0;
+}
+
+.single-payer-field--netto .single-payer-field-input-wrap {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, white);
+}
+
+.single-payer-field--netto .single-payer-field-input-wrap input {
+    font-size: 1.2rem;
+}
+
 /* ---------- Cheques ---------- */
 
 .cheques-amount-field {
@@ -321,9 +491,42 @@ select {
 }
 
 .cheques-share-days {
-    margin: 0;
+    margin: 0 0 14px;
     color: var(--text-soft);
     font-size: 0.95rem;
+}
+
+.cheques-coverage-bar {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(36, 21, 35, 0.1);
+    overflow: hidden;
+    margin: 0 0 8px;
+}
+
+.cheques-coverage-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width 0.25s ease;
+}
+
+.cheques-coverage-label {
+    margin: 0 0 10px;
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.cheques-remaining-amount {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.cheques-remaining-amount.is-outstanding {
+    color: #c35252;
 }
 
 .cheques-empty-message {
@@ -372,5 +575,9 @@ select {
 
     .cheques-share-amount {
         font-size: 2.2rem;
+    }
+
+    .single-payer-card-list {
+        grid-template-columns: 1fr;
     }
 }

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Eenvoudig overzicht van hoeveel Mama en Papa je verschuldigd zijn voor de cheques, op basis van de kalender.">
-    <title>Cheques - Cohousing</title>
+    <meta name="description" content="Houd per maand bij hoeveel cheques er zijn, wat Mama al gebruikt heeft, en wat je haar en Papa nog netto moet betalen.">
+    <title>Betalingen - Cohousing</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,10 +31,9 @@
         <header class="hero-card">
             <div class="hero-copy">
                 <p class="hero-kicker">Cohousing hulpmiddel</p>
-                <h1>Cheques verdelen</h1>
+                <h1>Betalingen bijhouden</h1>
                 <p class="hero-text">
-                    Elke maand staat er geld aan cheques op de kaart. Dit bedrag wordt verdeeld tussen Mama en Papa,
-                    op basis van hoeveel dagen je bij elk van hen was volgens de kalender.
+                    Vul per maand het totaalbedrag aan cheques in, en houd bij wat al gebruikt en betaald is.
                 </p>
                 <div class="hero-nav-links">
                     <a class="hero-nav-link" href="cohousing.html">&larr; Naar kalender</a>
@@ -53,8 +52,8 @@
             <section class="card" aria-labelledby="cheques-heading">
                 <div class="card-header">
                     <div>
-                        <p class="card-eyebrow">Cheques</p>
-                        <h2 id="cheques-heading">Hoeveel krijgt Mama, hoeveel krijgt Papa?</h2>
+                        <p class="card-eyebrow">Betalingen</p>
+                        <h2 id="cheques-heading">Cheques en betalingen bijhouden</h2>
                     </div>
                     <label class="month-picker" for="cheques-month-select">
                         <span>Maand</span>
@@ -63,16 +62,36 @@
                 </div>
 
                 <label class="cheques-amount-field" for="cheques-amount-input">
-                    <span>Bedrag aan cheques deze maand</span>
+                    <span>Totaal bedrag aan cheques deze maand</span>
                     <div class="cheques-amount-input-wrap">
                         <span class="cheques-amount-currency" aria-hidden="true">&euro;</span>
                         <input id="cheques-amount-input" type="number" min="0" step="1" inputmode="numeric" data-cheques-amount-input>
                     </div>
                 </label>
 
-                <div class="cheques-share-list" data-cheques-share-list></div>
+                <div class="mode-tabs" role="tablist" aria-label="Kies hoe de cheques verdeeld worden">
+                    <button type="button" class="mode-tab-button" data-mode-tab="single-payer" role="tab">Mama krijgt alle cheques</button>
+                    <button type="button" class="mode-tab-button" data-mode-tab="shared" role="tab">Papa kan ook cheques ontvangen</button>
+                </div>
 
-                <p class="cheques-explainer" data-cheques-explainer></p>
+                <div class="mode-tab-panel" data-mode-panel="single-payer">
+                    <p class="mode-tab-intro">
+                        Papa kan de cheques niet gebruiken, dus die gaan allemaal naar Mama. Vul hieronder in wat ze al
+                        gebruikt heeft en wat je haar en Papa nog netto moet betalen.
+                    </p>
+                    <div class="single-payer-card-list" data-single-payer-card-list></div>
+                </div>
+
+                <div class="mode-tab-panel" data-mode-panel="shared">
+                    <p class="mode-tab-intro">
+                        Voor als Papa de cheques ook kan gebruiken: het bedrag hierboven wordt dan verdeeld tussen Mama
+                        en Papa, op basis van hoeveel dagen je bij elk van hen was volgens de kalender.
+                    </p>
+
+                    <div class="cheques-share-list" data-cheques-share-list></div>
+
+                    <p class="cheques-explainer" data-cheques-explainer></p>
+                </div>
             </section>
         </main>
     </div>
