@@ -1,0 +1,640 @@
+/* ================================================================
+   Luna — personal gift page
+   Cassette-tape themed mixtape. Pastel green / coral palette, kept
+   separate from the portfolio's own design tokens on purpose — this
+   page has its own vibe and isn't meant to look like the rest of the
+   site (see tempclaude/context.md for the original brief).
+   ================================================================ */
+
+:root {
+    --luna-sage: #a8c99a;
+    --luna-sage-deep: #7ea974;
+    --luna-mint: #dcebd4;
+    --luna-mint-pale: #eef6e8;
+    --luna-cream: #fbf9f1;
+    --luna-forest: #2f4a3a;
+    --luna-forest-soft: #4b6b57;
+    --luna-peach: #efa98c;
+    --luna-peach-soft: #f6d3c2;
+    --luna-butter: #f3e3a0;
+    --luna-shadow: rgba(47, 74, 58, 0.14);
+    --luna-page-background:
+        radial-gradient(1200px 600px at 15% -5%, var(--luna-mint) 0%, transparent 55%),
+        radial-gradient(1000px 700px at 100% 10%, #e7f1df 0%, transparent 50%),
+        var(--luna-cream);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Nunito", system-ui, sans-serif;
+    color: var(--luna-forest);
+    background: var(--luna-page-background);
+    background-attachment: fixed;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.luna-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 22px 90px;
+}
+
+/* ---------- Scattered album covers (background decoration) ---------- */
+/* #luna-cover-layer is filled in at runtime by scatterAlbumCovers() in
+   assets/js/pages/luna.js — each .luna-cover gets its top/left/rotation/size
+   set inline there, generated from just the 4 image paths + a count instead
+   of one CSS rule per image. Positioned as a % of .luna-wrap's own height
+   (not fixed px against the whole document) so they always land inside the
+   actual page on any device, instead of overshooting past the last section
+   and stretching the page. z-index: -1 keeps them behind .luna-wrap's own
+   content (header/tracks), since .luna-wrap establishes its own stacking
+   context (position: relative + z-index: 1 above). Cards are translucent +
+   blurred, so the covers show through softly instead of covering the text. */
+.luna-cover {
+    position: absolute;
+    z-index: -1;
+    border-radius: 8px;
+    box-shadow: 0 12px 26px -12px var(--luna-shadow);
+    pointer-events: none;
+}
+
+@media (max-width: 520px) {
+    .luna-cover { width: 46px !important; }
+}
+
+/* ---------- Hero / cassette ---------- */
+.luna-hero {
+    padding: 64px 0 30px;
+    text-align: center;
+}
+
+.luna-eyebrow {
+    font-family: "Nunito";
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--luna-sage-deep);
+    margin-bottom: 18px;
+}
+
+.luna-cassette-trigger {
+    display: block;
+    width: min(430px, 100%);
+    margin: 0 auto;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: transform 0.15s ease;
+}
+
+.luna-cassette-trigger:hover {
+    transform: translateY(-2px);
+}
+
+.luna-cassette-trigger:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.luna-cassette-trigger:focus-visible {
+    outline: 3px solid var(--luna-peach);
+    outline-offset: 4px;
+    border-radius: 20px;
+}
+
+.luna-cassette-trigger.luna-cassette-trigger--pressed .luna-reel {
+    animation-duration: 0.5s;
+}
+
+.luna-cassette {
+    width: 100%;
+    background: linear-gradient(160deg, #b9d6ac, #9bc48c);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 18px 40px var(--luna-shadow), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+    position: relative;
+}
+
+.luna-cassette::before {
+    content: "";
+    position: absolute;
+    inset: 9px;
+    border-radius: 14px;
+    border: 2px dashed rgba(47, 74, 58, 0.18);
+    pointer-events: none;
+}
+
+.luna-cassette-label {
+    background: var(--luna-cream);
+    border-radius: 10px;
+    padding: 16px 18px 20px;
+    box-shadow: inset 0 1px 4px rgba(47, 74, 58, 0.12);
+}
+
+.luna-cassette-label .luna-side {
+    font-family: "Nunito";
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--luna-peach);
+    text-transform: uppercase;
+}
+
+.luna-cassette-name {
+    font-family: "Caveat";
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1;
+    color: var(--luna-forest);
+    margin: 2px 0 4px;
+}
+
+.luna-cassette-sub {
+    font-family: "Caveat";
+    font-size: 20px;
+    color: var(--luna-forest-soft);
+}
+
+.luna-reels {
+    display: flex;
+    justify-content: center;
+    gap: 70px;
+    margin: 22px 0 6px;
+}
+
+.luna-reel {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, #5e4632 0 22%, #f4ead8 22% 30%, #5e4632 30% 34%, #efe3ce 34%);
+    border: 5px solid var(--luna-forest);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: luna-spin 4s linear infinite;
+}
+
+.luna-reel::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--luna-cream);
+    box-shadow: 0 0 0 3px var(--luna-forest);
+}
+
+.luna-reel span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.luna-reel span::before,
+.luna-reel span::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 26px;
+    background: var(--luna-forest);
+    transform-origin: center;
+    border-radius: 2px;
+    margin: -13px 0 0 -2px;
+}
+
+.luna-reel span::after {
+    transform: rotate(90deg);
+}
+
+.luna-reel span.luna-reel-b::before {
+    transform: rotate(45deg);
+}
+
+.luna-reel span.luna-reel-b::after {
+    transform: rotate(135deg);
+}
+
+@keyframes luna-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.luna-hero-note {
+    display: inline-block;
+    font-family: "Caveat";
+    font-size: 26px;
+    color: var(--luna-forest-soft);
+    margin-top: 26px;
+    padding: 10px 20px;
+    background: var(--luna-page-background);
+    background-attachment: fixed;
+    border-radius: 14px;
+}
+
+.luna-scroll-hint {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--luna-sage-deep);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.luna-scroll-hint span {
+    display: inline-block;
+    animation: luna-bob 1.8s ease-in-out infinite;
+}
+
+@keyframes luna-bob {
+    50% {
+        transform: translateY(5px);
+    }
+}
+
+/* ---------- Track cards ---------- */
+.luna-track {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1.5px solid rgba(126, 169, 116, 0.35);
+    border-radius: 22px;
+    padding: 26px 24px;
+    margin-top: 22px;
+    box-shadow: 0 10px 26px -14px var(--luna-shadow);
+    backdrop-filter: blur(3px);
+}
+
+.luna-track-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+}
+
+.luna-track-num {
+    font-family: "Fraunces";
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--luna-peach);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+.luna-track-title {
+    font-family: "Fraunces";
+    font-weight: 500;
+    font-size: 23px;
+    color: var(--luna-forest);
+    line-height: 1.2;
+}
+
+.luna-track-caption {
+    font-size: 14.5px;
+    color: var(--luna-forest-soft);
+    margin: 0 0 18px 40px;
+}
+
+@media (max-width: 520px) {
+    .luna-track-caption {
+        margin-left: 0;
+    }
+}
+
+.luna-btn {
+    font-family: "Nunito";
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 24px;
+    background: var(--luna-forest);
+    color: var(--luna-cream);
+    box-shadow: 0 6px 16px -6px var(--luna-forest);
+    transition: transform 0.12s ease, filter 0.12s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.luna-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+}
+
+.luna-btn:active {
+    transform: translateY(0);
+}
+
+.luna-btn--soft {
+    background: var(--luna-sage);
+    color: var(--luna-forest);
+    box-shadow: 0 6px 16px -8px var(--luna-sage-deep);
+}
+
+.luna-btn:focus-visible {
+    outline: 3px solid var(--luna-peach);
+    outline-offset: 2px;
+}
+
+/* ---- Track 1: love notes ---- */
+.luna-note-stage {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--luna-mint-pale);
+    border-radius: 16px;
+    padding: 26px 22px;
+    margin-bottom: 16px;
+    border: 1.5px dashed rgba(126, 169, 116, 0.5);
+}
+
+.luna-note-text {
+    font-family: "Caveat";
+    font-size: 29px;
+    line-height: 1.35;
+    color: var(--luna-forest);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.luna-note-text.luna-note-text--show {
+    opacity: 1;
+    transform: none;
+}
+
+/* ---- Track 2: reasons ---- */
+.luna-reason-stage {
+    background: linear-gradient(160deg, var(--luna-peach-soft), #f8e7dc);
+    border-radius: 16px;
+    padding: 30px 24px;
+    margin-bottom: 14px;
+    text-align: center;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.luna-reason-count {
+    font-family: "Nunito";
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--luna-peach);
+    margin-bottom: 10px;
+}
+
+.luna-reason-text {
+    font-family: "Fraunces";
+    font-size: 21px;
+    color: var(--luna-forest);
+    line-height: 1.35;
+}
+
+.luna-reason-nav {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* ---- Track 3: game ---- */
+.luna-game-wrap {
+    position: relative;
+}
+
+.luna-game-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.luna-game-score {
+    font-family: "Fraunces";
+    font-size: 18px;
+    color: var(--luna-forest);
+}
+
+.luna-game-score b {
+    color: var(--luna-peach);
+}
+
+.luna-game-board {
+    position: relative;
+    height: 300px;
+    border-radius: 16px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.6), transparent 40%),
+        linear-gradient(160deg, var(--luna-mint), #cfe6c3);
+    border: 1.5px solid rgba(126, 169, 116, 0.4);
+    cursor: pointer;
+}
+
+.luna-float-note {
+    position: absolute;
+    font-size: 30px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s ease;
+    will-change: transform;
+}
+
+.luna-float-note--selfie {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--luna-cream);
+    box-shadow: 0 6px 14px -6px var(--luna-shadow);
+}
+
+.luna-float-note:active {
+    transform: scale(0.7);
+}
+
+.luna-game-msg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 20px;
+    font-family: "Fraunces";
+    font-size: 20px;
+    color: var(--luna-forest);
+    background: rgba(251, 249, 241, 0.82);
+}
+
+.luna-game-msg.luna-game-msg--hidden {
+    display: none;
+}
+
+/* ---- Track 4: playlist ---- */
+.luna-song {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 4px;
+    border-bottom: 1px solid rgba(126, 169, 116, 0.28);
+}
+
+.luna-song:last-child {
+    border-bottom: none;
+}
+
+.luna-song-cover {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: linear-gradient(160deg, var(--luna-mint), var(--luna-mint-pale));
+    box-shadow: inset 0 1px 3px rgba(47, 74, 58, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--luna-sage-deep);
+}
+
+.luna-song-cover svg {
+    width: 24px;
+    height: 24px;
+}
+
+.luna-song-title {
+    font-family: "Fraunces";
+    font-size: 17px;
+    color: var(--luna-forest);
+}
+
+.luna-song-caption {
+    font-family: "Nunito";
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--luna-peach);
+    margin-top: 2px;
+}
+
+.luna-song-why {
+    font-family: "Caveat";
+    font-size: 19px;
+    color: var(--luna-forest-soft);
+    line-height: 1.25;
+    margin-top: 4px;
+}
+
+/* ---- Track 5: countdown ---- */
+.luna-count-stage {
+    text-align: center;
+    background: var(--luna-mint-pale);
+    border-radius: 16px;
+    padding: 26px 20px;
+}
+
+.luna-count-grid {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 6px 0 4px;
+}
+
+.luna-count-box {
+    background: var(--luna-cream);
+    border-radius: 14px;
+    padding: 14px 6px;
+    min-width: 74px;
+    box-shadow: 0 6px 14px -10px var(--luna-shadow);
+}
+
+.luna-count-num {
+    font-family: "Fraunces";
+    font-size: 30px;
+    color: var(--luna-forest);
+    line-height: 1;
+}
+
+.luna-count-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--luna-sage-deep);
+    margin-top: 6px;
+}
+
+.luna-count-msg {
+    font-family: "Caveat";
+    font-size: 24px;
+    color: var(--luna-forest-soft);
+    margin-top: 14px;
+}
+
+/* ---------- Footer ---------- */
+.luna-footer {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.luna-footer .luna-heart {
+    font-size: 26px;
+    animation: luna-beat 1.6s ease-in-out infinite;
+    display: inline-block;
+}
+
+@keyframes luna-beat {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    15% {
+        transform: scale(1.22);
+    }
+    30% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(1.15);
+    }
+}
+
+.luna-footer p {
+    font-family: "Caveat";
+    font-size: 24px;
+    color: var(--luna-forest-soft);
+    margin-top: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        scroll-behavior: auto !important;
+    }
+}

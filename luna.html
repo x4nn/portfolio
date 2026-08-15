@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Een klein mixtapecadeautje, speciaal voor Luna.">
+    <title>Luna 🌿</title>
+
+    <!-- ============================================================= -->
+    <!--  Content to personalise lives in assets/js/pages/luna.js,      -->
+    <!--  marked with ✏️ EDIT. The song blocks below (Track 04) are     -->
+    <!--  the one piece of content that lives in this HTML file.        -->
+    <!-- ============================================================= -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/pages/luna.css">
+</head>
+<body>
+<div class="luna-wrap">
+
+    <!-- ============ Scattered album covers (background decoration) ============ -->
+    <!-- Purely decorative, hidden from screen readers — the real song info is
+         already in visible text further down in Track 04. Filled in by
+         assets/js/pages/luna.js (scatterAlbumCovers), positioned as % of
+         .luna-wrap's own height so they always land inside the real page
+         (any device) instead of overshooting past the last section. -->
+    <div id="luna-cover-layer" aria-hidden="true"></div>
+
+    <!-- ============ Hero ============ -->
+    <header class="luna-hero">
+        <div class="luna-eyebrow">Een klein mixtapeje · alleen voor jou</div>
+
+        <button type="button" class="luna-cassette-trigger" id="luna-cassette-trigger" aria-label="Speel de mixtape af">
+            <div class="luna-cassette">
+                <div class="luna-reels">
+                    <div class="luna-reel"><span></span><span class="luna-reel-b"></span></div>
+                    <div class="luna-reel"><span></span><span class="luna-reel-b"></span></div>
+                </div>
+                <div class="luna-cassette-label">
+                    <div class="luna-side">Kant A</div>
+                    <div class="luna-cassette-name">Voor mijn Luna</div>
+                    <div class="luna-cassette-sub">druk op play als je me mist 🌿</div>
+                </div>
+            </div>
+        </button>
+
+        <p class="luna-hero-note">Ik heb dit voor je gemaakt in de hoop dat je je wat beter voelt,<br>en om je te laten zien hoeveel ik van je hou. 💚</p>
+        <div class="luna-scroll-hint">scroll naar beneden <span>↓</span></div>
+    </header>
+
+    <!-- ============ Track 1 — Love notes ============ -->
+    <section class="luna-track" id="luna-track-01">
+        <div class="luna-track-head">
+            <div class="luna-track-num">01</div>
+            <h2 class="luna-track-title">Een berichtje, wanneer je er een nodig hebt</h2>
+        </div>
+        <p class="luna-track-caption">Druk op de knop wanneer je een klein berichtje wilt. Elke keer krijg je een ander.</p>
+        <div class="luna-note-stage">
+            <p class="luna-note-text" id="luna-note-text">Druk op de knop hieronder 👇</p>
+        </div>
+        <button class="luna-btn" id="luna-play-note-button" type="button">🎵 Speel een berichtje af</button>
+    </section>
+
+    <!-- ============ Track 2 — Reasons ============ -->
+    <section class="luna-track">
+        <div class="luna-track-head">
+            <div class="luna-track-num">02</div>
+            <h2 class="luna-track-title">Redenen waarom ik gek op je ben</h2>
+        </div>
+        <p class="luna-track-caption">Blader er doorheen wanneer je wilt. Geen specifieke volgorde — ik hou evenveel van allemaal.</p>
+        <div class="luna-reason-stage">
+            <div class="luna-reason-count" id="luna-reason-count">Reden 1</div>
+            <div class="luna-reason-text" id="luna-reason-text"></div>
+        </div>
+        <div class="luna-reason-nav">
+            <button class="luna-btn luna-btn--soft" id="luna-prev-reason-button" type="button">←</button>
+            <button class="luna-btn" id="luna-next-reason-button" type="button">Volgende →</button>
+        </div>
+    </section>
+
+    <!-- ============ Track 3 — Game ============ -->
+    <section class="luna-track">
+        <div class="luna-track-head">
+            <div class="luna-track-num">03</div>
+            <h2 class="luna-track-title">Vang de nootjes</h2>
+        </div>
+        <p class="luna-track-caption">Een gek spelletje om je handen bezig te houden. Tik op de zwevende nootjes voordat ze wegdrijven.</p>
+        <div class="luna-game-wrap">
+            <div class="luna-game-bar">
+                <div class="luna-game-score">Score: <b id="luna-game-score">0</b></div>
+                <div class="luna-game-score">⏱ <b id="luna-game-time">30</b>s</div>
+            </div>
+            <div class="luna-game-board" id="luna-game-board">
+                <div class="luna-game-msg" id="luna-game-msg">
+                    <div id="luna-game-msg-text">Klaar? Het duurt maar 30 seconden 🎶</div>
+                    <button class="luna-btn" id="luna-start-game-button" type="button">Start</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ Track 4 — Playlist ============ -->
+    <section class="luna-track">
+        <div class="luna-track-head">
+            <div class="luna-track-num">04</div>
+            <h2 class="luna-track-title">Nummers die me aan jou doen denken</h2>
+        </div>
+        <p class="luna-track-caption">Ons kleine soundtrackje. Zet ze op en doe alsof ik er ben.</p>
+        <!-- ✏️ EDIT: swap in more songs + why each one reminds you of her.
+             Duplicate a whole <div class="luna-song">...</div> block to add more.
+             Each song has a small original icon instead of the real album cover
+             (copyright — see chat). To use a real cover instead, replace the
+             <svg>...</svg> inside .luna-song-cover with an <img src="..."> of
+             your own saved image. -->
+        <div class="luna-song">
+            <div class="luna-song-cover" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="9" r="4"></circle>
+                    <line x1="3" y1="17" x2="21" y2="17"></line>
+                </svg>
+            </div>
+            <div>
+                <div class="luna-song-title">With or Without You — U2</div>
+                <div class="luna-song-caption">The Joshua Tree</div>
+                <div class="luna-song-why">een van jouw favoriete albums, en dit nummer past precies bij hoe ik me bij jou voel</div>
+            </div>
+        </div>
+        <div class="luna-song">
+            <div class="luna-song-cover" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="16" r="4"></circle>
+                    <line x1="12.5" y1="13" x2="20" y2="5"></line>
+                    <line x1="17" y1="5" x2="20" y2="5"></line>
+                    <line x1="20" y1="5" x2="20" y2="8"></line>
+                </svg>
+            </div>
+            <div>
+                <div class="luna-song-title">Romeo and Juliet — Dire Straits</div>
+                <div class="luna-song-why">jouw muzieksmaak is altijd top, en dit nummer bewijst het weer</div>
+            </div>
+        </div>
+        <div class="luna-song">
+            <div class="luna-song-cover" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 17l4-5 3 3 5-7 6 9"></path>
+                </svg>
+            </div>
+            <div>
+                <div class="luna-song-title">Shadow of the Day — Linkin Park</div>
+                <div class="luna-song-why">past bij de avonden dat we gewoon samen niks aan het doen zijn</div>
+            </div>
+        </div>
+        <div class="luna-song">
+            <div class="luna-song-cover" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="7" r="3"></circle>
+                    <line x1="12" y1="10" x2="12" y2="18"></line>
+                    <line x1="6" y1="14" x2="6" y2="17"></line>
+                    <line x1="18" y1="14" x2="18" y2="17"></line>
+                </svg>
+            </div>
+            <div>
+                <div class="luna-song-title">November Rain — Guns N' Roses</div>
+                <div class="luna-song-caption">Use Your Illusion I</div>
+                <div class="luna-song-why">1 van je favoriete nummers, en zeer terecht</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ Track 5 — Countdown ============ -->
+    <section class="luna-track">
+        <div class="luna-track-head">
+            <div class="luna-track-num">05</div>
+            <h2 class="luna-track-title">Tot ik je weer zie</h2>
+        </div>
+        <p class="luna-track-caption">Nog even geduld.</p>
+        <div class="luna-count-stage">
+            <div class="luna-count-grid" id="luna-count-grid">
+                <div class="luna-count-box"><div class="luna-count-num" id="luna-count-days">–</div><div class="luna-count-label">dagen</div></div>
+                <div class="luna-count-box"><div class="luna-count-num" id="luna-count-hours">–</div><div class="luna-count-label">uren</div></div>
+                <div class="luna-count-box"><div class="luna-count-num" id="luna-count-minutes">–</div><div class="luna-count-label">min</div></div>
+                <div class="luna-count-box"><div class="luna-count-num" id="luna-count-seconds">–</div><div class="luna-count-label">sec</div></div>
+            </div>
+            <div class="luna-count-msg" id="luna-count-msg">de seconden aftellen 💚</div>
+        </div>
+    </section>
+
+    <!-- ============ Footer ============ -->
+    <footer class="luna-footer">
+        <div class="luna-heart">💚</div>
+        <!-- ✏️ EDIT: sign-off still to be written -->
+        <p>met liefde gemaakt, voor jou<br>— xan</p>
+    </footer>
+
+</div>
+
+<script src="assets/js/pages/luna.js"></script>
+</body>
+</html>
