@@ -178,14 +178,32 @@ function scatterAlbumCovers() {
 }
 
 // -- Track 1: love notes --
+// Shuffle-bag: shows every note once, in random order, before reshuffling
+// and going again — never repeats a note until she's seen all the others.
+function shuffleArray(array) {
+    const shuffled = array.slice();
+    for (let indexToFill = shuffled.length - 1; indexToFill > 0; indexToFill--) {
+        const randomIndex = Math.floor(Math.random() * (indexToFill + 1));
+        [shuffled[indexToFill], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[indexToFill]];
+    }
+    return shuffled;
+}
+
+let noteShuffleQueue = [];
 let lastShownNoteIndex = -1;
 function playLoveNote() {
     const noteTextElement = document.getElementById("luna-note-text");
-    let noteIndex;
-    do {
-        noteIndex = Math.floor(Math.random() * loveNotes.length);
-    } while (loveNotes.length > 1 && noteIndex === lastShownNoteIndex);
+
+    if (noteShuffleQueue.length === 0) {
+        noteShuffleQueue = shuffleArray(loveNotes.map((_note, index) => index));
+        // avoid the freshly reshuffled bag starting with the note we just showed
+        if (noteShuffleQueue.length > 1 && noteShuffleQueue[0] === lastShownNoteIndex) {
+            [noteShuffleQueue[0], noteShuffleQueue[1]] = [noteShuffleQueue[1], noteShuffleQueue[0]];
+        }
+    }
+    const noteIndex = noteShuffleQueue.shift();
     lastShownNoteIndex = noteIndex;
+
     noteTextElement.classList.remove("luna-note-text--show");
     setTimeout(() => {
         noteTextElement.textContent = loveNotes[noteIndex];
