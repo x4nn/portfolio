@@ -1,0 +1,317 @@
+/* ================================================================
+   Dagboek — Luna's diary page
+   Shares the same pastel green / warm palette as the rest of the
+   luna/ sub-project (see luna.html, mixtape.css, brieven.css,
+   avonturen.css) — kept as separate `--sage`/`--forest`/etc. tokens
+   per page rather than a shared stylesheet, so each luna/ page stays
+   a fully standalone file.
+   ================================================================ */
+
+:root {
+    --sage: #A8C99A;
+    --sage-deep: #7EA974;
+    --mint: #DCEBD4;
+    --mint-pale: #EEF6E8;
+    --cream: #FBF9F1;
+    --forest: #2F4A3A;
+    --forest-soft: #4B6B57;
+    --peach: #EFA98C;
+    --peach-soft: #F6D3C2;
+    --butter: #F3E3A0;
+    --shadow: rgba(47, 74, 58, .14);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Nunito", system-ui, sans-serif;
+    color: var(--forest);
+    background:
+        radial-gradient(1200px 600px at 15% -5%, var(--mint) 0%, transparent 55%),
+        radial-gradient(1000px 700px at 100% 10%, #e7f1df 0%, transparent 50%),
+        var(--cream);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* ---------- Page wrap ---------- */
+
+.diary-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 28px 20px 90px;
+}
+
+.home-link {
+    display: inline-block;
+    margin-bottom: 22px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--forest-soft);
+    text-decoration: none;
+    opacity: 0.75;
+}
+
+.home-link:hover,
+.home-link:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+header.diary-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.diary-title {
+    font-family: "Fraunces", serif;
+    font-size: clamp(1.9rem, 6vw, 2.5rem);
+    font-weight: 600;
+}
+
+.diary-subtitle {
+    margin-top: 8px;
+    color: var(--forest-soft);
+    font-size: 0.98rem;
+}
+
+.diary-card {
+    background: #fff;
+    border: 1.5px solid var(--mint);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 30px -18px var(--shadow);
+    margin-bottom: 28px;
+}
+
+.diary-date {
+    font-family: "Fraunces", serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.diary-prompt-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    background: var(--mint-pale);
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+
+.diary-prompt-text {
+    font-style: italic;
+    color: var(--forest-soft);
+    font-size: 0.95rem;
+}
+
+.diary-prompt-button {
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    color: var(--sage-deep);
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    padding: 4px 6px;
+}
+
+.diary-prompt-button:hover,
+.diary-prompt-button:focus-visible {
+    text-decoration: underline;
+}
+
+.diary-mood-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.diary-mood-button {
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1.5px solid var(--mint);
+    background: var(--mint-pale);
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.diary-mood-button:hover {
+    transform: translateY(-2px);
+}
+
+.diary-mood-button.diary-mood-button--selected {
+    border-color: var(--sage-deep);
+    background: var(--sage);
+}
+
+.diary-mood-button:focus-visible {
+    outline: 2px solid var(--sage-deep);
+    outline-offset: 2px;
+}
+
+.diary-textarea {
+    width: 100%;
+    margin-top: 16px;
+    min-height: 130px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1.5px solid var(--mint);
+    font-family: "Nunito", system-ui, sans-serif;
+    font-size: 1rem;
+    color: var(--forest);
+    resize: vertical;
+}
+
+.diary-textarea:focus-visible {
+    outline: 2px solid var(--sage-deep);
+    outline-offset: 2px;
+}
+
+.diary-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.btn {
+    font-family: "Nunito", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 0.92rem;
+    border: none;
+    border-radius: 999px;
+    padding: 11px 22px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--sage-deep);
+    outline-offset: 2px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn--primary {
+    background: var(--forest);
+    color: #fff;
+}
+
+.btn--soft {
+    background: #fff;
+    color: var(--forest);
+    border: 1.5px solid var(--sage);
+}
+
+.diary-save-status {
+    font-size: 0.82rem;
+    color: var(--sage-deep);
+    align-self: center;
+    margin-right: auto;
+    min-height: 1em;
+}
+
+.diary-entries-heading {
+    font-family: "Fraunces", serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.diary-entry {
+    background: #fff;
+    border: 1.5px solid var(--mint);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 22px -18px var(--shadow);
+}
+
+.diary-entry-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.diary-entry-date {
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: capitalize;
+}
+
+.diary-entry-mood {
+    font-size: 1.2rem;
+}
+
+.diary-entry-text {
+    margin-top: 8px;
+    white-space: pre-wrap;
+    color: var(--forest-soft);
+    font-size: 0.95rem;
+}
+
+.diary-entry-delete {
+    border: none;
+    background: none;
+    color: var(--peach);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    padding: 4px 0;
+}
+
+.diary-entry-delete:hover,
+.diary-entry-delete:focus-visible {
+    text-decoration: underline;
+}
+
+.diary-empty-state {
+    color: var(--forest-soft);
+    font-size: 0.92rem;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.diary-download-row {
+    text-align: center;
+    margin: 24px 0 36px;
+}
+
+.diary-note {
+    font-family: "Caveat", cursive;
+    font-size: 1.4rem;
+    color: var(--sage-deep);
+    text-align: center;
+    line-height: 1.5;
+}

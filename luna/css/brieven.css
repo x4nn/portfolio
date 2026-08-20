@@ -1,0 +1,236 @@
+/* ================================================================
+   Brieven — Luna's "open when…" letters page
+   Shares the same pastel green / warm palette as the rest of the
+   luna/ sub-project (see luna.html, mixtape.css, dagboek.css,
+   avonturen.css) — kept as separate `--sage`/`--forest`/etc. tokens
+   per page rather than a shared stylesheet, so each luna/ page stays
+   a fully standalone file.
+   ================================================================ */
+
+:root {
+    --sage: #A8C99A;
+    --sage-deep: #7EA974;
+    --mint: #DCEBD4;
+    --mint-pale: #EEF6E8;
+    --cream: #FBF9F1;
+    --forest: #2F4A3A;
+    --forest-soft: #4B6B57;
+    --peach: #EFA98C;
+    --peach-soft: #F6D3C2;
+    --butter: #F3E3A0;
+    --shadow: rgba(47, 74, 58, .14);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Nunito", system-ui, sans-serif;
+    color: var(--forest);
+    background:
+        radial-gradient(1200px 600px at 15% -5%, var(--mint) 0%, transparent 55%),
+        radial-gradient(1000px 700px at 100% 10%, #e7f1df 0%, transparent 50%),
+        var(--cream);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* ---------- Page wrap ---------- */
+
+.letters-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px 20px 90px;
+}
+
+.home-link {
+    display: inline-block;
+    margin-bottom: 22px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--forest-soft);
+    text-decoration: none;
+    opacity: 0.75;
+}
+
+.home-link:hover,
+.home-link:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+header.letters-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.letters-title {
+    font-family: "Fraunces", serif;
+    font-size: clamp(1.9rem, 6vw, 2.5rem);
+    font-weight: 600;
+}
+
+.letters-subtitle {
+    margin-top: 8px;
+    color: var(--forest-soft);
+    font-size: 0.98rem;
+}
+
+.letters-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 520px) {
+    .letters-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.envelope-button {
+    font-family: "Nunito", system-ui, sans-serif;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--mint-pale);
+    border: 1.5px solid var(--sage);
+    border-radius: 16px;
+    padding: 20px 18px;
+    cursor: pointer;
+    box-shadow: 0 10px 26px -18px var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.envelope-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px -18px var(--shadow);
+}
+
+.envelope-button:focus-visible {
+    outline: 2px solid var(--sage-deep);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .envelope-button:hover {
+        transform: none;
+    }
+}
+
+.envelope-button.envelope-button--opened {
+    background: #fff;
+    border-color: var(--mint);
+    opacity: 0.75;
+}
+
+.envelope-icon {
+    font-size: 1.7rem;
+}
+
+.envelope-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.envelope-opened-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--sage-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.letter-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(47, 74, 58, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 10;
+}
+
+.letter-modal-overlay.letter-modal-overlay--visible {
+    display: flex;
+}
+
+.letter-modal {
+    background: var(--cream);
+    border-radius: 20px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 32px 28px;
+    position: relative;
+    box-shadow: 0 24px 60px -20px rgba(47, 74, 58, 0.4);
+}
+
+.letter-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    border: none;
+    background: var(--mint-pale);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--forest);
+}
+
+.letter-modal-close:hover,
+.letter-modal-close:focus-visible {
+    background: var(--sage);
+}
+
+.letter-modal-close:focus-visible {
+    outline: 2px solid var(--sage-deep);
+    outline-offset: 2px;
+}
+
+.letter-modal-title {
+    font-family: "Fraunces", serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-right: 30px;
+}
+
+.letter-modal-body {
+    font-family: "Caveat", cursive;
+    font-size: 1.55rem;
+    line-height: 1.5;
+    color: var(--forest);
+    white-space: pre-wrap;
+}
+
+.letter-modal-signoff {
+    margin-top: 18px;
+    font-family: "Caveat", cursive;
+    font-size: 1.55rem;
+    color: var(--sage-deep);
+}
