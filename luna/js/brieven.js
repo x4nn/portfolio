@@ -28,26 +28,26 @@ const letters = [
     {
         id: "je-gestrest-bent",
         situation: "je gestrest bent",
-        text: "Even pauze. Wat er ook aan de hand is, het is oké om het even niet te weten. Je hoeft het niet allemaal in één keer op te lossen. Adem diep in, en dan nog een keer. Ik ben trots op je, ook al zeg ik dat niet vaak genoeg.",
+        text: "Even pauze. Wat er ook aan de hand is, het is oké om het even niet te weten. Je hoeft het niet allemaal in één keer op te lossen. Adem diep in, en dan nog een keer. Ik ben trots op je, ook al zeg ik dat niet vaak genoeg. Doe jouw trukje met zo die 3 dingen :)",
         signoff: "Je doet het zo goed.\n— xan 💚"
     },
     {
         id: "je-blij-bent",
         situation: "je blij bent",
-        text: "Als je dit leest omdat je blij bent, dan ben ik dat nu ook — gewoon door het idee dat jij ergens lacht. Vier het lekker, geniet ervan, en vertel het me straks helemaal.",
+        text: "Als je dit leest omdat je blij bent, dan ben ik dat nu ook, gewoon door het idee dat jij ergens lacht. Geniet er van en laat me zeker ween waarom je zo blij bent.",
         signoff: "Jouw blijdschap is mijn favoriete ding.\n— xan 💚"
     },
     {
         id: "we-ruzie-hebben-gehad",
         situation: "we ruzie hebben gehad",
-        text: "Ruzie hoort erbij, en het verandert niets aan hoe ik over ons denk. Ik hou nog steeds evenveel van je als daarvoor, misschien wel meer — omdat ik weet dat we er altijd weer samen uitkomen. Laten we straks gewoon praten.",
+        text: "Ruzie hoort erbij, en het verandert niets aan hoe ik over ons denk. Ik hou nog steeds evenveel van je als daarvoor, misschien wel meer, omdat ik weet dat we er altijd weer samen uitkomen. Laten we straks gewoon praten.",
         signoff: "Nog steeds helemaal van jou.\n— xan 💚"
     },
     {
         id: "je-moet-lachen",
         situation: "je moet lachen",
-        text: "Oké, noodgeval: denk aan die keer dat we allebei de slappe lach kregen om iets wat achteraf helemaal niet zo grappig was. Of aan mijn belachelijke dansmoves. Werkt altijd.",
-        signoff: "Blij dat ik je aan het lachen kan maken, zelfs van ver.\n— xan 💚"
+        text: "Wist je dat ik echt smelt als jij lacht? Please blijf lachen, ook als ik er niet ben om het te zien. Het is een van de mooiste dingen die ik ken.",
+        signoff: "Jij hebt de mooiste glimlach.\n— xan 💚"
     }
 ];
 

@@ -6,6 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="description" content="Een klein plekje speciaal voor Luna.">
     <title>Voor Luna 🌿</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩷</text></svg>">
 
     <!-- ✏️ EDIT: Luna's naam / bijnaam in de begroeting hieronder aanpassen indien gewenst. -->
 
@@ -157,31 +158,6 @@
             color: var(--forest-soft);
         }
 
-        .hub-card.hub-card--disabled {
-            cursor: default;
-            opacity: 0.6;
-        }
-
-        .hub-card.hub-card--disabled:hover,
-        .hub-card.hub-card--disabled:focus-visible {
-            transform: none;
-            box-shadow: 0 10px 30px -18px var(--shadow);
-            border-color: var(--mint);
-            outline: none;
-        }
-
-        .hub-card-badge {
-            align-self: flex-start;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--sage-deep);
-            background: var(--mint-pale);
-            border-radius: 999px;
-            padding: 4px 10px;
-        }
-
         .hub-footer-note {
             margin-top: 52px;
             font-family: "Caveat", cursive;
@@ -205,28 +181,21 @@
             <span class="hub-card-title">Mixtape</span>
             <span class="hub-card-description">Een cassettebandje vol berichtjes, nummers en een spelletje.</span>
         </a>
-        <!-- ✏️ EDIT: these three cards are non-clickable "coming soon" placeholders on
-             purpose — set PAGE_IS_LIVE to true in dagboek.js / brieven.js / avonturen.js
-             once a page is ready, then swap its <div class="hub-card hub-card--disabled">
-             back into <a class="hub-card" href="..."> here (and drop the badge span). -->
-        <div class="hub-card hub-card--disabled" aria-disabled="true">
+        <a class="hub-card" href="/luna/dagboek">
             <span class="hub-card-icon" aria-hidden="true">📖</span>
             <span class="hub-card-title">Dagboek</span>
             <span class="hub-card-description">Schrijf hier over je dag, zo vaak als je wilt.</span>
-            <span class="hub-card-badge">binnenkort beschikbaar</span>
-        </div>
-        <div class="hub-card hub-card--disabled" aria-disabled="true">
+        </a>
+        <a class="hub-card" href="/luna/brieven">
             <span class="hub-card-icon" aria-hidden="true">💌</span>
             <span class="hub-card-title">Open wanneer…</span>
             <span class="hub-card-description">Kleine briefjes voor wanneer je me nodig hebt.</span>
-            <span class="hub-card-badge">binnenkort beschikbaar</span>
-        </div>
-        <div class="hub-card hub-card--disabled" aria-disabled="true">
+        </a>
+        <a class="hub-card" href="/luna/avonturen">
             <span class="hub-card-icon" aria-hidden="true">🌙</span>
             <span class="hub-card-title">Kies je avontuur</span>
             <span class="hub-card-description">Drie verhaaltjes, helemaal aan jou om te ontdekken.</span>
-            <span class="hub-card-badge">binnenkort beschikbaar</span>
-        </div>
+        </a>
     </nav>
 
     <p class="hub-footer-note">met liefde gemaakt, voor jou 💚</p>
