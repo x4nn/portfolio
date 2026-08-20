@@ -4,199 +4,200 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="description" content="Een klein mixtapecadeautje, speciaal voor Luna.">
-    <title>Luna 🌿</title>
+    <meta name="description" content="Een klein plekje speciaal voor Luna.">
+    <title>Voor Luna 🌿</title>
 
-    <!-- ============================================================= -->
-    <!--  Content to personalise lives in assets/js/pages/luna.js,      -->
-    <!--  marked with ✏️ EDIT. The song blocks below (Track 04) are     -->
-    <!--  the one piece of content that lives in this HTML file.        -->
-    <!-- ============================================================= -->
+    <!-- ✏️ EDIT: Luna's naam / bijnaam in de begroeting hieronder aanpassen indien gewenst. -->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/pages/luna.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sage: #A8C99A;
+            --sage-deep: #7EA974;
+            --mint: #DCEBD4;
+            --mint-pale: #EEF6E8;
+            --cream: #FBF9F1;
+            --forest: #2F4A3A;
+            --forest-soft: #4B6B57;
+            --peach: #EFA98C;
+            --peach-soft: #F6D3C2;
+            --butter: #F3E3A0;
+            --shadow: rgba(47, 74, 58, .14);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Nunito", system-ui, sans-serif;
+            color: var(--forest);
+            background:
+                radial-gradient(1200px 600px at 15% -5%, var(--mint) 0%, transparent 55%),
+                radial-gradient(1000px 700px at 100% 10%, #e7f1df 0%, transparent 50%),
+                var(--cream);
+            background-attachment: fixed;
+            min-height: 100vh;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 56px 20px 80px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+            * {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
+        .hub-hero {
+            width: 100%;
+            max-width: 640px;
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .hub-eyebrow {
+            font-family: "Caveat", cursive;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--sage-deep);
+            margin-bottom: 8px;
+        }
+
+        .hub-title {
+            font-family: "Fraunces", serif;
+            font-size: clamp(2rem, 6vw, 2.9rem);
+            font-weight: 600;
+            color: var(--forest);
+            margin-bottom: 14px;
+        }
+
+        .hub-subtitle {
+            font-size: 1.05rem;
+            color: var(--forest-soft);
+            max-width: 460px;
+            margin: 0 auto;
+        }
+
+        .hub-cards {
+            width: 100%;
+            max-width: 640px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 560px) {
+            .hub-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .hub-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #fff;
+            border: 1.5px solid var(--mint);
+            border-radius: 20px;
+            padding: 26px 22px;
+            text-decoration: none;
+            color: var(--forest);
+            box-shadow: 0 10px 30px -18px var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .hub-card:hover,
+        .hub-card:focus-visible {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 34px -18px var(--shadow);
+            border-color: var(--sage);
+        }
+
+        .hub-card:focus-visible {
+            outline: 2px solid var(--sage-deep);
+            outline-offset: 3px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hub-card:hover,
+            .hub-card:focus-visible {
+                transform: none;
+            }
+        }
+
+        .hub-card-icon {
+            font-size: 2rem;
+        }
+
+        .hub-card-title {
+            font-family: "Fraunces", serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .hub-card-description {
+            font-size: 0.92rem;
+            color: var(--forest-soft);
+        }
+
+        .hub-footer-note {
+            margin-top: 52px;
+            font-family: "Caveat", cursive;
+            font-size: 1.3rem;
+            color: var(--sage-deep);
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-<div class="luna-wrap">
 
-    <!-- ============ Scattered album covers (background decoration) ============ -->
-    <!-- Purely decorative, hidden from screen readers — the real song info is
-         already in visible text further down in Track 04. Filled in by
-         assets/js/pages/luna.js (scatterAlbumCovers), positioned as % of
-         .luna-wrap's own height so they always land inside the real page
-         (any device) instead of overshooting past the last section. -->
-    <div id="luna-cover-layer" aria-hidden="true"></div>
-
-    <!-- ============ Hero ============ -->
-    <header class="luna-hero">
-        <div class="luna-eyebrow">Een klein mixtapeje · alleen voor jou</div>
-
-        <button type="button" class="luna-cassette-trigger" id="luna-cassette-trigger" aria-label="Speel de mixtape af">
-            <div class="luna-cassette">
-                <div class="luna-reels">
-                    <div class="luna-reel"><span></span><span class="luna-reel-b"></span></div>
-                    <div class="luna-reel"><span></span><span class="luna-reel-b"></span></div>
-                </div>
-                <div class="luna-cassette-label">
-                    <div class="luna-side">Kant A</div>
-                    <div class="luna-cassette-name">Voor mijn Luna</div>
-                    <div class="luna-cassette-sub">druk op play als je me mist 🌿</div>
-                </div>
-            </div>
-        </button>
-
-        <p class="luna-hero-note">Ik heb dit voor je gemaakt in de hoop dat je je wat beter voelt,<br>en om je te laten zien hoeveel ik van je hou. 💚</p>
-        <div class="luna-scroll-hint">scroll naar beneden <span>↓</span></div>
+    <header class="hub-hero">
+        <div class="hub-eyebrow">Hey Luna 🌿</div>
+        <h1 class="hub-title">Een klein plekje, speciaal voor jou</h1>
+        <p class="hub-subtitle">Ik heb hier wat dingen verzameld om je op te vrolijken terwijl je weg bent. Kies maar iets uit — er is geen verkeerde keuze.</p>
     </header>
 
-    <!-- ============ Track 1 — Love notes ============ -->
-    <section class="luna-track" id="luna-track-01">
-        <div class="luna-track-head">
-            <div class="luna-track-num">01</div>
-            <h2 class="luna-track-title">Een berichtje, wanneer je er een nodig hebt</h2>
-        </div>
-        <p class="luna-track-caption">Druk op de knop wanneer je een klein berichtje wilt. Elke keer krijg je een ander.</p>
-        <div class="luna-note-stage">
-            <p class="luna-note-text" id="luna-note-text">Druk op de knop hieronder 👇</p>
-        </div>
-        <button class="luna-btn" id="luna-play-note-button" type="button">🎵 Speel een berichtje af</button>
-    </section>
+    <nav class="hub-cards" aria-label="Kies een pagina">
+        <a class="hub-card" href="/luna/mixtape">
+            <span class="hub-card-icon" aria-hidden="true">🎵</span>
+            <span class="hub-card-title">Mixtape</span>
+            <span class="hub-card-description">Een cassettebandje vol berichtjes, nummers en een spelletje.</span>
+        </a>
+        <a class="hub-card" href="/luna/dagboek">
+            <span class="hub-card-icon" aria-hidden="true">📖</span>
+            <span class="hub-card-title">Dagboek</span>
+            <span class="hub-card-description">Schrijf hier over je dag, zo vaak als je wilt.</span>
+        </a>
+        <a class="hub-card" href="/luna/brieven">
+            <span class="hub-card-icon" aria-hidden="true">💌</span>
+            <span class="hub-card-title">Open wanneer…</span>
+            <span class="hub-card-description">Kleine briefjes voor wanneer je me nodig hebt.</span>
+        </a>
+        <a class="hub-card" href="/luna/avonturen">
+            <span class="hub-card-icon" aria-hidden="true">🌙</span>
+            <span class="hub-card-title">Kies je avontuur</span>
+            <span class="hub-card-description">Drie verhaaltjes, helemaal aan jou om te ontdekken.</span>
+        </a>
+    </nav>
 
-    <!-- ============ Track 2 — Reasons ============ -->
-    <section class="luna-track">
-        <div class="luna-track-head">
-            <div class="luna-track-num">02</div>
-            <h2 class="luna-track-title">Redenen waarom ik gek op je ben</h2>
-        </div>
-        <p class="luna-track-caption">Blader er doorheen wanneer je wilt. Geen specifieke volgorde — ik hou evenveel van allemaal.</p>
-        <div class="luna-reason-stage">
-            <div class="luna-reason-count" id="luna-reason-count">Reden 1</div>
-            <div class="luna-reason-text" id="luna-reason-text"></div>
-        </div>
-        <div class="luna-reason-nav">
-            <button class="luna-btn luna-btn--soft" id="luna-prev-reason-button" type="button">←</button>
-            <button class="luna-btn" id="luna-next-reason-button" type="button">Volgende →</button>
-        </div>
-    </section>
+    <p class="hub-footer-note">met liefde gemaakt, voor jou 💚</p>
 
-    <!-- ============ Track 3 — Game ============ -->
-    <section class="luna-track">
-        <div class="luna-track-head">
-            <div class="luna-track-num">03</div>
-            <h2 class="luna-track-title">Vang de nootjes</h2>
-        </div>
-        <p class="luna-track-caption">Een gek spelletje om je handen bezig te houden. Tik op de zwevende nootjes voordat ze wegdrijven.</p>
-        <div class="luna-game-wrap">
-            <div class="luna-game-bar">
-                <div class="luna-game-score">Score: <b id="luna-game-score">0</b></div>
-                <div class="luna-game-score">⏱ <b id="luna-game-time">30</b>s</div>
-            </div>
-            <div class="luna-game-board" id="luna-game-board">
-                <div class="luna-game-msg" id="luna-game-msg">
-                    <div id="luna-game-msg-text">Klaar? Het duurt maar 30 seconden 🎶</div>
-                    <button class="luna-btn" id="luna-start-game-button" type="button">Start</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ Track 4 — Playlist ============ -->
-    <section class="luna-track">
-        <div class="luna-track-head">
-            <div class="luna-track-num">04</div>
-            <h2 class="luna-track-title">Nummers die me aan jou doen denken</h2>
-        </div>
-        <p class="luna-track-caption">Ons kleine soundtrackje. Zet ze op en doe alsof ik er ben.</p>
-        <!-- ✏️ EDIT: swap in more songs + why each one reminds you of her.
-             Duplicate a whole <div class="luna-song">...</div> block to add more.
-             Each song has a small original icon instead of the real album cover
-             (copyright — see chat). To use a real cover instead, replace the
-             <svg>...</svg> inside .luna-song-cover with an <img src="..."> of
-             your own saved image. -->
-        <div class="luna-song">
-            <div class="luna-song-cover" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="9" r="4"></circle>
-                    <line x1="3" y1="17" x2="21" y2="17"></line>
-                </svg>
-            </div>
-            <div>
-                <div class="luna-song-title">With or Without You — U2</div>
-                <div class="luna-song-caption">The Joshua Tree</div>
-                <div class="luna-song-why">een van jouw favoriete albums, en dit nummer past precies bij hoe ik me bij jou voel</div>
-            </div>
-        </div>
-        <div class="luna-song">
-            <div class="luna-song-cover" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="9" cy="16" r="4"></circle>
-                    <line x1="12.5" y1="13" x2="20" y2="5"></line>
-                    <line x1="17" y1="5" x2="20" y2="5"></line>
-                    <line x1="20" y1="5" x2="20" y2="8"></line>
-                </svg>
-            </div>
-            <div>
-                <div class="luna-song-title">Romeo and Juliet — Dire Straits</div>
-                <div class="luna-song-why">jouw muzieksmaak is altijd top, en dit nummer bewijst het weer</div>
-            </div>
-        </div>
-        <div class="luna-song">
-            <div class="luna-song-cover" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 17l4-5 3 3 5-7 6 9"></path>
-                </svg>
-            </div>
-            <div>
-                <div class="luna-song-title">Shadow of the Day — Linkin Park</div>
-                <div class="luna-song-why">past bij de avonden dat we gewoon samen niks aan het doen zijn</div>
-            </div>
-        </div>
-        <div class="luna-song">
-            <div class="luna-song-cover" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="7" r="3"></circle>
-                    <line x1="12" y1="10" x2="12" y2="18"></line>
-                    <line x1="6" y1="14" x2="6" y2="17"></line>
-                    <line x1="18" y1="14" x2="18" y2="17"></line>
-                </svg>
-            </div>
-            <div>
-                <div class="luna-song-title">November Rain — Guns N' Roses</div>
-                <div class="luna-song-caption">Use Your Illusion I</div>
-                <div class="luna-song-why">1 van je favoriete nummers, en zeer terecht</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ Track 5 — Countdown ============ -->
-    <section class="luna-track">
-        <div class="luna-track-head">
-            <div class="luna-track-num">05</div>
-            <h2 class="luna-track-title">Tot ik je weer zie</h2>
-        </div>
-        <p class="luna-track-caption">Nog even geduld.</p>
-        <div class="luna-count-stage">
-            <div class="luna-count-grid" id="luna-count-grid">
-                <div class="luna-count-box"><div class="luna-count-num" id="luna-count-days">–</div><div class="luna-count-label">dagen</div></div>
-                <div class="luna-count-box"><div class="luna-count-num" id="luna-count-hours">–</div><div class="luna-count-label">uren</div></div>
-                <div class="luna-count-box"><div class="luna-count-num" id="luna-count-minutes">–</div><div class="luna-count-label">min</div></div>
-                <div class="luna-count-box"><div class="luna-count-num" id="luna-count-seconds">–</div><div class="luna-count-label">sec</div></div>
-            </div>
-            <div class="luna-count-msg" id="luna-count-msg">de seconden aftellen 💚</div>
-        </div>
-    </section>
-
-    <!-- ============ Footer ============ -->
-    <footer class="luna-footer">
-        <div class="luna-heart">💚</div>
-        <!-- ✏️ EDIT: sign-off still to be written -->
-        <p>met liefde gemaakt, voor jou<br>— xan</p>
-    </footer>
-
-</div>
-
-<script src="assets/js/pages/luna.js"></script>
 </body>
 </html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Kleine briefjes voor Luna, voor elk moment.">
+    <title>Open wanneer… — Luna 🌿</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sage: #A8C99A;
+            --sage-deep: #7EA974;
+            --mint: #DCEBD4;
+            --mint-pale: #EEF6E8;
+            --cream: #FBF9F1;
+            --forest: #2F4A3A;
+            --forest-soft: #4B6B57;
+            --peach: #EFA98C;
+            --peach-soft: #F6D3C2;
+            --butter: #F3E3A0;
+            --shadow: rgba(47, 74, 58, .14);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Nunito", system-ui, sans-serif;
+            color: var(--forest);
+            background:
+                radial-gradient(1200px 600px at 15% -5%, var(--mint) 0%, transparent 55%),
+                radial-gradient(1000px 700px at 100% 10%, #e7f1df 0%, transparent 50%),
+                var(--cream);
+            background-attachment: fixed;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+            * {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
+        .letters-wrap {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 28px 20px 90px;
+        }
+
+        .home-link {
+            display: inline-block;
+            margin-bottom: 22px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--forest-soft);
+            text-decoration: none;
+            opacity: 0.75;
+        }
+
+        .home-link:hover,
+        .home-link:focus-visible {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        header.letters-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .letters-title {
+            font-family: "Fraunces", serif;
+            font-size: clamp(1.9rem, 6vw, 2.5rem);
+            font-weight: 600;
+        }
+
+        .letters-subtitle {
+            margin-top: 8px;
+            color: var(--forest-soft);
+            font-size: 0.98rem;
+        }
+
+        .letters-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 520px) {
+            .letters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .envelope-button {
+            font-family: "Nunito", system-ui, sans-serif;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--mint-pale);
+            border: 1.5px solid var(--sage);
+            border-radius: 16px;
+            padding: 20px 18px;
+            cursor: pointer;
+            box-shadow: 0 10px 26px -18px var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .envelope-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 30px -18px var(--shadow);
+        }
+
+        .envelope-button:focus-visible {
+            outline: 2px solid var(--sage-deep);
+            outline-offset: 3px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .envelope-button:hover {
+                transform: none;
+            }
+        }
+
+        .envelope-button.envelope-button--opened {
+            background: #fff;
+            border-color: var(--mint);
+            opacity: 0.75;
+        }
+
+        .envelope-icon {
+            font-size: 1.7rem;
+        }
+
+        .envelope-label {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .envelope-opened-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--sage-deep);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .letter-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(47, 74, 58, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .letter-modal-overlay.letter-modal-overlay--visible {
+            display: flex;
+        }
+
+        .letter-modal {
+            background: var(--cream);
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px 28px;
+            position: relative;
+            box-shadow: 0 24px 60px -20px rgba(47, 74, 58, 0.4);
+        }
+
+        .letter-modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            border: none;
+            background: var(--mint-pale);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--forest);
+        }
+
+        .letter-modal-close:hover,
+        .letter-modal-close:focus-visible {
+            background: var(--sage);
+        }
+
+        .letter-modal-close:focus-visible {
+            outline: 2px solid var(--sage-deep);
+            outline-offset: 2px;
+        }
+
+        .letter-modal-title {
+            font-family: "Fraunces", serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-right: 30px;
+        }
+
+        .letter-modal-body {
+            font-family: "Caveat", cursive;
+            font-size: 1.55rem;
+            line-height: 1.5;
+            color: var(--forest);
+            white-space: pre-wrap;
+        }
+
+        .letter-modal-signoff {
+            margin-top: 18px;
+            font-family: "Caveat", cursive;
+            font-size: 1.55rem;
+            color: var(--sage-deep);
+        }
+    </style>
+</head>
+<body>
+<div class="letters-wrap">
+
+    <a href="/luna" class="home-link">← terug naar huis</a>
+
+    <header class="letters-header">
+        <h1 class="letters-title">Open wanneer…</h1>
+        <p class="letters-subtitle">Een briefje voor wat je ook voelt. 💌</p>
+    </header>
+
+    <div class="letters-grid" id="letters-grid"></div>
+
+</div>
+
+<div class="letter-modal-overlay" id="letter-modal-overlay">
+    <div class="letter-modal" role="dialog" aria-modal="true" aria-labelledby="letter-modal-title">
+        <button type="button" class="letter-modal-close" id="letter-modal-close" aria-label="Sluit deze brief">✕</button>
+        <h2 class="letter-modal-title" id="letter-modal-title"></h2>
+        <p class="letter-modal-body" id="letter-modal-body"></p>
+        <p class="letter-modal-signoff" id="letter-modal-signoff"></p>
+    </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// ✏️ EDIT ZONE — real content goes here
+// ---------------------------------------------------------------
+
+// ✏️ EDIT: the letters themselves. Add, remove or rewrite freely —
+// each needs a unique id, a short situation label, the letter text,
+// and a sign-off.
+const letters = [
+    {
+        id: "je-me-mist",
+        situation: "je me mist",
+        text: "Als je dit leest, mis je me waarschijnlijk net zo erg als ik jou mis. Weet dat de afstand niets verandert aan hoe ik over je denk — jij bent er altijd, in alles wat ik doe. Sluit je ogen even, ik ben er zo goed als bij je.",
+        signoff: "Tot snel, mijn liefste.\n— xan 💚"
+    },
+    {
+        id: "je-niet-kunt-slapen",
+        situation: "je niet kunt slapen",
+        text: "Lig je nog wakker? Denk maar even aan iets doms dat we ooit samen deden, en de glimlach die daarbij hoort. Adem rustig in en uit. Ik waak virtueel over je tot je wegdroomt.",
+        signoff: "Slaap zacht, ik hou van je.\n— xan 💚"
+    },
+    {
+        id: "je-gestrest-bent",
+        situation: "je gestrest bent",
+        text: "Even pauze. Wat er ook aan de hand is, het is oké om het even niet te weten. Je hoeft het niet allemaal in één keer op te lossen. Adem diep in, en dan nog een keer. Ik ben trots op je, ook al zeg ik dat niet vaak genoeg.",
+        signoff: "Je doet het zo goed.\n— xan 💚"
+    },
+    {
+        id: "je-blij-bent",
+        situation: "je blij bent",
+        text: "Als je dit leest omdat je blij bent, dan ben ik dat nu ook — gewoon door het idee dat jij ergens lacht. Vier het lekker, geniet ervan, en vertel het me straks helemaal.",
+        signoff: "Jouw blijdschap is mijn favoriete ding.\n— xan 💚"
+    },
+    {
+        id: "we-ruzie-hebben-gehad",
+        situation: "we ruzie hebben gehad",
+        text: "Ruzie hoort erbij, en het verandert niets aan hoe ik over ons denk. Ik hou nog steeds evenveel van je als daarvoor, misschien wel meer — omdat ik weet dat we er altijd weer samen uitkomen. Laten we straks gewoon praten.",
+        signoff: "Nog steeds helemaal van jou.\n— xan 💚"
+    },
+    {
+        id: "je-moet-lachen",
+        situation: "je moet lachen",
+        text: "Oké, noodgeval: denk aan die keer dat we allebei de slappe lach kregen om iets wat achteraf helemaal niet zo grappig was. Of aan mijn belachelijke dansmoves. Werkt altijd.",
+        signoff: "Blij dat ik je aan het lachen kan maken, zelfs van ver.\n— xan 💚"
+    }
+];
+
+// ---------------------------------------------------------------
+// Firebase — reuses this site's existing Realtime Database, under its
+// own "luna-brieven" key so it never touches other data on the same
+// database. Every call is wrapped so a network failure never breaks
+// the page — it just quietly stops persisting for that session.
+// ---------------------------------------------------------------
+
+const LUNA_LETTERS_DATABASE_URL = "https://co-housing-e2c00-default-rtdb.europe-west1.firebasedatabase.app/luna-brieven";
+
+async function loadOpenedLettersFromFirebase() {
+    try {
+        const response = await fetch(`${LUNA_LETTERS_DATABASE_URL}/opened.json`);
+        if (!response.ok) return {};
+        const data = await response.json();
+        return data || {};
+    } catch (error) {
+        console.warn("Kon geopende brieven niet laden uit Firebase:", error);
+        return {};
+    }
+}
+
+async function markLetterOpenedInFirebase(letterId) {
+    try {
+        await fetch(`${LUNA_LETTERS_DATABASE_URL}/opened/${letterId}.json`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(true)
+        });
+    } catch (error) {
+        console.warn("Kon geopende brief niet opslaan in Firebase:", error);
+    }
+}
+
+// ---------------------------------------------------------------
+// Machinery — no need to touch below this line
+// ---------------------------------------------------------------
+
+let openedLetterIds = {};
+
+function renderLettersGrid() {
+    const grid = document.getElementById("letters-grid");
+    grid.innerHTML = "";
+    letters.forEach((letter) => {
+        const isOpened = Boolean(openedLetterIds[letter.id]);
+        const envelopeButton = document.createElement("button");
+        envelopeButton.type = "button";
+        envelopeButton.className = "envelope-button" + (isOpened ? " envelope-button--opened" : "");
+        envelopeButton.innerHTML = `
+            <span class="envelope-icon" aria-hidden="true">💌</span>
+            <span class="envelope-label">Open wanneer ${letter.situation}</span>
+            ${isOpened ? '<span class="envelope-opened-tag">gelezen</span>' : ""}
+        `;
+        envelopeButton.addEventListener("click", () => openLetter(letter));
+        grid.appendChild(envelopeButton);
+    });
+}
+
+function openLetter(letter) {
+    document.getElementById("letter-modal-title").textContent = `Open wanneer ${letter.situation}`;
+    document.getElementById("letter-modal-body").textContent = letter.text;
+    document.getElementById("letter-modal-signoff").textContent = letter.signoff;
+    document.getElementById("letter-modal-overlay").classList.add("letter-modal-overlay--visible");
+    document.getElementById("letter-modal-close").focus();
+
+    if (!openedLetterIds[letter.id]) {
+        openedLetterIds[letter.id] = true;
+        renderLettersGrid();
+        markLetterOpenedInFirebase(letter.id);
+    }
+}
+
+function closeLetterModal() {
+    document.getElementById("letter-modal-overlay").classList.remove("letter-modal-overlay--visible");
+}
+
+document.getElementById("letter-modal-close").addEventListener("click", closeLetterModal);
+document.getElementById("letter-modal-overlay").addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) closeLetterModal();
+});
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeLetterModal();
+});
+
+async function initLettersPage() {
+    renderLettersGrid();
+    openedLetterIds = await loadOpenedLettersFromFirebase();
+    renderLettersGrid();
+}
+
+initLettersPage();
+</script>
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Luna's eigen dagboekplekje.">
+    <title>Dagboek — Luna 🌿</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sage: #A8C99A;
+            --sage-deep: #7EA974;
+            --mint: #DCEBD4;
+            --mint-pale: #EEF6E8;
+            --cream: #FBF9F1;
+            --forest: #2F4A3A;
+            --forest-soft: #4B6B57;
+            --peach: #EFA98C;
+            --peach-soft: #F6D3C2;
+            --butter: #F3E3A0;
+            --shadow: rgba(47, 74, 58, .14);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Nunito", system-ui, sans-serif;
+            color: var(--forest);
+            background:
+                radial-gradient(1200px 600px at 15% -5%, var(--mint) 0%, transparent 55%),
+                radial-gradient(1000px 700px at 100% 10%, #e7f1df 0%, transparent 50%),
+                var(--cream);
+            background-attachment: fixed;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+            * {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
+        .diary-wrap {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 28px 20px 90px;
+        }
+
+        .home-link {
+            display: inline-block;
+            margin-bottom: 22px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--forest-soft);
+            text-decoration: none;
+            opacity: 0.75;
+        }
+
+        .home-link:hover,
+        .home-link:focus-visible {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        header.diary-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .diary-title {
+            font-family: "Fraunces", serif;
+            font-size: clamp(1.9rem, 6vw, 2.5rem);
+            font-weight: 600;
+        }
+
+        .diary-subtitle {
+            margin-top: 8px;
+            color: var(--forest-soft);
+            font-size: 0.98rem;
+        }
+
+        .diary-card {
+            background: #fff;
+            border: 1.5px solid var(--mint);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px -18px var(--shadow);
+            margin-bottom: 28px;
+        }
+
+        .diary-date {
+            font-family: "Fraunces", serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .diary-prompt-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 12px;
+            background: var(--mint-pale);
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+
+        .diary-prompt-text {
+            font-style: italic;
+            color: var(--forest-soft);
+            font-size: 0.95rem;
+        }
+
+        .diary-prompt-button {
+            flex-shrink: 0;
+            border: none;
+            background: none;
+            color: var(--sage-deep);
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            padding: 4px 6px;
+        }
+
+        .diary-prompt-button:hover,
+        .diary-prompt-button:focus-visible {
+            text-decoration: underline;
+        }
+
+        .diary-mood-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .diary-mood-button {
+            font-size: 1.4rem;
+            line-height: 1;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1.5px solid var(--mint);
+            background: var(--mint-pale);
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .diary-mood-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .diary-mood-button.diary-mood-button--selected {
+            border-color: var(--sage-deep);
+            background: var(--sage);
+        }
+
+        .diary-mood-button:focus-visible {
+            outline: 2px solid var(--sage-deep);
+            outline-offset: 2px;
+        }
+
+        .diary-textarea {
+            width: 100%;
+            margin-top: 16px;
+            min-height: 130px;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1.5px solid var(--mint);
+            font-family: "Nunito", system-ui, sans-serif;
+            font-size: 1rem;
+            color: var(--forest);
+            resize: vertical;
+        }
+
+        .diary-textarea:focus-visible {
+            outline: 2px solid var(--sage-deep);
+            outline-offset: 2px;
+        }
+
+        .diary-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn {
+            font-family: "Nunito", system-ui, sans-serif;
+            font-weight: 700;
+            font-size: 0.92rem;
+            border: none;
+            border-radius: 999px;
+            padding: 11px 22px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--sage-deep);
+            outline-offset: 2px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn--primary {
+            background: var(--forest);
+            color: #fff;
+        }
+
+        .btn--soft {
+            background: #fff;
+            color: var(--forest);
+            border: 1.5px solid var(--sage);
+        }
+
+        .diary-save-status {
+            font-size: 0.82rem;
+            color: var(--sage-deep);
+            align-self: center;
+            margin-right: auto;
+            min-height: 1em;
+        }
+
+        .diary-entries-heading {
+            font-family: "Fraunces", serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .diary-entry {
+            background: #fff;
+            border: 1.5px solid var(--mint);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 22px -18px var(--shadow);
+        }
+
+        .diary-entry-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .diary-entry-date {
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: capitalize;
+        }
+
+        .diary-entry-mood {
+            font-size: 1.2rem;
+        }
+
+        .diary-entry-text {
+            margin-top: 8px;
+            white-space: pre-wrap;
+            color: var(--forest-soft);
+            font-size: 0.95rem;
+        }
+
+        .diary-entry-delete {
+            border: none;
+            background: none;
+            color: var(--peach);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            padding: 4px 0;
+        }
+
+        .diary-entry-delete:hover,
+        .diary-entry-delete:focus-visible {
+            text-decoration: underline;
+        }
+
+        .diary-empty-state {
+            color: var(--forest-soft);
+            font-size: 0.92rem;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .diary-download-row {
+            text-align: center;
+            margin: 24px 0 36px;
+        }
+
+        .diary-note {
+            font-family: "Caveat", cursive;
+            font-size: 1.4rem;
+            color: var(--sage-deep);
+            text-align: center;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+<div class="diary-wrap">
+
+    <a href="/luna" class="home-link">← terug naar huis</a>
+
+    <header class="diary-header">
+        <h1 class="diary-title">Dagboek</h1>
+        <p class="diary-subtitle">Schrijf hier over je dag, zo lang of zo kort als je wilt. Niemand anders leest dit.</p>
+    </header>
+
+    <section class="diary-card">
+        <div class="diary-date" id="diary-today-date"></div>
+
+        <div class="diary-prompt-row">
+            <p class="diary-prompt-text" id="diary-prompt-text"></p>
+            <button type="button" class="diary-prompt-button" id="diary-another-prompt-button">ander prompt</button>
+        </div>
+
+        <div class="diary-mood-row" id="diary-mood-row" role="group" aria-label="Kies je stemming"></div>
+
+        <label for="diary-textarea" class="visually-hidden" style="position:absolute; left:-9999px;">Jouw dagboektekst</label>
+        <textarea class="diary-textarea" id="diary-textarea" placeholder="Vertel eens hoe je dag was…"></textarea>
+
+        <div class="diary-actions">
+            <span class="diary-save-status" id="diary-save-status"></span>
+            <button type="button" class="btn btn--primary" id="diary-save-button">Opslaan</button>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="diary-entries-heading">Eerdere dagen</h2>
+        <div id="diary-entries-list"></div>
+    </section>
+
+    <div class="diary-download-row">
+        <button type="button" class="btn btn--soft" id="diary-download-button">⬇ Download al mijn dagboekjes</button>
+    </div>
+
+    <!-- ✏️ EDIT: jouw eigen berichtje hieronder aanpassen. -->
+    <p class="diary-note">Ik lees dit niet mee, dit is helemaal van jou.<br>Maar weet dat ik altijd aan je denk. 💚<br>— xan</p>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// ✏️ EDIT ZONE — real content goes here
+// ---------------------------------------------------------------
+
+// ✏️ EDIT: rotating diary prompts. Add or change lines any time.
+const diaryPrompts = [
+    "Wat maakte je vandaag aan het lachen?",
+    "Waar verlang je nu het meest naar?",
+    "Wat was het fijnste moment van vandaag?",
+    "Waar denk je aan, net voor het slapengaan?",
+    "Wat zou je me nu het liefst vertellen?",
+    "Wat heeft je vandaag verrast?",
+    "Waar ben je vandaag dankbaar voor?",
+    "Wat mis je het meest op dit moment?",
+];
+
+// ✏️ EDIT: mood options she can pick from.
+const diaryMoods = ["😊", "😌", "🥰", "😴", "😕", "😢", "✨"];
+
+// ---------------------------------------------------------------
+// Firebase — reuses this site's existing Realtime Database, under its
+// own "luna-dagboek" key so it never touches other data on the same
+// database. Every call is wrapped so a network failure never breaks
+// the page — it just quietly stops persisting for that session.
+// ---------------------------------------------------------------
+
+const LUNA_DIARY_DATABASE_URL = "https://co-housing-e2c00-default-rtdb.europe-west1.firebasedatabase.app/luna-dagboek";
+
+async function loadDiaryEntriesFromFirebase() {
+    try {
+        const response = await fetch(`${LUNA_DIARY_DATABASE_URL}/entries.json`);
+        if (!response.ok) return {};
+        const data = await response.json();
+        return data || {};
+    } catch (error) {
+        console.warn("Kon dagboek niet laden uit Firebase:", error);
+        return {};
+    }
+}
+
+async function saveDiaryEntryToFirebase(dateKey, entry) {
+    try {
+        await fetch(`${LUNA_DIARY_DATABASE_URL}/entries/${dateKey}.json`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(entry)
+        });
+    } catch (error) {
+        console.warn("Kon dagboek-entry niet opslaan in Firebase:", error);
+    }
+}
+
+async function deleteDiaryEntryFromFirebase(dateKey) {
+    try {
+        await fetch(`${LUNA_DIARY_DATABASE_URL}/entries/${dateKey}.json`, { method: "DELETE" });
+    } catch (error) {
+        console.warn("Kon dagboek-entry niet verwijderen uit Firebase:", error);
+    }
+}
+
+// ---------------------------------------------------------------
+// Machinery — no need to touch below this line
+// ---------------------------------------------------------------
+
+const SAVE_STATUS_MESSAGE_DURATION_MS = 2200;
+
+function getDateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function formatLongDutchDate(dateKey) {
+    const [year, month, day] = dateKey.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
+let diaryEntries = {};
+let selectedMood = null;
+let currentPromptIndex = 0;
+
+const todayKey = getDateKey(new Date());
+
+function pickRandomPromptIndex() {
+    if (diaryPrompts.length <= 1) return 0;
+    let nextIndex = Math.floor(Math.random() * diaryPrompts.length);
+    while (nextIndex === currentPromptIndex) {
+        nextIndex = Math.floor(Math.random() * diaryPrompts.length);
+    }
+    return nextIndex;
+}
+
+function renderPrompt() {
+    document.getElementById("diary-prompt-text").textContent = diaryPrompts[currentPromptIndex];
+}
+
+function renderMoodRow() {
+    const moodRow = document.getElementById("diary-mood-row");
+    moodRow.innerHTML = "";
+    diaryMoods.forEach((mood) => {
+        const moodButton = document.createElement("button");
+        moodButton.type = "button";
+        moodButton.className = "diary-mood-button";
+        moodButton.textContent = mood;
+        moodButton.setAttribute("aria-pressed", String(mood === selectedMood));
+        if (mood === selectedMood) {
+            moodButton.classList.add("diary-mood-button--selected");
+        }
+        moodButton.addEventListener("click", () => {
+            selectedMood = mood;
+            renderMoodRow();
+        });
+        moodRow.appendChild(moodButton);
+    });
+}
+
+function renderEntriesList() {
+    const entriesList = document.getElementById("diary-entries-list");
+    const sortedDateKeys = Object.keys(diaryEntries).sort((a, b) => (a < b ? 1 : -1));
+
+    if (sortedDateKeys.length === 0) {
+        entriesList.innerHTML = '<p class="diary-empty-state">Nog geen eerdere dagen — begin hierboven met schrijven.</p>';
+        return;
+    }
+
+    entriesList.innerHTML = "";
+    sortedDateKeys.forEach((dateKey) => {
+        const entry = diaryEntries[dateKey];
+        const entryElement = document.createElement("article");
+        entryElement.className = "diary-entry";
+        entryElement.innerHTML = `
+            <div class="diary-entry-top">
+                <span class="diary-entry-date">${formatLongDutchDate(dateKey)}</span>
+                <span class="diary-entry-mood" aria-hidden="true">${entry.mood || ""}</span>
+            </div>
+            <p class="diary-entry-text"></p>
+            <button type="button" class="diary-entry-delete">verwijderen</button>
+        `;
+        entryElement.querySelector(".diary-entry-text").textContent = entry.text;
+        entryElement.querySelector(".diary-entry-delete").addEventListener("click", () => deleteEntry(dateKey));
+        entriesList.appendChild(entryElement);
+    });
+}
+
+async function deleteEntry(dateKey) {
+    delete diaryEntries[dateKey];
+    renderEntriesList();
+    if (dateKey === todayKey) {
+        document.getElementById("diary-textarea").value = "";
+        selectedMood = null;
+        renderMoodRow();
+    }
+    await deleteDiaryEntryFromFirebase(dateKey);
+}
+
+function showSaveStatus(message) {
+    const statusElement = document.getElementById("diary-save-status");
+    statusElement.textContent = message;
+    setTimeout(() => {
+        if (statusElement.textContent === message) {
+            statusElement.textContent = "";
+        }
+    }, SAVE_STATUS_MESSAGE_DURATION_MS);
+}
+
+async function saveTodayEntry() {
+    const text = document.getElementById("diary-textarea").value.trim();
+    if (!text) {
+        showSaveStatus("Schrijf eerst iets voordat je opslaat 🌿");
+        return;
+    }
+
+    const entry = { date: todayKey, mood: selectedMood, text, savedAt: new Date().toISOString() };
+    diaryEntries[todayKey] = entry;
+    renderEntriesList();
+    showSaveStatus("Opgeslagen 💚");
+    await saveDiaryEntryToFirebase(todayKey, entry);
+}
+
+function downloadAllEntries() {
+    const sortedDateKeys = Object.keys(diaryEntries).sort();
+    const fileLines = sortedDateKeys.map((dateKey) => {
+        const entry = diaryEntries[dateKey];
+        return `${formatLongDutchDate(dateKey)} ${entry.mood || ""}\n${entry.text}\n`;
+    });
+    const fileContent = fileLines.length ? fileLines.join("\n---\n\n") : "Nog geen dagboekjes geschreven.";
+
+    const downloadBlob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
+    const downloadUrl = URL.createObjectURL(downloadBlob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = downloadUrl;
+    downloadLink.download = "luna-dagboek.txt";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    URL.revokeObjectURL(downloadUrl);
+}
+
+async function initDiaryPage() {
+    document.getElementById("diary-today-date").textContent = formatLongDutchDate(todayKey);
+    currentPromptIndex = Math.floor(Math.random() * diaryPrompts.length);
+    renderPrompt();
+    renderMoodRow();
+    renderEntriesList();
+
+    diaryEntries = await loadDiaryEntriesFromFirebase();
+
+    if (diaryEntries[todayKey]) {
+        document.getElementById("diary-textarea").value = diaryEntries[todayKey].text || "";
+        selectedMood = diaryEntries[todayKey].mood || null;
+        renderMoodRow();
+    }
+    renderEntriesList();
+}
+
+document.getElementById("diary-another-prompt-button").addEventListener("click", () => {
+    currentPromptIndex = pickRandomPromptIndex();
+    renderPrompt();
+});
+document.getElementById("diary-save-button").addEventListener("click", saveTodayEntry);
+document.getElementById("diary-download-button").addEventListener("click", downloadAllEntries);
+
+initDiaryPage();
+</script>
+</body>
+</html>
