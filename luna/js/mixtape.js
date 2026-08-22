@@ -136,6 +136,12 @@ const PIANO_TILES_VISIBLE_AT_ONCE = 3;
 const PIANO_TILE_HEIGHT_PERCENT = 26;
 const GAME_SCORE_GREAT_THRESHOLD = 40;
 const GAME_SCORE_GOOD_THRESHOLD = 15;
+// How long the "Nee" button stays disabled right after the game-over prompt
+// appears, so a rapid tap still in flight when the round ends can't land on
+// it and accidentally skip saving the score. Counts down visibly on the
+// button itself so it's clear it's not just unresponsive.
+const GAME_OVER_NO_BUTTON_LOCK_SECONDS = 2;
+let noButtonCountdownTimer = null;
 const FLOATING_NOTE_EMOJIS = ["🎵", "🎶", "🎼", "💚", "🌿", "🎧"];
 
 // ✏️ EDIT: chance a spawned note is an emoji vs. a selfie — 1/3 emoji, 2/3
@@ -407,6 +413,24 @@ function handlePianoLaneTap(laneIndex) {
     document.getElementById("luna-game-score").textContent = gameScore;
 }
 
+function lockLeaderboardNoButton() {
+    const noButton = document.getElementById("luna-leaderboard-no-button");
+    clearInterval(noButtonCountdownTimer);
+    noButton.disabled = true;
+    let secondsRemaining = GAME_OVER_NO_BUTTON_LOCK_SECONDS;
+    noButton.textContent = `Nee (${secondsRemaining})`;
+    noButtonCountdownTimer = setInterval(() => {
+        secondsRemaining--;
+        if (secondsRemaining <= 0) {
+            clearInterval(noButtonCountdownTimer);
+            noButton.disabled = false;
+            noButton.textContent = "Nee";
+            return;
+        }
+        noButton.textContent = `Nee (${secondsRemaining})`;
+    }, 1000);
+}
+
 function endGame() {
     if (!gameIsRunning) return;
     gameIsRunning = false;
@@ -426,6 +450,7 @@ function endGame() {
     document.getElementById("luna-game-msg-text").textContent =
         "Je hebt " + gameScore + " nootjes geraakt! " + resultMessage;
     gameMessageBox.classList.remove("luna-game-msg--hidden");
+    lockLeaderboardNoButton();
 
     const startButton = document.getElementById("luna-start-game-button");
     startButton.textContent = "Nog een keer";

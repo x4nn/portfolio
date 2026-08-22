@@ -529,6 +529,15 @@ body {
     display: none;
 }
 
+/* "Nee" is briefly disabled (with a visible countdown) right after the
+   game-over prompt appears — see lockLeaderboardNoButton() in mixtape.js —
+   so a rapid tap still "in flight" when the round ends can't land on it and
+   accidentally skip saving the score. */
+.luna-leaderboard-prompt-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .luna-leaderboard-prompt,
 .luna-leaderboard-form {
     display: flex;

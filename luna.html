@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
     <meta name="description" content="Een klein plekje speciaal voor Luna.">
     <title>Voor Luna 🌿</title>
@@ -53,6 +53,11 @@
             flex-direction: column;
             align-items: center;
             padding: 56px 20px 80px;
+            /* Rapid taps on the "ik mis je" button were triggering iOS/Android's
+               double-tap-to-zoom gesture and pull-to-refresh bounce — same fix
+               as the mixtape page (see mixtape.css). */
+            touch-action: manipulation;
+            overscroll-behavior-y: contain;
         }
 
         @media (prefers-reduced-motion: reduce) {
