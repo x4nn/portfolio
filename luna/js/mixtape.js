@@ -460,53 +460,6 @@ function tickReunionCountdown() {
     document.getElementById("luna-count-seconds").textContent = String(seconds).padStart(2, "0");
 }
 
-// -- Track 6: shared "ik mis je" counter --
-// A single shared number both of you tap, stored under its own Firebase key
-// (same reused-database pattern as the diary/leaderboard). Each tap re-reads
-// the live total right before incrementing it — rather than trusting a count
-// cached once at page load — since you'll both likely have this page open
-// across the same day; without the re-read, whichever device saves last
-// would silently overwrite the other's taps instead of just occasionally
-// racing on two truly simultaneous taps.
-const LUNA_MISS_YOU_DATABASE_URL = "https://co-housing-e2c00-default-rtdb.europe-west1.firebasedatabase.app/luna-miss-you-counter";
-const MISS_BUTTON_PRESSED_CLASS_DURATION_MS = 400;
-let missYouCount = 0;
-
-async function loadMissYouCountFromFirebase() {
-    try {
-        const response = await fetch(`${LUNA_MISS_YOU_DATABASE_URL}/total.json`);
-        if (!response.ok) return 0;
-        const data = await response.json();
-        return typeof data === "number" ? data : 0;
-    } catch (error) {
-        console.warn("Kon mis-je-teller niet laden uit Firebase:", error);
-        return 0;
-    }
-}
-
-async function saveMissYouCountToFirebase(newTotal) {
-    try {
-        await fetch(`${LUNA_MISS_YOU_DATABASE_URL}/total.json`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newTotal)
-        });
-    } catch (error) {
-        console.warn("Kon mis-je-teller niet opslaan in Firebase:", error);
-    }
-}
-
-async function incrementMissYouCount() {
-    const missButton = document.getElementById("luna-miss-button");
-    missButton.classList.add("luna-miss-button--pressed");
-    setTimeout(() => missButton.classList.remove("luna-miss-button--pressed"), MISS_BUTTON_PRESSED_CLASS_DURATION_MS);
-
-    const latestCount = await loadMissYouCountFromFirebase();
-    missYouCount = latestCount + 1;
-    document.getElementById("luna-miss-count").textContent = missYouCount;
-    await saveMissYouCountToFirebase(missYouCount);
-}
-
 // -- Hero: cassette "play" button --
 const CASSETTE_PRESSED_CLASS_DURATION_MS = 1500;
 function playCassette() {
@@ -568,14 +521,8 @@ document.getElementById("luna-leaderboard-form").addEventListener("submit", asyn
     renderLeaderboard(await loadLeaderboardFromFirebase());
 });
 
-document.getElementById("luna-miss-button").addEventListener("click", incrementMissYouCount);
-
 renderCurrentReason();
 reunionCountdownTimer = setInterval(tickReunionCountdown, 1000);
 tickReunionCountdown();
 scatterAlbumCovers();
 loadLeaderboardFromFirebase().then(renderLeaderboard);
-loadMissYouCountFromFirebase().then((total) => {
-    missYouCount = total;
-    document.getElementById("luna-miss-count").textContent = missYouCount;
-});

@@ -165,6 +165,69 @@
             color: var(--sage-deep);
             text-align: center;
         }
+
+        /* ---- Shared "ik mis je" counter ---- */
+        .hub-miss-stage {
+            width: 100%;
+            max-width: 640px;
+            margin-top: 36px;
+            text-align: center;
+            background: #fff;
+            border: 1.5px solid var(--mint);
+            border-radius: 20px;
+            padding: 26px 22px;
+            box-shadow: 0 10px 30px -18px var(--shadow);
+        }
+
+        .hub-miss-caption {
+            font-size: 0.92rem;
+            color: var(--forest-soft);
+            margin-bottom: 16px;
+        }
+
+        .hub-miss-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: var(--forest);
+            box-shadow: 0 10px 22px -10px var(--forest);
+            font-size: 32px;
+            line-height: 1;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .hub-miss-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .hub-miss-button:focus-visible {
+            outline: 2px solid var(--sage-deep);
+            outline-offset: 3px;
+        }
+
+        .hub-miss-button.hub-miss-button--pressed {
+            transform: scale(0.85);
+        }
+
+        .hub-miss-count {
+            font-family: "Fraunces", serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--forest);
+            margin-top: 14px;
+            line-height: 1;
+        }
+
+        .hub-miss-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--sage-deep);
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
@@ -198,7 +261,72 @@
         </a>
     </nav>
 
+    <div class="hub-miss-stage">
+        <p class="hub-miss-caption">Tik erop wanneer je me mist. Ik zie het ook, en ik tik terug!</p>
+        <button type="button" class="hub-miss-button" id="hub-miss-button" aria-label="Ik mis je">
+            <span aria-hidden="true">💚</span>
+        </button>
+        <div class="hub-miss-count" id="hub-miss-count">–</div>
+        <div class="hub-miss-label">keer gemist, samen</div>
+    </div>
+
     <p class="hub-footer-note">met liefde gemaakt, voor jou 💚</p>
+
+    <script>
+        // Shared "ik mis je" counter — same Firebase key the mixtape page used
+        // before this moved to the hub, so any past taps still count. Each tap
+        // re-reads the live total right before incrementing it (rather than
+        // trusting a count cached once at page load), since you'll both likely
+        // have this page open across the same day; without the re-read,
+        // whichever device saves last would silently overwrite the other's
+        // taps instead of just occasionally racing on two truly simultaneous
+        // taps.
+        const LUNA_MISS_YOU_DATABASE_URL = "https://co-housing-e2c00-default-rtdb.europe-west1.firebasedatabase.app/luna-miss-you-counter";
+        const MISS_BUTTON_PRESSED_CLASS_DURATION_MS = 400;
+        let missYouCount = 0;
+
+        async function loadMissYouCountFromFirebase() {
+            try {
+                const response = await fetch(`${LUNA_MISS_YOU_DATABASE_URL}/total.json`);
+                if (!response.ok) return 0;
+                const data = await response.json();
+                return typeof data === "number" ? data : 0;
+            } catch (error) {
+                console.warn("Kon mis-je-teller niet laden uit Firebase:", error);
+                return 0;
+            }
+        }
+
+        async function saveMissYouCountToFirebase(newTotal) {
+            try {
+                await fetch(`${LUNA_MISS_YOU_DATABASE_URL}/total.json`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newTotal)
+                });
+            } catch (error) {
+                console.warn("Kon mis-je-teller niet opslaan in Firebase:", error);
+            }
+        }
+
+        async function incrementMissYouCount() {
+            const missButton = document.getElementById("hub-miss-button");
+            missButton.classList.add("hub-miss-button--pressed");
+            setTimeout(() => missButton.classList.remove("hub-miss-button--pressed"), MISS_BUTTON_PRESSED_CLASS_DURATION_MS);
+
+            const latestCount = await loadMissYouCountFromFirebase();
+            missYouCount = latestCount + 1;
+            document.getElementById("hub-miss-count").textContent = missYouCount;
+            await saveMissYouCountToFirebase(missYouCount);
+        }
+
+        document.getElementById("hub-miss-button").addEventListener("click", incrementMissYouCount);
+
+        loadMissYouCountFromFirebase().then((total) => {
+            missYouCount = total;
+            document.getElementById("hub-miss-count").textContent = missYouCount;
+        });
+    </script>
 
 </body>
 </html>

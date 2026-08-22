@@ -735,57 +735,6 @@ body {
     margin-top: 14px;
 }
 
-/* ---- Track 6: shared "ik mis je" counter ---- */
-.luna-miss-stage {
-    text-align: center;
-    background: var(--luna-mint-pale);
-    border-radius: 16px;
-    padding: 30px 20px;
-}
-
-.luna-miss-button {
-    width: 92px;
-    height: 92px;
-    border-radius: 50%;
-    border: none;
-    background: var(--luna-forest);
-    box-shadow: 0 10px 22px -10px var(--luna-forest);
-    font-size: 38px;
-    line-height: 1;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-}
-
-.luna-miss-button:hover {
-    transform: translateY(-2px);
-}
-
-.luna-miss-button:focus-visible {
-    outline: 3px solid var(--luna-peach);
-    outline-offset: 4px;
-}
-
-.luna-miss-button.luna-miss-button--pressed {
-    transform: scale(0.85);
-}
-
-.luna-miss-count {
-    font-family: "Fraunces";
-    font-size: 36px;
-    color: var(--luna-forest);
-    margin-top: 16px;
-    line-height: 1;
-}
-
-.luna-miss-label {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--luna-sage-deep);
-    margin-top: 6px;
-}
-
 /* ---------- Footer ---------- */
 .luna-footer {
     text-align: center;
