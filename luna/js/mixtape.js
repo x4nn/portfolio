@@ -123,26 +123,20 @@ const SELFIE_IMAGE_PATHS = [
 // Machinery — no need to touch below this line
 // ---------------------------------------------------------------
 
-const GAME_DURATION_SECONDS = 30;
-// Difficulty ramps up over the round: notes spawn faster and fly past
-// quicker near the end, so a skilled player has to keep speeding up too —
-// the score ceiling isn't just "how many notes spawned" anymore.
-const NOTE_SPAWN_INTERVAL_START_MS = 650;
-const NOTE_SPAWN_INTERVAL_END_MS = 280;
-const NOTE_FLIGHT_DURATION_START_MIN_MS = 2200;
-const NOTE_FLIGHT_DURATION_START_RANDOM_RANGE_MS = 1200;
-const NOTE_FLIGHT_DURATION_END_MIN_MS = 1000;
-const NOTE_FLIGHT_DURATION_END_RANDOM_RANGE_MS = 500;
 const NOTE_TEXT_TRANSITION_DELAY_MS = 120;
-// Catching notes back-to-back without missing builds a combo: every
-// STREAK_CATCHES_PER_COMBO_STEP consecutive catches, each catch is worth one
-// point more, up to MAX_COMBO_BONUS_POINTS extra — missing a note resets it.
-const STREAK_CATCHES_PER_COMBO_STEP = 4;
-const MAX_COMBO_BONUS_POINTS = 4;
-const GAME_SCORE_GREAT_THRESHOLD = 150;
-const GAME_SCORE_GOOD_THRESHOLD = 60;
+// Piano-tiles style game: 4 lanes, a tile falls down one of them, tap its
+// lane before it reaches the bottom. Tap an empty lane, or let a tile reach
+// the bottom, and it's game over — fall speed ramps up with score, reaching
+// full speed once PIANO_SPEED_RAMP_SCORE_FOR_MIN_SPEED is hit.
+const PIANO_LANE_COUNT = 4;
+const PIANO_FALL_DURATION_START_MS = 1500;
+const PIANO_FALL_DURATION_MIN_MS = 550;
+const PIANO_SPEED_RAMP_SCORE_FOR_MIN_SPEED = 40;
+const PIANO_TILES_VISIBLE_AT_ONCE = 3;
+const PIANO_TILE_HEIGHT_PERCENT = 26;
+const GAME_SCORE_GREAT_THRESHOLD = 40;
+const GAME_SCORE_GOOD_THRESHOLD = 15;
 const FLOATING_NOTE_EMOJIS = ["🎵", "🎶", "🎼", "💚", "🌿", "🎧"];
-const FLOATING_NOTE_SIZE_PX = 46;
 
 // ✏️ EDIT: chance a spawned note is an emoji vs. a selfie — 1/3 emoji, 2/3
 // selfie. A fixed ratio (not just pooling both arrays together) so it stays
@@ -298,118 +292,121 @@ function renderLeaderboard(scores) {
     });
 }
 
-// -- Track 3: catch-the-notes game --
+// -- Track 3: piano-tiles style game --
+// Endless/permadeath instead of the old 30-second timer, like real piano-tile
+// games: score is simply how many tiles you tap correctly in a row before
+// missing one — the only difficulty knob is fall speed, which ramps up with
+// score, so the skill ceiling is genuinely open-ended instead of capped by a
+// fixed round length.
 let gameScore = 0;
-let secondsRemaining = GAME_DURATION_SECONDS;
-let gameCountdownTimer = null;
-let noteSpawnTimer = null;
 let gameIsRunning = false;
-let gameStartedAtMs = 0;
-let currentCatchStreak = 0;
-
-function getGameProgress() {
-    const elapsedMs = Date.now() - gameStartedAtMs;
-    return Math.min(1, Math.max(0, elapsedMs / (GAME_DURATION_SECONDS * 1000)));
-}
+let activePianoTiles = [];
+let pianoTileSpawnTimer = null;
+let pianoTileAnimationFrameId = null;
+let previousSpawnLaneIndex = -1;
 
 function interpolate(startValue, endValue, progress) {
     return startValue + (endValue - startValue) * progress;
 }
 
-function updateComboDisplay() {
-    const comboMultiplier = 1 + Math.min(Math.floor(currentCatchStreak / STREAK_CATCHES_PER_COMBO_STEP), MAX_COMBO_BONUS_POINTS);
-    document.getElementById("luna-game-combo").textContent = "x" + comboMultiplier;
+function getPianoTileFallDurationMs() {
+    const rampProgress = Math.min(1, gameScore / PIANO_SPEED_RAMP_SCORE_FOR_MIN_SPEED);
+    return interpolate(PIANO_FALL_DURATION_START_MS, PIANO_FALL_DURATION_MIN_MS, rampProgress);
 }
 
 function startGame() {
     if (gameIsRunning) return;
     gameIsRunning = true;
     gameScore = 0;
-    currentCatchStreak = 0;
-    secondsRemaining = GAME_DURATION_SECONDS;
-    gameStartedAtMs = Date.now();
+    previousSpawnLaneIndex = -1;
+    activePianoTiles.forEach((tile) => tile.element.remove());
+    activePianoTiles = [];
     document.getElementById("luna-game-score").textContent = gameScore;
-    document.getElementById("luna-game-time").textContent = secondsRemaining;
     document.getElementById("luna-game-msg").classList.add("luna-game-msg--hidden");
-    updateComboDisplay();
 
-    gameCountdownTimer = setInterval(() => {
-        secondsRemaining--;
-        document.getElementById("luna-game-time").textContent = secondsRemaining;
-        if (secondsRemaining <= 0) endGame();
-    }, 1000);
-
-    scheduleNextNoteSpawn();
+    scheduleNextPianoTileSpawn();
+    pianoTileAnimationFrameId = requestAnimationFrame(tickPianoTiles);
 }
 
-function scheduleNextNoteSpawn() {
+function scheduleNextPianoTileSpawn() {
     if (!gameIsRunning) return;
-    spawnFloatingNote();
-    const nextSpawnInterval = interpolate(NOTE_SPAWN_INTERVAL_START_MS, NOTE_SPAWN_INTERVAL_END_MS, getGameProgress());
-    noteSpawnTimer = setTimeout(scheduleNextNoteSpawn, nextSpawnInterval);
+    spawnPianoTile();
+    const nextSpawnInterval = getPianoTileFallDurationMs() / PIANO_TILES_VISIBLE_AT_ONCE;
+    pianoTileSpawnTimer = setTimeout(scheduleNextPianoTileSpawn, nextSpawnInterval);
 }
 
-function spawnFloatingNote() {
-    const board = document.getElementById("luna-game-board");
-    const isSelfie = SELFIE_IMAGE_PATHS.length > 0 && Math.random() >= EMOJI_SPAWN_PROBABILITY;
+function spawnPianoTile() {
+    const lanes = document.querySelectorAll(".luna-piano-lane");
+    let laneIndex = Math.floor(Math.random() * PIANO_LANE_COUNT);
+    if (laneIndex === previousSpawnLaneIndex) {
+        laneIndex = (laneIndex + 1) % PIANO_LANE_COUNT;
+    }
+    previousSpawnLaneIndex = laneIndex;
 
-    const floatingNote = document.createElement(isSelfie ? "img" : "div");
-    floatingNote.className = isSelfie ? "luna-float-note luna-float-note--selfie" : "luna-float-note";
-    floatingNote.draggable = false;
+    const isSelfie = SELFIE_IMAGE_PATHS.length > 0 && Math.random() >= EMOJI_SPAWN_PROBABILITY;
+    const tileElement = document.createElement("div");
+    tileElement.className = "luna-piano-tile";
+    tileElement.style.height = PIANO_TILE_HEIGHT_PERCENT + "%";
     if (isSelfie) {
-        floatingNote.src = SELFIE_IMAGE_PATHS[Math.floor(Math.random() * SELFIE_IMAGE_PATHS.length)];
-        floatingNote.alt = "";
+        const selfieImage = document.createElement("img");
+        selfieImage.src = SELFIE_IMAGE_PATHS[Math.floor(Math.random() * SELFIE_IMAGE_PATHS.length)];
+        selfieImage.alt = "";
+        selfieImage.draggable = false;
+        tileElement.appendChild(selfieImage);
     } else {
-        floatingNote.textContent = FLOATING_NOTE_EMOJIS[Math.floor(Math.random() * FLOATING_NOTE_EMOJIS.length)];
+        tileElement.textContent = FLOATING_NOTE_EMOJIS[Math.floor(Math.random() * FLOATING_NOTE_EMOJIS.length)];
+    }
+    lanes[laneIndex].appendChild(tileElement);
+
+    activePianoTiles.push({
+        laneIndex,
+        element: tileElement,
+        spawnedAtMs: performance.now(),
+        fallDurationMs: getPianoTileFallDurationMs(),
+        isResolved: false
+    });
+}
+
+function tickPianoTiles(nowMs) {
+    if (!gameIsRunning) return;
+    const boardHeight = document.getElementById("luna-game-board").clientHeight;
+    const tileHeightPx = (PIANO_TILE_HEIGHT_PERCENT / 100) * boardHeight;
+
+    for (const tile of activePianoTiles) {
+        if (tile.isResolved) continue;
+        const progress = (nowMs - tile.spawnedAtMs) / tile.fallDurationMs;
+        if (progress >= 1) {
+            tile.isResolved = true;
+            endGame();
+            return;
+        }
+        tile.element.style.top = progress * (boardHeight - tileHeightPx) + "px";
     }
 
-    const horizontalPosition = Math.random() * (board.clientWidth - FLOATING_NOTE_SIZE_PX);
-    floatingNote.style.left = horizontalPosition + "px";
-    floatingNote.style.top = board.clientHeight - FLOATING_NOTE_SIZE_PX + "px";
+    activePianoTiles = activePianoTiles.filter((tile) => !tile.isResolved);
+    pianoTileAnimationFrameId = requestAnimationFrame(tickPianoTiles);
+}
 
-    const progress = getGameProgress();
-    const flightDurationMin = interpolate(NOTE_FLIGHT_DURATION_START_MIN_MS, NOTE_FLIGHT_DURATION_END_MIN_MS, progress);
-    const flightDurationRandomRange = interpolate(NOTE_FLIGHT_DURATION_START_RANDOM_RANGE_MS, NOTE_FLIGHT_DURATION_END_RANDOM_RANGE_MS, progress);
-    const flightDuration = flightDurationMin + Math.random() * flightDurationRandomRange;
-    floatingNote.style.transition = "top " + flightDuration + "ms linear, transform .1s ease";
-    board.appendChild(floatingNote);
-    // Force the browser to commit the starting "top" (bottom of board) to layout
-    // before changing it, instead of relying on requestAnimationFrame timing —
-    // an <img> that's still loading over the network can eat that timing
-    // window, so the transition gets skipped and the photo just appears at
-    // its end position (the top) instead of floating up.
-    void floatingNote.offsetHeight;
-    floatingNote.style.top = -FLOATING_NOTE_SIZE_PX + "px";
-
-    let wasCaught = false;
-    const catchNote = (event) => {
-        event.stopPropagation();
-        if (!gameIsRunning || wasCaught) return;
-        wasCaught = true;
-        const comboMultiplier = 1 + Math.min(Math.floor(currentCatchStreak / STREAK_CATCHES_PER_COMBO_STEP), MAX_COMBO_BONUS_POINTS);
-        gameScore += comboMultiplier;
-        currentCatchStreak++;
-        document.getElementById("luna-game-score").textContent = gameScore;
-        updateComboDisplay();
-        floatingNote.remove();
-    };
-    floatingNote.addEventListener("click", catchNote);
-    floatingNote.addEventListener("touchstart", catchNote, { passive: true });
-
-    setTimeout(() => {
-        if (!wasCaught && gameIsRunning) {
-            currentCatchStreak = 0;
-            updateComboDisplay();
-        }
-        floatingNote.remove();
-    }, flightDuration + 50);
+function handlePianoLaneTap(laneIndex) {
+    if (!gameIsRunning) return;
+    const catchableTile = activePianoTiles.find((tile) => tile.laneIndex === laneIndex && !tile.isResolved);
+    if (!catchableTile) {
+        endGame();
+        return;
+    }
+    catchableTile.isResolved = true;
+    catchableTile.element.remove();
+    gameScore++;
+    document.getElementById("luna-game-score").textContent = gameScore;
 }
 
 function endGame() {
+    if (!gameIsRunning) return;
     gameIsRunning = false;
-    clearInterval(gameCountdownTimer);
-    clearTimeout(noteSpawnTimer);
-    document.querySelectorAll(".luna-float-note").forEach((note) => note.remove());
+    clearTimeout(pianoTileSpawnTimer);
+    cancelAnimationFrame(pianoTileAnimationFrameId);
+    activePianoTiles.forEach((tile) => tile.element.remove());
+    activePianoTiles = [];
 
     const resultMessage =
         gameScore >= GAME_SCORE_GREAT_THRESHOLD
@@ -420,7 +417,7 @@ function endGame() {
 
     const gameMessageBox = document.getElementById("luna-game-msg");
     document.getElementById("luna-game-msg-text").textContent =
-        "Je hebt " + gameScore + " nootjes gevangen! " + resultMessage;
+        "Je hebt " + gameScore + " nootjes geraakt! " + resultMessage;
     gameMessageBox.classList.remove("luna-game-msg--hidden");
 
     const startButton = document.getElementById("luna-start-game-button");
@@ -475,6 +472,14 @@ document.getElementById("luna-play-note-button").addEventListener("click", playL
 document.getElementById("luna-prev-reason-button").addEventListener("click", showPreviousReason);
 document.getElementById("luna-next-reason-button").addEventListener("click", showNextReason);
 document.getElementById("luna-start-game-button").addEventListener("click", startGame);
+
+document.querySelectorAll(".luna-piano-lane").forEach((lane) => {
+    const laneIndex = Number(lane.dataset.laneIndex);
+    lane.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        handlePianoLaneTap(laneIndex);
+    });
+});
 
 document.getElementById("luna-leaderboard-yes-button").addEventListener("click", () => {
     document.getElementById("luna-leaderboard-prompt").classList.add("luna-leaderboard-prompt--hidden");

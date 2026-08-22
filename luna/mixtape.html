@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
     <meta name="description" content="Een klein mixtapecadeautje, speciaal voor Luna.">
     <title>Luna 🌿</title>
@@ -107,18 +107,22 @@
     <section class="luna-track">
         <div class="luna-track-head">
             <div class="luna-track-num">03</div>
-            <h2 class="luna-track-title">Vang de nootjes</h2>
+            <h2 class="luna-track-title">Tik de nootjes</h2>
         </div>
-        <p class="luna-track-caption">Een gek spelletje om je handen bezig te houden. Tik op de zwevende nootjes voordat ze wegdrijven — het gaat sneller hoe langer je speelt, en een reeks zonder missen geeft je een combo-bonus.</p>
+        <p class="luna-track-caption">Piano tiles, maar met onze nootjes. Tik op het vakje waar een nootje valt, voordat het beneden komt — mis je een tik, of tik je op een leeg vakje, dan is het gedaan. Het gaat wel steeds sneller.</p>
         <div class="luna-game-wrap">
             <div class="luna-game-bar">
                 <div class="luna-game-score">Score: <b id="luna-game-score">0</b></div>
-                <div class="luna-game-score">Combo: <b id="luna-game-combo">x1</b></div>
-                <div class="luna-game-score">⏱ <b id="luna-game-time">30</b>s</div>
             </div>
             <div class="luna-game-board" id="luna-game-board">
+                <div class="luna-piano-lanes" id="luna-piano-lanes">
+                    <div class="luna-piano-lane" data-lane-index="0"></div>
+                    <div class="luna-piano-lane" data-lane-index="1"></div>
+                    <div class="luna-piano-lane" data-lane-index="2"></div>
+                    <div class="luna-piano-lane" data-lane-index="3"></div>
+                </div>
                 <div class="luna-game-msg" id="luna-game-msg">
-                    <div id="luna-game-msg-text">Klaar? Het duurt maar 30 seconden 🎶</div>
+                    <div id="luna-game-msg-text">Klaar? Tik het juiste vakje, mis niet 🎶</div>
 
                     <div class="luna-leaderboard-prompt luna-leaderboard-prompt--hidden" id="luna-leaderboard-prompt">
                         <p class="luna-leaderboard-prompt-question">Op het scorebord zetten?</p>
