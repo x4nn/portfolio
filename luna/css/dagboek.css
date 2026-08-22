@@ -306,12 +306,33 @@ header.diary-header {
     font-size: 0.95rem;
 }
 
+.diary-entry-reaction {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: var(--mint-pale);
+}
+
+.diary-entry-reaction-emoji {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.diary-entry-reaction-text {
+    font-size: 0.88rem;
+    color: var(--forest-soft);
+}
+
 .diary-entry-buttons {
     display: flex;
     gap: 18px;
     margin-top: 10px;
 }
 
+.diary-entry-react,
 .diary-entry-edit,
 .diary-entry-delete {
     border: none;
@@ -322,6 +343,10 @@ header.diary-header {
     padding: 4px 0;
 }
 
+.diary-entry-react {
+    color: var(--forest-soft);
+}
+
 .diary-entry-edit {
     color: var(--sage-deep);
 }
@@ -330,10 +355,44 @@ header.diary-header {
     color: var(--peach);
 }
 
+.diary-entry-react:hover,
+.diary-entry-react:focus-visible,
 .diary-entry-edit:hover,
 .diary-entry-edit:focus-visible,
 .diary-entry-delete:hover,
 .diary-entry-delete:focus-visible {
+    text-decoration: underline;
+}
+
+.diary-reaction-text-input {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--mint);
+    font-family: "Nunito", system-ui, sans-serif;
+    font-size: 0.92rem;
+    color: var(--forest);
+}
+
+.diary-reaction-text-input:focus-visible {
+    outline: 2px solid var(--sage-deep);
+    outline-offset: 2px;
+}
+
+.diary-entry-reaction-remove {
+    border: none;
+    background: none;
+    color: var(--peach);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-right: auto;
+    padding: 4px 0;
+}
+
+.diary-entry-reaction-remove:hover,
+.diary-entry-reaction-remove:focus-visible {
     text-decoration: underline;
 }
 

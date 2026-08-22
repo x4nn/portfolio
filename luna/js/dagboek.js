@@ -24,6 +24,9 @@ const diaryPrompts = [
 // ✏️ EDIT: mood options she can pick from.
 const diaryMoods = ["😊", "😌", "🥰", "😴", "😠", "😕", "😢", "✨"];
 
+// ✏️ EDIT: reaction emoji options for replying to one of her entries.
+const diaryReactionEmojis = ["❤️", "🥰", "😍", "🌿", "😂", "🥺", "👏", "💪"];
+
 // ---------------------------------------------------------------
 // Firebase — reuses this site's existing Realtime Database, under its
 // own "luna-dagboek" key so it never touches other data on the same
@@ -90,6 +93,7 @@ async function deleteDiaryEntryFromFirebase(dateKey, entryId) {
 const SAVE_STATUS_MESSAGE_DURATION_MS = 2200;
 const SAVE_BUTTON_TEXT_READY = "Opslaan";
 const SAVE_BUTTON_TEXT_NEEDS_MOOD = "Kies eerst een emoji";
+const REACTION_TEXT_MAX_LENGTH = 60;
 
 function getDateKey(date) {
     const year = date.getFullYear();
@@ -155,6 +159,7 @@ let diaryEntries = {};
 let selectedMood = null;
 let currentPromptIndex = 0;
 let editingEntryKey = null;
+let reactingEntryKey = null;
 
 const todayKey = getDateKey(new Date());
 
@@ -234,9 +239,12 @@ function renderEntriesList() {
             const entry = dayEntries[entryId];
             const entryElement = document.createElement("article");
             entryElement.className = "diary-entry";
+            const entryKey = makeEntryKey(dateKey, entryId);
 
-            if (editingEntryKey === makeEntryKey(dateKey, entryId)) {
+            if (editingEntryKey === entryKey) {
                 renderEntryEditForm(entryElement, dateKey, entryId, entry);
+            } else if (reactingEntryKey === entryKey) {
+                renderEntryReactionForm(entryElement, dateKey, entryId, entry);
             } else {
                 renderEntryDisplay(entryElement, dateKey, entryId, entry);
             }
@@ -249,22 +257,129 @@ function renderEntriesList() {
 }
 
 function renderEntryDisplay(entryElement, dateKey, entryId, entry) {
+    const reactionHtml = entry.reaction
+        ? `<div class="diary-entry-reaction">
+               <span class="diary-entry-reaction-emoji" aria-hidden="true"></span>
+               <span class="diary-entry-reaction-text"></span>
+           </div>`
+        : "";
+
     entryElement.innerHTML = `
         <div class="diary-entry-top">
             <span class="diary-entry-time">${formatEntryTime(entry.savedAt)}</span>
             <span class="diary-entry-mood" aria-hidden="true">${entry.mood || ""}</span>
         </div>
         <p class="diary-entry-text"></p>
+        ${reactionHtml}
         <div class="diary-entry-buttons">
+            <button type="button" class="diary-entry-react">${entry.reaction ? "reactie aanpassen" : "reageren"}</button>
             <button type="button" class="diary-entry-edit">bewerken</button>
             <button type="button" class="diary-entry-delete">verwijderen</button>
         </div>
     `;
     entryElement.querySelector(".diary-entry-text").textContent = entry.text;
+
+    if (entry.reaction) {
+        entryElement.querySelector(".diary-entry-reaction-emoji").textContent = entry.reaction.emoji;
+        entryElement.querySelector(".diary-entry-reaction-text").textContent = entry.reaction.text || "";
+    }
+
     entryElement.querySelector(".diary-entry-delete").addEventListener("click", () => deleteEntry(dateKey, entryId));
     entryElement.querySelector(".diary-entry-edit").addEventListener("click", () => {
         editingEntryKey = makeEntryKey(dateKey, entryId);
         renderEntriesList();
+    });
+    entryElement.querySelector(".diary-entry-react").addEventListener("click", () => {
+        reactingEntryKey = makeEntryKey(dateKey, entryId);
+        renderEntriesList();
+    });
+}
+
+function renderEntryReactionForm(entryElement, dateKey, entryId, entry) {
+    const hasExistingReaction = Boolean(entry.reaction);
+    entryElement.innerHTML = `
+        <div class="diary-entry-top">
+            <span class="diary-entry-time">${formatEntryTime(entry.savedAt)}</span>
+        </div>
+        <p class="diary-mood-label">Kies een reactie-emoji <span aria-hidden="true">*</span></p>
+        <div class="diary-mood-row diary-entry-reaction-emoji-row" role="group" aria-label="Kies een reactie-emoji (verplicht)"></div>
+        <label class="visually-hidden" style="position:absolute; left:-9999px;">Reactietekst (optioneel)</label>
+        <input type="text" class="diary-reaction-text-input" placeholder="Een kort berichtje (optioneel)" maxlength="${REACTION_TEXT_MAX_LENGTH}">
+        <div class="diary-entry-edit-actions">
+            ${hasExistingReaction ? '<button type="button" class="diary-entry-reaction-remove">reactie verwijderen</button>' : ""}
+            <button type="button" class="btn btn--soft diary-entry-reaction-cancel">Annuleren</button>
+            <button type="button" class="btn btn--primary diary-entry-reaction-save"></button>
+        </div>
+    `;
+
+    const reactionTextInput = entryElement.querySelector(".diary-reaction-text-input");
+    reactionTextInput.value = entry.reaction ? entry.reaction.text || "" : "";
+
+    const reactionEmojiRow = entryElement.querySelector(".diary-entry-reaction-emoji-row");
+    const reactionSaveButton = entryElement.querySelector(".diary-entry-reaction-save");
+    const reactionCancelButton = entryElement.querySelector(".diary-entry-reaction-cancel");
+    const reactionRemoveButton = entryElement.querySelector(".diary-entry-reaction-remove");
+    let selectedReactionEmoji = entry.reaction ? entry.reaction.emoji : null;
+
+    function updateReactionSaveButtonState() {
+        const emojiIsSelected = Boolean(selectedReactionEmoji);
+        reactionSaveButton.disabled = !emojiIsSelected;
+        reactionSaveButton.textContent = emojiIsSelected ? SAVE_BUTTON_TEXT_READY : SAVE_BUTTON_TEXT_NEEDS_MOOD;
+    }
+
+    function renderReactionEmojiRow() {
+        reactionEmojiRow.innerHTML = "";
+        diaryReactionEmojis.forEach((emoji) => {
+            const emojiButton = document.createElement("button");
+            emojiButton.type = "button";
+            emojiButton.className = "diary-mood-button";
+            emojiButton.textContent = emoji;
+            emojiButton.setAttribute("aria-pressed", String(emoji === selectedReactionEmoji));
+            if (emoji === selectedReactionEmoji) {
+                emojiButton.classList.add("diary-mood-button--selected");
+            }
+            emojiButton.addEventListener("click", () => {
+                selectedReactionEmoji = emoji;
+                renderReactionEmojiRow();
+            });
+            reactionEmojiRow.appendChild(emojiButton);
+        });
+        updateReactionSaveButtonState();
+    }
+    renderReactionEmojiRow();
+
+    reactionCancelButton.addEventListener("click", () => {
+        reactingEntryKey = null;
+        renderEntriesList();
+    });
+
+    if (reactionRemoveButton) {
+        reactionRemoveButton.addEventListener("click", async () => {
+            const updatedEntry = { ...entry };
+            delete updatedEntry.reaction;
+            diaryEntries[dateKey][entryId] = updatedEntry;
+            reactingEntryKey = null;
+            renderEntriesList();
+            showSaveStatus("Reactie verwijderd");
+            await saveDiaryEntryToFirebase(dateKey, entryId, updatedEntry);
+        });
+    }
+
+    reactionSaveButton.addEventListener("click", async () => {
+        if (!selectedReactionEmoji) return;
+        const updatedEntry = {
+            ...entry,
+            reaction: {
+                emoji: selectedReactionEmoji,
+                text: reactionTextInput.value.trim().slice(0, REACTION_TEXT_MAX_LENGTH),
+                savedAt: new Date().toISOString()
+            }
+        };
+        diaryEntries[dateKey][entryId] = updatedEntry;
+        reactingEntryKey = null;
+        renderEntriesList();
+        showSaveStatus("Reactie opgeslagen 💚");
+        await saveDiaryEntryToFirebase(dateKey, entryId, updatedEntry);
     });
 }
 
@@ -348,6 +463,9 @@ async function deleteEntry(dateKey, entryId) {
     if (editingEntryKey === makeEntryKey(dateKey, entryId)) {
         editingEntryKey = null;
     }
+    if (reactingEntryKey === makeEntryKey(dateKey, entryId)) {
+        reactingEntryKey = null;
+    }
     renderEntriesList();
     await deleteDiaryEntryFromFirebase(dateKey, entryId);
 }
@@ -405,7 +523,8 @@ function downloadAllEntries() {
         });
         sortedEntryIds.forEach((entryId) => {
             const entry = dayEntries[entryId];
-            fileLines.push(`${formatLongDutchDate(dateKey)} ${entry.mood || ""}\n${entry.text}\n`);
+            const reactionLine = entry.reaction ? `\nReactie: ${entry.reaction.emoji} ${entry.reaction.text || ""}` : "";
+            fileLines.push(`${formatLongDutchDate(dateKey)} ${entry.mood || ""}\n${entry.text}${reactionLine}\n`);
         });
     });
 
