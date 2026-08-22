@@ -248,6 +248,28 @@ const LUNA_LEADERBOARD_DATABASE_URL = "https://co-housing-e2c00-default-rtdb.eur
 const LEADERBOARD_MAX_ENTRIES_SHOWN = 10;
 const LEADERBOARD_NAME_MAX_LENGTH = 20;
 
+// Remembers her name locally so she only has to type it once, not every
+// round. Wrapped in try/catch since localStorage can throw in some browser
+// contexts (e.g. private browsing) — losing the remembered name isn't worth
+// breaking the leaderboard over.
+const LEADERBOARD_NAME_STORAGE_KEY = "luna-leaderboard-player-name";
+
+function getSavedLeaderboardName() {
+    try {
+        return localStorage.getItem(LEADERBOARD_NAME_STORAGE_KEY) || "";
+    } catch (error) {
+        return "";
+    }
+}
+
+function saveLeaderboardName(name) {
+    try {
+        localStorage.setItem(LEADERBOARD_NAME_STORAGE_KEY, name);
+    } catch (error) {
+        // ignore — just means it won't be remembered next time
+    }
+}
+
 async function loadLeaderboardFromFirebase() {
     try {
         const response = await fetch(`${LUNA_LEADERBOARD_DATABASE_URL}/scores.json`);
@@ -457,7 +479,7 @@ function endGame() {
     startButton.classList.add("luna-start-button--hidden");
 
     document.getElementById("luna-leaderboard-form").classList.add("luna-leaderboard-form--hidden");
-    document.getElementById("luna-leaderboard-name-input").value = "";
+    document.getElementById("luna-leaderboard-name-input").value = getSavedLeaderboardName();
     document.getElementById("luna-leaderboard-prompt").classList.remove("luna-leaderboard-prompt--hidden");
 }
 
@@ -516,7 +538,9 @@ document.querySelectorAll(".luna-piano-lane").forEach((lane) => {
 document.getElementById("luna-leaderboard-yes-button").addEventListener("click", () => {
     document.getElementById("luna-leaderboard-prompt").classList.add("luna-leaderboard-prompt--hidden");
     document.getElementById("luna-leaderboard-form").classList.remove("luna-leaderboard-form--hidden");
-    document.getElementById("luna-leaderboard-name-input").focus();
+    const nameInput = document.getElementById("luna-leaderboard-name-input");
+    nameInput.focus();
+    nameInput.select();
 });
 
 document.getElementById("luna-leaderboard-no-button").addEventListener("click", () => {
@@ -538,6 +562,7 @@ document.getElementById("luna-leaderboard-form").addEventListener("submit", asyn
         score: gameScore,
         savedAt: new Date().toISOString()
     };
+    saveLeaderboardName(entry.name);
 
     document.getElementById("luna-leaderboard-form").classList.add("luna-leaderboard-form--hidden");
     document.getElementById("luna-start-game-button").classList.remove("luna-start-button--hidden");
