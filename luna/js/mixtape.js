@@ -254,10 +254,17 @@ async function loadLeaderboardFromFirebase() {
     }
 }
 
+// Keyed by name (not a Firebase push id) so saving under a name that's
+// already on the board overwrites that entry instead of adding a duplicate.
+function normalizeLeaderboardNameKey(name) {
+    return name.trim().toLowerCase().replace(/[.#$[\]/]/g, "_");
+}
+
 async function saveLeaderboardEntryToFirebase(entry) {
     try {
-        await fetch(`${LUNA_LEADERBOARD_DATABASE_URL}/scores.json`, {
-            method: "POST",
+        const entryKey = normalizeLeaderboardNameKey(entry.name);
+        await fetch(`${LUNA_LEADERBOARD_DATABASE_URL}/scores/${entryKey}.json`, {
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(entry)
         });
