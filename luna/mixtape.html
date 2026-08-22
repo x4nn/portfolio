@@ -109,17 +109,40 @@
             <div class="luna-track-num">03</div>
             <h2 class="luna-track-title">Vang de nootjes</h2>
         </div>
-        <p class="luna-track-caption">Een gek spelletje om je handen bezig te houden. Tik op de zwevende nootjes voordat ze wegdrijven.</p>
+        <p class="luna-track-caption">Een gek spelletje om je handen bezig te houden. Tik op de zwevende nootjes voordat ze wegdrijven — het gaat sneller hoe langer je speelt, en een reeks zonder missen geeft je een combo-bonus.</p>
         <div class="luna-game-wrap">
             <div class="luna-game-bar">
                 <div class="luna-game-score">Score: <b id="luna-game-score">0</b></div>
+                <div class="luna-game-score">Combo: <b id="luna-game-combo">x1</b></div>
                 <div class="luna-game-score">⏱ <b id="luna-game-time">30</b>s</div>
             </div>
             <div class="luna-game-board" id="luna-game-board">
                 <div class="luna-game-msg" id="luna-game-msg">
                     <div id="luna-game-msg-text">Klaar? Het duurt maar 30 seconden 🎶</div>
+
+                    <div class="luna-leaderboard-prompt luna-leaderboard-prompt--hidden" id="luna-leaderboard-prompt">
+                        <p class="luna-leaderboard-prompt-question">Op het scorebord zetten?</p>
+                        <div class="luna-leaderboard-prompt-buttons">
+                            <button type="button" class="luna-btn luna-btn--soft" id="luna-leaderboard-no-button">Nee</button>
+                            <button type="button" class="luna-btn" id="luna-leaderboard-yes-button">Ja!</button>
+                        </div>
+                    </div>
+
+                    <form class="luna-leaderboard-form luna-leaderboard-form--hidden" id="luna-leaderboard-form">
+                        <label for="luna-leaderboard-name-input" class="visually-hidden" style="position:absolute; left:-9999px;">Jouw naam</label>
+                        <input type="text" class="luna-leaderboard-name-input" id="luna-leaderboard-name-input" placeholder="Jouw naam" maxlength="20" autocomplete="off">
+                        <button type="submit" class="luna-btn" id="luna-leaderboard-save-button">Opslaan</button>
+                    </form>
+
                     <button class="luna-btn" id="luna-start-game-button" type="button">Start</button>
                 </div>
+            </div>
+
+            <div class="luna-leaderboard-board">
+                <h3 class="luna-leaderboard-heading">Scorebord</h3>
+                <ol class="luna-leaderboard-list" id="luna-leaderboard-list">
+                    <li class="luna-leaderboard-empty">Nog geen scores — wees de eerste! 🎶</li>
+                </ol>
             </div>
         </div>
     </section>

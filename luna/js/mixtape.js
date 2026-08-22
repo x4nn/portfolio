@@ -124,12 +124,23 @@ const SELFIE_IMAGE_PATHS = [
 // ---------------------------------------------------------------
 
 const GAME_DURATION_SECONDS = 30;
-const NOTE_SPAWN_INTERVAL_MS = 650;
-const NOTE_FLIGHT_DURATION_MIN_MS = 2200;
-const NOTE_FLIGHT_DURATION_RANDOM_RANGE_MS = 1200;
+// Difficulty ramps up over the round: notes spawn faster and fly past
+// quicker near the end, so a skilled player has to keep speeding up too —
+// the score ceiling isn't just "how many notes spawned" anymore.
+const NOTE_SPAWN_INTERVAL_START_MS = 650;
+const NOTE_SPAWN_INTERVAL_END_MS = 280;
+const NOTE_FLIGHT_DURATION_START_MIN_MS = 2200;
+const NOTE_FLIGHT_DURATION_START_RANDOM_RANGE_MS = 1200;
+const NOTE_FLIGHT_DURATION_END_MIN_MS = 1000;
+const NOTE_FLIGHT_DURATION_END_RANDOM_RANGE_MS = 500;
 const NOTE_TEXT_TRANSITION_DELAY_MS = 120;
-const GAME_SCORE_GREAT_THRESHOLD = 25;
-const GAME_SCORE_GOOD_THRESHOLD = 12;
+// Catching notes back-to-back without missing builds a combo: every
+// STREAK_CATCHES_PER_COMBO_STEP consecutive catches, each catch is worth one
+// point more, up to MAX_COMBO_BONUS_POINTS extra — missing a note resets it.
+const STREAK_CATCHES_PER_COMBO_STEP = 4;
+const MAX_COMBO_BONUS_POINTS = 4;
+const GAME_SCORE_GREAT_THRESHOLD = 150;
+const GAME_SCORE_GOOD_THRESHOLD = 60;
 const FLOATING_NOTE_EMOJIS = ["🎵", "🎶", "🎼", "💚", "🌿", "🎧"];
 const FLOATING_NOTE_SIZE_PX = 46;
 
@@ -227,21 +238,100 @@ function showPreviousReason() {
     renderCurrentReason();
 }
 
+// -- Track 3: catch-the-notes game leaderboard --
+// Reuses this site's existing Firebase Realtime Database, under its own
+// "luna-mixtape-leaderboard" key so it never touches other data on the
+// same database (see dagboek.js for the same pattern). Wrapped so a
+// network failure never breaks the game — it just quietly stops
+// persisting for that session.
+const LUNA_LEADERBOARD_DATABASE_URL = "https://co-housing-e2c00-default-rtdb.europe-west1.firebasedatabase.app/luna-mixtape-leaderboard";
+const LEADERBOARD_MAX_ENTRIES_SHOWN = 10;
+const LEADERBOARD_NAME_MAX_LENGTH = 20;
+
+async function loadLeaderboardFromFirebase() {
+    try {
+        const response = await fetch(`${LUNA_LEADERBOARD_DATABASE_URL}/scores.json`);
+        if (!response.ok) return {};
+        const data = await response.json();
+        return data || {};
+    } catch (error) {
+        console.warn("Kon scorebord niet laden uit Firebase:", error);
+        return {};
+    }
+}
+
+async function saveLeaderboardEntryToFirebase(entry) {
+    try {
+        await fetch(`${LUNA_LEADERBOARD_DATABASE_URL}/scores.json`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(entry)
+        });
+    } catch (error) {
+        console.warn("Kon score niet opslaan in Firebase:", error);
+    }
+}
+
+function renderLeaderboard(scores) {
+    const leaderboardList = document.getElementById("luna-leaderboard-list");
+    const rankedEntries = Object.values(scores)
+        .filter((entry) => entry && typeof entry.score === "number" && typeof entry.name === "string")
+        .sort((a, b) => b.score - a.score)
+        .slice(0, LEADERBOARD_MAX_ENTRIES_SHOWN);
+
+    if (rankedEntries.length === 0) {
+        leaderboardList.innerHTML = '<li class="luna-leaderboard-empty">Nog geen scores — wees de eerste! 🎶</li>';
+        return;
+    }
+
+    leaderboardList.innerHTML = "";
+    rankedEntries.forEach((entry, entryIndex) => {
+        const listItem = document.createElement("li");
+        listItem.className = "luna-leaderboard-entry";
+        listItem.innerHTML = `
+            <span class="luna-leaderboard-entry-rank">${entryIndex + 1}.</span>
+            <span class="luna-leaderboard-entry-name"></span>
+            <span class="luna-leaderboard-entry-score">${entry.score}</span>
+        `;
+        listItem.querySelector(".luna-leaderboard-entry-name").textContent = entry.name;
+        leaderboardList.appendChild(listItem);
+    });
+}
+
 // -- Track 3: catch-the-notes game --
 let gameScore = 0;
 let secondsRemaining = GAME_DURATION_SECONDS;
 let gameCountdownTimer = null;
 let noteSpawnTimer = null;
 let gameIsRunning = false;
+let gameStartedAtMs = 0;
+let currentCatchStreak = 0;
+
+function getGameProgress() {
+    const elapsedMs = Date.now() - gameStartedAtMs;
+    return Math.min(1, Math.max(0, elapsedMs / (GAME_DURATION_SECONDS * 1000)));
+}
+
+function interpolate(startValue, endValue, progress) {
+    return startValue + (endValue - startValue) * progress;
+}
+
+function updateComboDisplay() {
+    const comboMultiplier = 1 + Math.min(Math.floor(currentCatchStreak / STREAK_CATCHES_PER_COMBO_STEP), MAX_COMBO_BONUS_POINTS);
+    document.getElementById("luna-game-combo").textContent = "x" + comboMultiplier;
+}
 
 function startGame() {
     if (gameIsRunning) return;
     gameIsRunning = true;
     gameScore = 0;
+    currentCatchStreak = 0;
     secondsRemaining = GAME_DURATION_SECONDS;
+    gameStartedAtMs = Date.now();
     document.getElementById("luna-game-score").textContent = gameScore;
     document.getElementById("luna-game-time").textContent = secondsRemaining;
     document.getElementById("luna-game-msg").classList.add("luna-game-msg--hidden");
+    updateComboDisplay();
 
     gameCountdownTimer = setInterval(() => {
         secondsRemaining--;
@@ -249,8 +339,14 @@ function startGame() {
         if (secondsRemaining <= 0) endGame();
     }, 1000);
 
-    noteSpawnTimer = setInterval(spawnFloatingNote, NOTE_SPAWN_INTERVAL_MS);
+    scheduleNextNoteSpawn();
+}
+
+function scheduleNextNoteSpawn() {
+    if (!gameIsRunning) return;
     spawnFloatingNote();
+    const nextSpawnInterval = interpolate(NOTE_SPAWN_INTERVAL_START_MS, NOTE_SPAWN_INTERVAL_END_MS, getGameProgress());
+    noteSpawnTimer = setTimeout(scheduleNextNoteSpawn, nextSpawnInterval);
 }
 
 function spawnFloatingNote() {
@@ -271,7 +367,10 @@ function spawnFloatingNote() {
     floatingNote.style.left = horizontalPosition + "px";
     floatingNote.style.top = board.clientHeight - FLOATING_NOTE_SIZE_PX + "px";
 
-    const flightDuration = NOTE_FLIGHT_DURATION_MIN_MS + Math.random() * NOTE_FLIGHT_DURATION_RANDOM_RANGE_MS;
+    const progress = getGameProgress();
+    const flightDurationMin = interpolate(NOTE_FLIGHT_DURATION_START_MIN_MS, NOTE_FLIGHT_DURATION_END_MIN_MS, progress);
+    const flightDurationRandomRange = interpolate(NOTE_FLIGHT_DURATION_START_RANDOM_RANGE_MS, NOTE_FLIGHT_DURATION_END_RANDOM_RANGE_MS, progress);
+    const flightDuration = flightDurationMin + Math.random() * flightDurationRandomRange;
     floatingNote.style.transition = "top " + flightDuration + "ms linear, transform .1s ease";
     board.appendChild(floatingNote);
     // Force the browser to commit the starting "top" (bottom of board) to layout
@@ -282,17 +381,26 @@ function spawnFloatingNote() {
     void floatingNote.offsetHeight;
     floatingNote.style.top = -FLOATING_NOTE_SIZE_PX + "px";
 
+    let wasCaught = false;
     const catchNote = (event) => {
         event.stopPropagation();
-        if (!gameIsRunning) return;
-        gameScore++;
+        if (!gameIsRunning || wasCaught) return;
+        wasCaught = true;
+        const comboMultiplier = 1 + Math.min(Math.floor(currentCatchStreak / STREAK_CATCHES_PER_COMBO_STEP), MAX_COMBO_BONUS_POINTS);
+        gameScore += comboMultiplier;
+        currentCatchStreak++;
         document.getElementById("luna-game-score").textContent = gameScore;
+        updateComboDisplay();
         floatingNote.remove();
     };
     floatingNote.addEventListener("click", catchNote);
     floatingNote.addEventListener("touchstart", catchNote, { passive: true });
 
     setTimeout(() => {
+        if (!wasCaught && gameIsRunning) {
+            currentCatchStreak = 0;
+            updateComboDisplay();
+        }
         floatingNote.remove();
     }, flightDuration + 50);
 }
@@ -300,7 +408,7 @@ function spawnFloatingNote() {
 function endGame() {
     gameIsRunning = false;
     clearInterval(gameCountdownTimer);
-    clearInterval(noteSpawnTimer);
+    clearTimeout(noteSpawnTimer);
     document.querySelectorAll(".luna-float-note").forEach((note) => note.remove());
 
     const resultMessage =
@@ -314,7 +422,14 @@ function endGame() {
     document.getElementById("luna-game-msg-text").textContent =
         "Je hebt " + gameScore + " nootjes gevangen! " + resultMessage;
     gameMessageBox.classList.remove("luna-game-msg--hidden");
-    gameMessageBox.querySelector("button").textContent = "Nog een keer";
+
+    const startButton = document.getElementById("luna-start-game-button");
+    startButton.textContent = "Nog een keer";
+    startButton.classList.add("luna-start-button--hidden");
+
+    document.getElementById("luna-leaderboard-form").classList.add("luna-leaderboard-form--hidden");
+    document.getElementById("luna-leaderboard-name-input").value = "";
+    document.getElementById("luna-leaderboard-prompt").classList.remove("luna-leaderboard-prompt--hidden");
 }
 
 // -- Track 5: reunion countdown --
@@ -361,7 +476,41 @@ document.getElementById("luna-prev-reason-button").addEventListener("click", sho
 document.getElementById("luna-next-reason-button").addEventListener("click", showNextReason);
 document.getElementById("luna-start-game-button").addEventListener("click", startGame);
 
+document.getElementById("luna-leaderboard-yes-button").addEventListener("click", () => {
+    document.getElementById("luna-leaderboard-prompt").classList.add("luna-leaderboard-prompt--hidden");
+    document.getElementById("luna-leaderboard-form").classList.remove("luna-leaderboard-form--hidden");
+    document.getElementById("luna-leaderboard-name-input").focus();
+});
+
+document.getElementById("luna-leaderboard-no-button").addEventListener("click", () => {
+    document.getElementById("luna-leaderboard-prompt").classList.add("luna-leaderboard-prompt--hidden");
+    document.getElementById("luna-start-game-button").classList.remove("luna-start-button--hidden");
+});
+
+document.getElementById("luna-leaderboard-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const nameInput = document.getElementById("luna-leaderboard-name-input");
+    const playerName = nameInput.value.trim();
+    if (!playerName) {
+        nameInput.focus();
+        return;
+    }
+
+    const entry = {
+        name: playerName.slice(0, LEADERBOARD_NAME_MAX_LENGTH),
+        score: gameScore,
+        savedAt: new Date().toISOString()
+    };
+
+    document.getElementById("luna-leaderboard-form").classList.add("luna-leaderboard-form--hidden");
+    document.getElementById("luna-start-game-button").classList.remove("luna-start-button--hidden");
+
+    await saveLeaderboardEntryToFirebase(entry);
+    renderLeaderboard(await loadLeaderboardFromFirebase());
+});
+
 renderCurrentReason();
 reunionCountdownTimer = setInterval(tickReunionCountdown, 1000);
 tickReunionCountdown();
 scatterAlbumCovers();
+loadLeaderboardFromFirebase().then(renderLeaderboard);

@@ -428,8 +428,11 @@ body {
 
 .luna-game-bar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    row-gap: 6px;
+    column-gap: 16px;
     margin-bottom: 12px;
 }
 
@@ -495,6 +498,110 @@ body {
 }
 
 .luna-game-msg.luna-game-msg--hidden {
+    display: none;
+}
+
+.luna-leaderboard-prompt,
+.luna-leaderboard-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.luna-leaderboard-prompt--hidden,
+.luna-leaderboard-form--hidden {
+    display: none;
+}
+
+.luna-leaderboard-prompt-question {
+    font-size: 16px;
+}
+
+.luna-leaderboard-prompt-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.luna-leaderboard-name-input {
+    font-family: "Nunito";
+    font-size: 15px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--luna-sage);
+    background: var(--luna-cream);
+    color: var(--luna-forest);
+    text-align: center;
+    width: 200px;
+    max-width: 100%;
+}
+
+.luna-leaderboard-name-input:focus-visible {
+    outline: 3px solid var(--luna-peach);
+    outline-offset: 2px;
+}
+
+.luna-leaderboard-board {
+    margin-top: 22px;
+}
+
+.luna-leaderboard-heading {
+    font-family: "Fraunces";
+    font-size: 18px;
+    color: var(--luna-forest);
+    margin-bottom: 10px;
+}
+
+.luna-leaderboard-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.luna-leaderboard-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    background: var(--luna-mint-pale);
+    border: 1.5px solid var(--luna-mint);
+    font-family: "Nunito";
+    font-weight: 600;
+    color: var(--luna-forest);
+}
+
+.luna-leaderboard-entry-rank {
+    flex-shrink: 0;
+    width: 22px;
+    color: var(--luna-forest-soft);
+    font-weight: 700;
+}
+
+.luna-leaderboard-entry-name {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.luna-leaderboard-entry-score {
+    flex-shrink: 0;
+    color: var(--luna-peach);
+    font-family: "Fraunces";
+    font-weight: 600;
+}
+
+.luna-leaderboard-empty {
+    color: var(--luna-forest-soft);
+    font-size: 14px;
+    text-align: center;
+    padding: 8px 0;
+}
+
+.luna-start-button--hidden {
     display: none;
 }
 
