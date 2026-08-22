@@ -31,7 +31,8 @@
             <button type="button" class="diary-prompt-button" id="diary-another-prompt-button">ander prompt</button>
         </div>
 
-        <div class="diary-mood-row" id="diary-mood-row" role="group" aria-label="Kies je stemming"></div>
+        <p class="diary-mood-label" id="diary-mood-label">Kies eerst een stemming <span aria-hidden="true">*</span></p>
+        <div class="diary-mood-row" id="diary-mood-row" role="group" aria-label="Kies je stemming (verplicht)" aria-describedby="diary-mood-label"></div>
 
         <label for="diary-textarea" class="visually-hidden" style="position:absolute; left:-9999px;">Jouw dagboektekst</label>
         <textarea class="diary-textarea" id="diary-textarea" placeholder="Vertel eens hoe je dag was…"></textarea>

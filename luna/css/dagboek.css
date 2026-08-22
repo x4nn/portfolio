@@ -144,11 +144,18 @@ header.diary-header {
     text-decoration: underline;
 }
 
+.diary-mood-label {
+    margin-top: 18px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--forest-soft);
+}
+
 .diary-mood-row {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 18px;
+    margin-top: 8px;
 }
 
 .diary-mood-button {
@@ -221,6 +228,13 @@ header.diary-header {
     transform: translateY(-1px);
 }
 
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .btn--primary {
     background: var(--forest);
     color: #fff;
@@ -247,6 +261,18 @@ header.diary-header {
     margin-bottom: 14px;
 }
 
+.diary-entry-day {
+    margin-bottom: 22px;
+}
+
+.diary-entry-day-date {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: capitalize;
+    margin-bottom: 10px;
+}
+
 .diary-entry {
     background: #fff;
     border: 1.5px solid var(--mint);
@@ -263,10 +289,10 @@ header.diary-header {
     gap: 10px;
 }
 
-.diary-entry-date {
+.diary-entry-time {
     font-weight: 700;
-    font-size: 0.9rem;
-    text-transform: capitalize;
+    font-size: 0.85rem;
+    color: var(--forest-soft);
 }
 
 .diary-entry-mood {
@@ -280,20 +306,50 @@ header.diary-header {
     font-size: 0.95rem;
 }
 
+.diary-entry-buttons {
+    display: flex;
+    gap: 18px;
+    margin-top: 10px;
+}
+
+.diary-entry-edit,
 .diary-entry-delete {
     border: none;
     background: none;
-    color: var(--peach);
     font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 10px;
     padding: 4px 0;
 }
 
+.diary-entry-edit {
+    color: var(--sage-deep);
+}
+
+.diary-entry-delete {
+    color: var(--peach);
+}
+
+.diary-entry-edit:hover,
+.diary-entry-edit:focus-visible,
 .diary-entry-delete:hover,
 .diary-entry-delete:focus-visible {
     text-decoration: underline;
+}
+
+.diary-entry-edit-mood-row {
+    margin-top: 8px;
+}
+
+.diary-entry-edit-textarea {
+    min-height: 100px;
+}
+
+.diary-entry-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
 }
 
 .diary-empty-state {
