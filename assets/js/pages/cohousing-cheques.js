@@ -396,6 +396,7 @@ function buildSinglePayerFieldHtml(role, field, label, currentTotal, options = {
             <p class="single-payer-add-payment-caption">Bedrag toevoegen</p>
             <div class="single-payer-field-input-wrap">
                 <span aria-hidden="true">&euro;</span>
+                <button type="button" class="single-payer-sign-toggle" data-single-payer-sign-toggle data-role="${role}" data-field="${field}" data-sign="1" aria-pressed="false" aria-label="Wissel naar aftrekken (voor het corrigeren van een fout)">+</button>
                 <input type="number" step="1" inputmode="numeric" placeholder="0" aria-label="Bedrag toevoegen aan ${label.toLowerCase()}" data-single-payer-add-input data-role="${role}" data-field="${field}">
                 <button type="button" class="single-payer-add-button" data-single-payer-add-button data-role="${role}" data-field="${field}">Toevoegen</button>
             </div>
@@ -410,6 +411,19 @@ function bindSinglePayerInputEvents() {
     singlePayerCardList.querySelectorAll("[data-single-payer-add-button]").forEach((button) => {
         button.addEventListener("click", async () => {
             await addSinglePayerPayment(button.getAttribute("data-role"), button.getAttribute("data-field"));
+        });
+    });
+
+    // Mobile number keypads generally don't offer a "-" key, so typing a negative
+    // correction amount (see comment on buildSinglePayerFieldHtml) isn't possible
+    // there. This toggle lets any device switch the add-input to subtract instead.
+    singlePayerCardList.querySelectorAll("[data-single-payer-sign-toggle]").forEach((toggleButton) => {
+        toggleButton.addEventListener("click", () => {
+            const isNowNegative = toggleButton.getAttribute("data-sign") !== "-1";
+            toggleButton.setAttribute("data-sign", isNowNegative ? "-1" : "1");
+            toggleButton.setAttribute("aria-pressed", String(isNowNegative));
+            toggleButton.textContent = isNowNegative ? "−" : "+";
+            toggleButton.classList.toggle("is-negative", isNowNegative);
         });
     });
 
@@ -434,7 +448,9 @@ function bindSinglePayerInputEvents() {
 
 async function addSinglePayerPayment(role, field) {
     const input = singlePayerCardList.querySelector(`[data-single-payer-add-input][data-role="${role}"][data-field="${field}"]`);
-    const addedAmount = Number(input?.value) || 0;
+    const signToggle = singlePayerCardList.querySelector(`[data-single-payer-sign-toggle][data-role="${role}"][data-field="${field}"]`);
+    const sign = signToggle?.getAttribute("data-sign") === "-1" ? -1 : 1;
+    const addedAmount = (Math.abs(Number(input?.value)) || 0) * sign;
 
     if (!addedAmount) {
         return;

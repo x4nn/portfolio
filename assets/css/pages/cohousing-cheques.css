@@ -17,6 +17,7 @@
     --payment-paid-color: #3fa66b;
     --payment-unpaid-color: #c3d6d1;
     --payment-partial-color: #e2a13c;
+    --negative-amount-color: #e05d44;
 }
 
 /* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
@@ -78,7 +79,7 @@ select {
     z-index: 40;
     display: flex;
     align-items: stretch;
-    gap: 4px;
+    gap: 14px;
     max-width: calc(100vw - 24px);
     background: color-mix(in srgb, var(--surface) 55%, transparent);
     backdrop-filter: blur(24px) saturate(180%);
@@ -90,6 +91,7 @@ select {
 }
 
 .nav-dock-link {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -105,6 +107,19 @@ select {
 
 .nav-dock-link svg {
     flex-shrink: 0;
+}
+
+/* Small vertical separator stripe between nav items, in the page's accent color */
+.nav-dock-link:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -8px;
+    width: 1.5px;
+    height: 55%;
+    background: var(--accent);
+    opacity: 0.4;
+    transform: translateY(-50%);
 }
 
 .nav-dock-link:hover,
@@ -491,6 +506,36 @@ select {
 .single-payer-field-input-wrap span {
     font-weight: 800;
     color: var(--accent);
+}
+
+.single-payer-sign-toggle {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--accent);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.single-payer-sign-toggle:hover,
+.single-payer-sign-toggle:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.single-payer-sign-toggle.is-negative {
+    background: var(--negative-amount-color);
+    border-color: var(--negative-amount-color);
+    color: #fff;
 }
 
 .single-payer-field-input-wrap input {

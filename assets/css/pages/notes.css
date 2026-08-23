@@ -70,7 +70,7 @@ select {
     z-index: 40;
     display: flex;
     align-items: stretch;
-    gap: 4px;
+    gap: 14px;
     max-width: calc(100vw - 24px);
     background: color-mix(in srgb, var(--surface) 55%, transparent);
     backdrop-filter: blur(24px) saturate(180%);
@@ -82,6 +82,7 @@ select {
 }
 
 .nav-dock-link {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -97,6 +98,19 @@ select {
 
 .nav-dock-link svg {
     flex-shrink: 0;
+}
+
+/* Small vertical separator stripe between nav items, in the page's accent color */
+.nav-dock-link:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -8px;
+    width: 1.5px;
+    height: 55%;
+    background: var(--accent);
+    opacity: 0.4;
+    transform: translateY(-50%);
 }
 
 .nav-dock-link:hover,
