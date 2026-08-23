@@ -14,6 +14,9 @@
     --dad-color: #9ed8bf;
     --accent: #1f8a76;
     --accent-soft: rgba(31, 138, 118, 0.15);
+    --payment-paid-color: #3fa66b;
+    --payment-unpaid-color: #c3d6d1;
+    --payment-partial-color: #e2a13c;
 }
 
 /* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
@@ -32,6 +35,7 @@ html {
 
 body {
     margin: 0;
+    overflow-x: hidden;
     font-family: "Inter", "Segoe UI", sans-serif;
     background:
         radial-gradient(circle at top left, var(--accent-soft), transparent 24%),
@@ -62,6 +66,63 @@ select {
 
 .access-overlay.is-hidden {
     display: none;
+}
+
+/* ---------- Floating navigation dock (glass-style, always docked at the bottom) ---------- */
+
+.nav-dock {
+    position: fixed;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    max-width: calc(100vw - 24px);
+    background: color-mix(in srgb, var(--surface) 55%, transparent);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid color-mix(in srgb, white 45%, var(--line) 55%);
+    border-radius: 999px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    padding: 8px;
+}
+
+.nav-dock-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.nav-dock-link svg {
+    flex-shrink: 0;
+}
+
+.nav-dock-link:hover,
+.nav-dock-link:focus-visible {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+    outline: none;
+}
+
+.nav-dock-link:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 420px) {
+    .nav-dock-link {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
 }
 
 .access-card {
@@ -122,7 +183,7 @@ select {
 .page-shell {
     max-width: 780px;
     margin: 0 auto;
-    padding: 28px 18px 48px;
+    padding: 28px 18px 104px;
 }
 
 .hero-card,
@@ -288,6 +349,7 @@ select {
 }
 
 .single-payer-card {
+    min-width: 0;
     border: 1px solid var(--line);
     border-radius: 20px;
     padding: 20px;
@@ -309,6 +371,27 @@ select {
     font-size: 1.15rem;
 }
 
+.single-payer-status-badge {
+    display: inline-block;
+    margin: 0 0 14px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--payment-unpaid-color);
+    color: var(--text-soft);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.single-payer-status-badge.is-partial {
+    background: var(--payment-partial-color);
+    color: #5c3d0a;
+}
+
+.single-payer-status-badge.is-paid {
+    background: var(--payment-paid-color);
+    color: #fff;
+}
+
 .single-payer-owed-hint {
     margin: 0 0 16px;
     color: var(--text-soft);
@@ -328,19 +411,47 @@ select {
 
 .single-payer-field {
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
 }
 
-.single-payer-field-label {
-    display: block;
+.single-payer-field-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0 0 8px;
+    font-size: 0.86rem;
+    color: var(--text-soft);
+}
+
+.single-payer-field-total-value {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.single-payer-add-payment-caption {
+    margin: 0 0 6px;
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--text-soft);
 }
 
-.single-payer-field-label > span {
-    display: block;
-    margin-bottom: 6px;
+.single-payer-add-button {
+    flex: 1 1 100%;
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.single-payer-add-button:hover,
+.single-payer-add-button:focus-visible {
+    background: color-mix(in srgb, var(--accent) 85%, black);
+    outline: none;
 }
 
 .single-payer-mark-paid-button {
@@ -368,8 +479,9 @@ select {
 
 .single-payer-field-input-wrap {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: 6px 8px;
     border: 1px solid var(--line);
     border-radius: 12px;
     background: #fff;
@@ -382,13 +494,13 @@ select {
 }
 
 .single-payer-field-input-wrap input {
-    flex: 1;
+    flex: 1 1 60px;
+    min-width: 0;
     border: 0;
     background: transparent;
     font-size: 1rem;
     font-weight: 700;
     color: var(--text);
-    min-width: 0;
 }
 
 .single-payer-field-input-wrap input:focus {
@@ -406,6 +518,11 @@ select {
 
 .single-payer-field--netto .single-payer-field-input-wrap input {
     font-size: 1.2rem;
+}
+
+.single-payer-field--netto .single-payer-field-total-value {
+    font-size: 1.1rem;
+    color: var(--accent);
 }
 
 /* ---------- Cheques ---------- */
@@ -460,6 +577,7 @@ select {
 }
 
 .cheques-share-card {
+    min-width: 0;
     border: 1px solid var(--line);
     border-radius: 20px;
     padding: 20px 16px;
@@ -553,7 +671,7 @@ select {
     }
 
     .page-shell {
-        padding: 16px 12px 32px;
+        padding: 16px 12px 104px;
     }
 
     .hero-card,

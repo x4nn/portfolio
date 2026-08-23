@@ -319,22 +319,26 @@ function renderSinglePayerCards() {
     const paymentBreakdown = getPaymentBreakdown(state.assignments, monthKey, state.weeklyBudget);
     const monthlyChequesAmount = getMonthlyChequesAmount(state.monthlyChequesAmounts, monthKey);
     const tracking = getSinglePayerTrackingForMonth(state.singlePayerTracking, monthKey);
+    const isMomTracked = isSinglePayerRoleTrackedForMonth(state.singlePayerTracking, monthKey, "mom");
+    const isDadTracked = isSinglePayerRoleTrackedForMonth(state.singlePayerTracking, monthKey, "dad");
 
     singlePayerCardList.innerHTML =
-        buildMomSinglePayerCardHtml(monthKey, paymentBreakdown, monthlyChequesAmount, tracking.mom) +
-        buildDadSinglePayerCardHtml(monthKey, paymentBreakdown, tracking.dad);
+        buildMomSinglePayerCardHtml(monthKey, paymentBreakdown, monthlyChequesAmount, tracking.mom, isMomTracked) +
+        buildDadSinglePayerCardHtml(monthKey, paymentBreakdown, tracking.dad, isDadTracked);
 
     bindSinglePayerInputEvents();
 }
 
-function buildMomSinglePayerCardHtml(monthKey, paymentBreakdown, monthlyChequesAmount, momTracking) {
+function buildMomSinglePayerCardHtml(monthKey, paymentBreakdown, monthlyChequesAmount, momTracking, isMomTracked) {
     const dayCount = paymentBreakdown.counts.mom;
     const chequesLeft = roundToCents(Math.max(monthlyChequesAmount - momTracking.chequesUsed, 0));
     const nettoRemaining = getSinglePayerNettoRemaining(paymentBreakdown, "mom", momTracking);
+    const paymentStatus = getSinglePayerPaymentStatus(paymentBreakdown, "mom", momTracking, isMomTracked);
 
     return `
         <article class="single-payer-card is-mom">
             <h3>Mama</h3>
+            <span class="single-payer-status-badge is-${paymentStatus}">${PAYMENT_STATUS_LABELS[paymentStatus]}</span>
             <p class="single-payer-owed-hint">
                 Volgens de kalender heeft ze recht op ${formatCurrency(paymentBreakdown.momShare)} voor ${formatMonthLabel(monthKey)}
                 (${dayCount} dag${dayCount === 1 ? "" : "en"}).
@@ -354,13 +358,15 @@ function buildMomSinglePayerCardHtml(monthKey, paymentBreakdown, monthlyChequesA
     `;
 }
 
-function buildDadSinglePayerCardHtml(monthKey, paymentBreakdown, dadTracking) {
+function buildDadSinglePayerCardHtml(monthKey, paymentBreakdown, dadTracking, isDadTracked) {
     const dayCount = paymentBreakdown.counts.dad;
     const nettoRemaining = getSinglePayerNettoRemaining(paymentBreakdown, "dad", dadTracking);
+    const paymentStatus = getSinglePayerPaymentStatus(paymentBreakdown, "dad", dadTracking, isDadTracked);
 
     return `
         <article class="single-payer-card is-dad">
             <h3>Papa</h3>
+            <span class="single-payer-status-badge is-${paymentStatus}">${PAYMENT_STATUS_LABELS[paymentStatus]}</span>
             <p class="single-payer-owed-hint">
                 Volgens de kalender heeft hij recht op ${formatCurrency(paymentBreakdown.dadShare)} voor ${formatMonthLabel(monthKey)}
                 (${dayCount} dag${dayCount === 1 ? "" : "en"}). Papa kan geen cheques gebruiken, dus dit is volledig netto.
@@ -375,18 +381,24 @@ function buildDadSinglePayerCardHtml(monthKey, paymentBreakdown, dadTracking) {
     `;
 }
 
-function buildSinglePayerFieldHtml(role, field, label, value, options = {}) {
+// Shows the running total as read-only and lets the user enter just the amount of a new payment
+// (added to the running total on submit) - so nobody has to add up past payments by hand before
+// typing in a new grand total. A negative amount can be entered to correct a mistake.
+function buildSinglePayerFieldHtml(role, field, label, currentTotal, options = {}) {
     const { markPaidLabel, markPaidValue, isEmphasized = false } = options;
 
     return `
         <div class="single-payer-field${isEmphasized ? " single-payer-field--netto" : ""}">
-            <label class="single-payer-field-label" for="single-payer-${role}-${field}">
+            <p class="single-payer-field-total-row">
                 <span>${label}</span>
-                <div class="single-payer-field-input-wrap">
-                    <span aria-hidden="true">&euro;</span>
-                    <input id="single-payer-${role}-${field}" type="number" min="0" step="1" inputmode="numeric" data-single-payer-input data-role="${role}" data-field="${field}" value="${value}">
-                </div>
-            </label>
+                <span class="single-payer-field-total-value">${formatCurrency(currentTotal)}</span>
+            </p>
+            <p class="single-payer-add-payment-caption">Bedrag toevoegen</p>
+            <div class="single-payer-field-input-wrap">
+                <span aria-hidden="true">&euro;</span>
+                <input type="number" step="1" inputmode="numeric" placeholder="0" aria-label="Bedrag toevoegen aan ${label.toLowerCase()}" data-single-payer-add-input data-role="${role}" data-field="${field}">
+                <button type="button" class="single-payer-add-button" data-single-payer-add-button data-role="${role}" data-field="${field}">Toevoegen</button>
+            </div>
             ${markPaidLabel
                 ? `<button type="button" class="single-payer-mark-paid-button" data-single-payer-mark-paid data-role="${role}" data-field="${field}" data-value="${markPaidValue}">${markPaidLabel}</button>`
                 : ""}
@@ -395,10 +407,20 @@ function buildSinglePayerFieldHtml(role, field, label, value, options = {}) {
 }
 
 function bindSinglePayerInputEvents() {
-    singlePayerCardList.querySelectorAll("[data-single-payer-input]").forEach((input) => {
-        input.addEventListener("change", async () => {
-            await updateSinglePayerField(input.getAttribute("data-role"), input.getAttribute("data-field"), Number(input.value) || 0);
-            renderSinglePayerCards();
+    singlePayerCardList.querySelectorAll("[data-single-payer-add-button]").forEach((button) => {
+        button.addEventListener("click", async () => {
+            await addSinglePayerPayment(button.getAttribute("data-role"), button.getAttribute("data-field"));
+        });
+    });
+
+    singlePayerCardList.querySelectorAll("[data-single-payer-add-input]").forEach((input) => {
+        input.addEventListener("keydown", async (event) => {
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            event.preventDefault();
+            await addSinglePayerPayment(input.getAttribute("data-role"), input.getAttribute("data-field"));
         });
     });
 
@@ -408,6 +430,21 @@ function bindSinglePayerInputEvents() {
             renderSinglePayerCards();
         });
     });
+}
+
+async function addSinglePayerPayment(role, field) {
+    const input = singlePayerCardList.querySelector(`[data-single-payer-add-input][data-role="${role}"][data-field="${field}"]`);
+    const addedAmount = Number(input?.value) || 0;
+
+    if (!addedAmount) {
+        return;
+    }
+
+    const monthKey = state.selectedMonthKey;
+    const currentTotal = getSinglePayerTrackingForMonth(state.singlePayerTracking, monthKey)[role]?.[field] || 0;
+
+    await updateSinglePayerField(role, field, currentTotal + addedAmount);
+    renderSinglePayerCards();
 }
 
 async function updateSinglePayerField(role, field, value) {

@@ -363,3 +363,39 @@ function getSinglePayerNettoRemaining(paymentBreakdown, role, tracking) {
     const chequesUsed = role === "mom" ? tracking.chequesUsed : 0;
     return roundToCents(Math.max(amountOwed - chequesUsed - tracking.nettoPaid, 0));
 }
+
+// ---------- Payment status (shared by the calendar's history badges and the cheques page's cards) ----------
+
+const PAYMENT_STATUS = {
+    NOT_TRACKED: "not-tracked",
+    UNPAID: "unpaid",
+    PARTIAL: "partial",
+    PAID: "paid"
+};
+
+const PAYMENT_STATUS_LABELS = {
+    [PAYMENT_STATUS.NOT_TRACKED]: "Nog niet ingevuld",
+    [PAYMENT_STATUS.UNPAID]: "Nog niet betaald",
+    [PAYMENT_STATUS.PARTIAL]: "Gedeeltelijk betaald",
+    [PAYMENT_STATUS.PAID]: "Volledig betaald"
+};
+
+// Nothing owed (0 days on the calendar) or the netto amount brought down to €0 both count as
+// "paid" - matches the pre-existing green/gray badge behaviour. Otherwise: no tracking saved yet
+// is "not tracked", some amount already covered (cheques used and/or netto paid) is "partial",
+// and nothing covered yet is "unpaid".
+function getSinglePayerPaymentStatus(paymentBreakdown, role, tracking, isTracked) {
+    const amountOwed = role === "mom" ? paymentBreakdown.momShare : paymentBreakdown.dadShare;
+    const nettoRemaining = getSinglePayerNettoRemaining(paymentBreakdown, role, tracking);
+
+    if (amountOwed <= 0 || nettoRemaining <= 0) {
+        return PAYMENT_STATUS.PAID;
+    }
+
+    if (!isTracked) {
+        return PAYMENT_STATUS.NOT_TRACKED;
+    }
+
+    const amountAlreadyCovered = roundToCents(amountOwed - nettoRemaining);
+    return amountAlreadyCovered > 0 ? PAYMENT_STATUS.PARTIAL : PAYMENT_STATUS.UNPAID;
+}

@@ -14,6 +14,7 @@
     --accent-soft: rgba(31, 138, 118, 0.15);
     --payment-paid-color: #3fa66b;
     --payment-unpaid-color: #c3d6d1;
+    --payment-partial-color: #e2a13c;
 }
 
 /* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
@@ -26,6 +27,7 @@
 
 body {
     margin: 0;
+    overflow-x: hidden;
     font-family: "Inter", "Segoe UI", sans-serif;
     background:
         radial-gradient(circle at top left, var(--accent-soft), transparent 24%),
@@ -58,6 +60,63 @@ select {
 
 .access-card.is-hidden {
     display: none;
+}
+
+/* ---------- Floating navigation dock (glass-style, always docked at the bottom) ---------- */
+
+.nav-dock {
+    position: fixed;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    max-width: calc(100vw - 24px);
+    background: color-mix(in srgb, var(--surface) 55%, transparent);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid color-mix(in srgb, white 45%, var(--line) 55%);
+    border-radius: 999px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    padding: 8px;
+}
+
+.nav-dock-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.nav-dock-link svg {
+    flex-shrink: 0;
+}
+
+.nav-dock-link:hover,
+.nav-dock-link:focus-visible {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+    outline: none;
+}
+
+.nav-dock-link:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 420px) {
+    .nav-dock-link {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
 }
 
 .access-card {
@@ -116,7 +175,7 @@ select {
 .page-shell {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 28px 18px 48px;
+    padding: 28px 18px 104px;
 }
 
 .hero-card,
@@ -498,6 +557,10 @@ select {
     flex-shrink: 0;
 }
 
+.payment-status-dot.is-partial {
+    background: var(--payment-partial-color);
+}
+
 .payment-status-dot.is-paid {
     background: var(--payment-paid-color);
 }
@@ -523,7 +586,7 @@ select {
 
 @media (max-width: 640px) {
     .page-shell {
-        padding: 16px 12px 32px;
+        padding: 16px 12px 104px;
     }
 
     .hero-card,
