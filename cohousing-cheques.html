@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Houd per maand bij hoeveel cheques er zijn, wat Mama al gebruikt heeft, en wat je haar en Papa nog netto moet betalen.">
+    <meta name="description" content="Houd per maand bij welke maaltijdcheque- en nettobetalingen er zijn geweest aan Mama en Papa, en wat er nog te betalen is.">
     <title>Betalingen - Cohousing</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,7 +56,7 @@
                 <p class="hero-kicker">Cohousing hulpmiddel</p>
                 <h1>Betalingen bijhouden</h1>
                 <p class="hero-text">
-                    Vul per maand het totaalbedrag aan cheques in, en houd bij wat al gebruikt en betaald is.
+                    Voeg per betaling toe of het een maaltijdcheque of een nettobetaling was, met een bedrag en een omschrijving.
                 </p>
             </div>
 
@@ -72,7 +72,7 @@
                 <div class="card-header">
                     <div>
                         <p class="card-eyebrow">Betalingen</p>
-                        <h2 id="cheques-heading">Cheques en betalingen bijhouden</h2>
+                        <h2 id="cheques-heading">Betalingen bijhouden</h2>
                     </div>
                     <label class="month-picker" for="cheques-month-select">
                         <span>Maand</span>
@@ -80,37 +80,7 @@
                     </label>
                 </div>
 
-                <label class="cheques-amount-field" for="cheques-amount-input">
-                    <span>Totaal bedrag aan cheques deze maand</span>
-                    <div class="cheques-amount-input-wrap">
-                        <span class="cheques-amount-currency" aria-hidden="true">&euro;</span>
-                        <input id="cheques-amount-input" type="number" min="0" step="1" inputmode="numeric" data-cheques-amount-input>
-                    </div>
-                </label>
-
-                <div class="mode-tabs" role="tablist" aria-label="Kies hoe de cheques verdeeld worden">
-                    <button type="button" class="mode-tab-button" data-mode-tab="single-payer" role="tab">Mama krijgt alle cheques</button>
-                    <button type="button" class="mode-tab-button" data-mode-tab="shared" role="tab">Papa kan ook cheques ontvangen</button>
-                </div>
-
-                <div class="mode-tab-panel" data-mode-panel="single-payer">
-                    <p class="mode-tab-intro">
-                        Papa kan de cheques niet gebruiken, dus die gaan allemaal naar Mama. Vul hieronder in wat ze al
-                        gebruikt heeft en wat je haar en Papa nog netto moet betalen.
-                    </p>
-                    <div class="single-payer-card-list" data-single-payer-card-list></div>
-                </div>
-
-                <div class="mode-tab-panel" data-mode-panel="shared">
-                    <p class="mode-tab-intro">
-                        Voor als Papa de cheques ook kan gebruiken: het bedrag hierboven wordt dan verdeeld tussen Mama
-                        en Papa, op basis van hoeveel dagen je bij elk van hen was volgens de kalender.
-                    </p>
-
-                    <div class="cheques-share-list" data-cheques-share-list></div>
-
-                    <p class="cheques-explainer" data-cheques-explainer></p>
-                </div>
+                <div class="payment-card-list" data-payment-card-list></div>
             </section>
         </main>
     </div>

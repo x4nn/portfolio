@@ -20,9 +20,20 @@ const ROLE_LABELS = {
 // "recent months" range and default amounts always stay in sync.
 const MONTHS_TO_DISPLAY = 12;
 const MONTHS_BEFORE_CURRENT = Math.floor(MONTHS_TO_DISPLAY / 2);
+
+// How many months back to walk when carrying an overpayment forward - a personal household ledger
+// like this never realistically has an unbroken surplus streak longer than this, so it's a safe
+// cap that keeps the calculation bounded instead of walking back indefinitely.
+const MAX_CREDIT_LOOKBACK_MONTHS = 24;
 const WEEKLY_DAYS = 7;
 const DEFAULT_WEEKLY_BUDGET = 100;
-const DEFAULT_MONTHLY_CHEQUES_AMOUNT = 200;
+
+// Which payment types each role is allowed to log - Papa can't physically use maaltijdcheques,
+// so his card only ever offers "netto" and never shows the type toggle.
+const PAYMENT_TYPES_BY_ROLE = {
+    mom: ["maaltijd", "netto"],
+    dad: ["netto"]
+};
 
 // Placeholder shown only before the app has ever successfully reached the shared database
 // (very first load, or the database being unreachable) - real names/colors/flags/passwords
@@ -131,7 +142,7 @@ async function loadUsersForLogin() {
     return remoteData.users;
 }
 
-function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta = {}, weeklyBudget = 0, monthlyChequesAmounts = {}, singlePayerTracking = {}) {
+function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta = {}, weeklyBudget = 0, paymentRecords = {}) {
     const selectedDays = {};
 
     Object.entries(assignments || {}).forEach(([monthKey, monthAssignments]) => {
@@ -163,8 +174,7 @@ function buildRemotePayload(assignments, users = DEFAULT_USERS, assignmentMeta =
         selectedDays,
         users: Array.isArray(users) && users.length ? users : DEFAULT_USERS,
         weeklyBudget: Number(weeklyBudget) || 0,
-        monthlyChequesAmounts: monthlyChequesAmounts && typeof monthlyChequesAmounts === "object" ? monthlyChequesAmounts : {},
-        singlePayerTracking: singlePayerTracking && typeof singlePayerTracking === "object" ? singlePayerTracking : {}
+        paymentRecords: paymentRecords && typeof paymentRecords === "object" ? paymentRecords : {}
     };
 }
 
@@ -180,12 +190,8 @@ function hydrateStateFromRemoteData(remoteData, localState) {
         nextState.weeklyBudget = Number(remoteData.weeklyBudget);
     }
 
-    nextState.monthlyChequesAmounts = remoteData?.monthlyChequesAmounts && typeof remoteData.monthlyChequesAmounts === "object"
-        ? remoteData.monthlyChequesAmounts
-        : {};
-
-    nextState.singlePayerTracking = remoteData?.singlePayerTracking && typeof remoteData.singlePayerTracking === "object"
-        ? remoteData.singlePayerTracking
+    nextState.paymentRecords = remoteData?.paymentRecords && typeof remoteData.paymentRecords === "object"
+        ? remoteData.paymentRecords
         : {};
 
     const selectedDays = remoteData?.selectedDays || {};
@@ -310,58 +316,63 @@ function getPaymentBreakdown(assignments, monthKey, weeklyBudget) {
     };
 }
 
-function getMonthlyChequesAmount(monthlyChequesAmounts, monthKey) {
-    const storedValue = monthlyChequesAmounts?.[monthKey];
-    return Number.isFinite(Number(storedValue)) && storedValue !== undefined && storedValue !== null
-        ? Number(storedValue)
-        : DEFAULT_MONTHLY_CHEQUES_AMOUNT;
+// ---------- Payment records (Mama and Papa each log individual maaltijdcheque/netto payments as
+// they happen, instead of typing in one running total) ----------
+
+// Newest first, so the history list on the payments page reads top-to-bottom as a timeline.
+function getPaymentRecordsForMonth(paymentRecords, monthKey, role) {
+    const records = paymentRecords?.[monthKey]?.[role];
+    return Array.isArray(records)
+        ? [...records].sort((first, second) => (second.createdAt || 0) - (first.createdAt || 0))
+        : [];
 }
 
-// How much of a person's amount owed for the month is covered by the cheques budget, based on
-// their share of the total paid days. Used by both the cheques page and the payments page so the
-// "cheques share" number always means the same thing in both places.
-function getChequesShareForRole(paymentBreakdown, monthlyChequesAmount, role) {
-    const { counts, totalPaidDays } = paymentBreakdown;
+function sumPaymentRecordsByType(records, type) {
+    return roundToCents(records.filter((record) => record.type === type).reduce((total, record) => total + (Number(record.amount) || 0), 0));
+}
+
+// Totals used both by the payments page (per-card stats) and the calendar page's history badges.
+function getPaymentTotalsForRole(paymentRecords, monthKey, role) {
+    const records = getPaymentRecordsForMonth(paymentRecords, monthKey, role);
+    const chequesPaid = sumPaymentRecordsByType(records, "maaltijd");
+    const nettoPaid = sumPaymentRecordsByType(records, "netto");
+
+    return { records, chequesPaid, nettoPaid, totalPaid: roundToCents(chequesPaid + nettoPaid) };
+}
+
+function isRoleTrackedForMonth(paymentRecords, monthKey, role) {
+    return getPaymentRecordsForMonth(paymentRecords, monthKey, role).length > 0;
+}
+
+// If a person overpays in a month (more logged than they owed), the surplus automatically counts
+// as already paid toward the following month instead of just disappearing - this walks forward
+// from up to MAX_CREDIT_LOOKBACK_MONTHS ago, chronologically, carrying any running surplus along
+// so a streak of overpayments keeps rolling forward correctly. A shortfall never goes negative
+// here, so underpaying never carries a debt onto the next month - it just stays owed this month.
+function getCarriedCreditForRole(assignments, weeklyBudget, paymentRecords, monthKey, role) {
+    const targetMonthDate = parseMonthKey(monthKey);
+    let carry = 0;
+
+    for (let stepsBack = MAX_CREDIT_LOOKBACK_MONTHS; stepsBack >= 1; stepsBack -= 1) {
+        const priorMonthKey = getMonthKey(addMonths(targetMonthDate, -stepsBack));
+        const priorBreakdown = getPaymentBreakdown(assignments, priorMonthKey, weeklyBudget);
+        const amountOwed = role === "mom" ? priorBreakdown.momShare : priorBreakdown.dadShare;
+        const { totalPaid } = getPaymentTotalsForRole(paymentRecords, priorMonthKey, role);
+
+        carry = roundToCents(Math.max(totalPaid + carry - amountOwed, 0));
+    }
+
+    return carry;
+}
+
+// What's still owed to a person for the month: their calendar share (minus any credit carried
+// forward from an earlier overpayment), minus everything they've already logged this month
+// (cheques and netto both count, since both reduce the debt).
+function getPaymentRemainingForRole(paymentBreakdown, paymentRecords, monthKey, role, carriedCredit = 0) {
     const amountOwed = role === "mom" ? paymentBreakdown.momShare : paymentBreakdown.dadShare;
-    const chequesShare = roundToCents(totalPaidDays > 0 ? monthlyChequesAmount * (counts[role] / totalPaidDays) : 0);
-    const remaining = roundToCents(Math.max(amountOwed - chequesShare, 0));
-    const coveragePercentage = amountOwed > 0 ? Math.min(Math.round((chequesShare / amountOwed) * 100), 100) : 100;
-
-    return { role, days: counts[role], chequesShare, amountOwed, remaining, coveragePercentage };
-}
-
-// ---------- Single-payer tracking (Mama gets all the cheques and self-reports how much she has
-// used and how much netto has already been paid to her and to Papa) ----------
-
-function getSinglePayerTrackingForMonth(singlePayerTracking, monthKey) {
-    const monthTracking = singlePayerTracking?.[monthKey] || {};
-    const momTracking = monthTracking.mom || {};
-    const dadTracking = monthTracking.dad || {};
-
-    return {
-        mom: {
-            chequesUsed: roundToCents(momTracking.chequesUsed),
-            nettoPaid: roundToCents(momTracking.nettoPaid)
-        },
-        dad: {
-            nettoPaid: roundToCents(dadTracking.nettoPaid)
-        }
-    };
-}
-
-// A role only counts as "tracked" for a month once one of its fields has actually been saved -
-// this is what lets the history badge tell "nothing filled in yet" apart from "filled in as €0",
-// since both would otherwise look like a zero balance.
-function isSinglePayerRoleTrackedForMonth(singlePayerTracking, monthKey, role) {
-    return Boolean(singlePayerTracking?.[monthKey]?.[role]);
-}
-
-// What's still owed netto (outside the cheques) to a person for the month: their calendar share,
-// minus cheques already used (Mama only - Papa can't use cheques), minus netto already paid.
-function getSinglePayerNettoRemaining(paymentBreakdown, role, tracking) {
-    const amountOwed = role === "mom" ? paymentBreakdown.momShare : paymentBreakdown.dadShare;
-    const chequesUsed = role === "mom" ? tracking.chequesUsed : 0;
-    return roundToCents(Math.max(amountOwed - chequesUsed - tracking.nettoPaid, 0));
+    const amountOwedAfterCredit = roundToCents(Math.max(amountOwed - carriedCredit, 0));
+    const { totalPaid } = getPaymentTotalsForRole(paymentRecords, monthKey, role);
+    return roundToCents(Math.max(amountOwedAfterCredit - totalPaid, 0));
 }
 
 // ---------- Payment status (shared by the calendar's history badges and the cheques page's cards) ----------
@@ -380,22 +391,21 @@ const PAYMENT_STATUS_LABELS = {
     [PAYMENT_STATUS.PAID]: "Volledig betaald"
 };
 
-// Nothing owed (0 days on the calendar) or the netto amount brought down to €0 both count as
-// "paid" - matches the pre-existing green/gray badge behaviour. Otherwise: no tracking saved yet
-// is "not tracked", some amount already covered (cheques used and/or netto paid) is "partial",
-// and nothing covered yet is "unpaid".
-function getSinglePayerPaymentStatus(paymentBreakdown, role, tracking, isTracked) {
+// Nothing owed (0 days on the calendar) or the remaining amount brought down to €0 both count as
+// "paid". Otherwise: no records logged yet is "not tracked", some amount already logged is
+// "partial", and nothing logged yet is "unpaid".
+function getPaymentStatusForRole(paymentBreakdown, paymentRecords, monthKey, role, carriedCredit = 0) {
     const amountOwed = role === "mom" ? paymentBreakdown.momShare : paymentBreakdown.dadShare;
-    const nettoRemaining = getSinglePayerNettoRemaining(paymentBreakdown, role, tracking);
+    const remaining = getPaymentRemainingForRole(paymentBreakdown, paymentRecords, monthKey, role, carriedCredit);
 
-    if (amountOwed <= 0 || nettoRemaining <= 0) {
+    if (amountOwed <= 0 || remaining <= 0) {
         return PAYMENT_STATUS.PAID;
     }
 
-    if (!isTracked) {
+    if (!isRoleTrackedForMonth(paymentRecords, monthKey, role)) {
         return PAYMENT_STATUS.NOT_TRACKED;
     }
 
-    const amountAlreadyCovered = roundToCents(amountOwed - nettoRemaining);
+    const amountAlreadyCovered = roundToCents(amountOwed - remaining);
     return amountAlreadyCovered > 0 ? PAYMENT_STATUS.PARTIAL : PAYMENT_STATUS.UNPAID;
 }
