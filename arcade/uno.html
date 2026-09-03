@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Speel UNO online met vrienden — maak of join een room en speel samen in realtime.">
+    <title>UNO — Arcade</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/uno.css">
+</head>
+<body>
+
+    <!-- ---------- Landing: create or join a room ---------- -->
+    <div class="rk-container" id="view-landing">
+        <a class="rk-back-link" href="../arcade.html">&larr; Terug naar arcade</a>
+        <h1 class="rk-title">UNO</h1>
+        <p class="rk-subtitle">Maak een room aan of join er een om samen te spelen.</p>
+
+        <div class="rk-panel" id="landing-create-section">
+            <div class="rk-field">
+                <label for="create-name-input">Jouw naam</label>
+                <input type="text" id="create-name-input" maxlength="20" placeholder="Naam">
+            </div>
+            <div class="rk-button-row">
+                <button type="button" class="rk-button rk-button--primary" id="create-room-button">Room aanmaken</button>
+                <button type="button" class="rk-button rk-button--soft" id="show-join-form-button">Ik heb een code</button>
+            </div>
+        </div>
+
+        <div class="rk-panel" id="landing-join-section" hidden>
+            <div class="rk-field">
+                <label for="join-name-input">Jouw naam</label>
+                <input type="text" id="join-name-input" maxlength="20" placeholder="Naam">
+            </div>
+            <div class="rk-field">
+                <label for="join-code-input">Roomcode</label>
+                <input type="text" id="join-code-input" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;">
+            </div>
+            <div class="rk-button-row">
+                <button type="button" class="rk-button rk-button--primary" id="join-room-button">Room joinen</button>
+                <button type="button" class="rk-button rk-button--soft" id="show-create-form-button">Nieuwe room maken</button>
+            </div>
+        </div>
+
+        <p class="rk-error-message" id="landing-error-message"></p>
+    </div>
+
+    <!-- ---------- Waiting room ---------- -->
+    <div class="rk-container" id="view-waiting-room" hidden>
+        <h1 class="rk-title">Wachtkamer</h1>
+        <p class="rk-subtitle">Deel deze code met de andere spelers.</p>
+        <div class="rk-panel">
+            <div class="rk-room-code-row">
+                <div class="rk-room-code" id="waiting-room-code"></div>
+                <button type="button" class="rk-button rk-button--soft rk-copy-code-button" id="copy-room-code-button">Kopiëren</button>
+            </div>
+            <ul id="waiting-player-list"></ul>
+            <button type="button" class="rk-button rk-button--primary" id="start-game-button" hidden>Start spel</button>
+            <p class="rk-hint" id="waiting-hint"></p>
+        </div>
+    </div>
+
+    <!-- ---------- Game ---------- -->
+    <div id="view-game" hidden>
+        <div id="game-root">
+            <div class="rk-game-topbar">
+                <div class="rk-game-topbar-status">
+                    <div id="turn-status"></div>
+                    <div id="action-message"></div>
+                </div>
+                <div id="players-strip"></div>
+                <div class="uno-topbar-controls">
+                    <span id="direction-indicator" class="uno-direction-indicator" aria-hidden="true"></span>
+                    <button type="button" class="rk-icon-button" id="mute-toggle-button" aria-label="Geluid uitzetten">🔊</button>
+                </div>
+            </div>
+
+            <div class="uno-table">
+                <div class="uno-pile-row">
+                    <div class="uno-pile-group">
+                        <button type="button" class="uno-pile-button" id="draw-pile"></button>
+                        <span class="uno-pile-label">Trekstapel</span>
+                    </div>
+                    <div class="uno-pile-group">
+                        <div id="discard-pile" class="uno-discard-pile"></div>
+                        <span class="uno-pile-label">Aflegstapel</span>
+                    </div>
+                </div>
+                <button type="button" class="rk-button rk-button--primary uno-call-button" id="uno-call-button" hidden>UNO!</button>
+            </div>
+
+            <div class="rk-hand-header">
+                <span class="rk-hand-header-label">Jouw kaarten</span>
+            </div>
+            <div id="hand-zone"></div>
+        </div>
+
+        <!-- Wild color picker overlay -->
+        <div class="uno-color-picker-overlay" id="color-picker-overlay" hidden>
+            <div class="uno-color-picker-panel">
+                <p class="uno-color-picker-title">Kies een kleur</p>
+                <div class="uno-color-picker-swatches">
+                    <button type="button" class="uno-color-swatch" data-color="red" aria-label="Rood"></button>
+                    <button type="button" class="uno-color-swatch" data-color="yellow" aria-label="Geel"></button>
+                    <button type="button" class="uno-color-swatch" data-color="green" aria-label="Groen"></button>
+                    <button type="button" class="uno-color-swatch" data-color="blue" aria-label="Blauw"></button>
+                </div>
+                <button type="button" class="rk-button rk-button--soft" id="color-picker-cancel-button">Annuleren</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ---------- Game over ---------- -->
+    <div class="rk-container" id="view-game-over" hidden>
+        <h1 class="rk-title">Spel afgelopen</h1>
+        <div id="game-over-summary"></div>
+
+        <h2 class="rk-leaderboard-title">Meeste overwinningen</h2>
+        <ul id="leaderboard-list"></ul>
+
+        <div class="rk-button-row">
+            <a class="rk-button rk-button--soft" href="../arcade.html">Terug naar arcade</a>
+        </div>
+    </div>
+
+    <script type="module" src="js/uno/main.js"></script>
+</body>
+</html>

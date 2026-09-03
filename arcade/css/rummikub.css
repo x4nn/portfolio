@@ -1,0 +1,754 @@
+/* ================================================================
+   Rummikub — self-contained styling for the arcade project.
+   Deliberately not sharing tokens with the rest of the site (portfolio
+   brand or luna's pastel theme) — this is its own dark arcade look.
+   ================================================================ */
+
+:root {
+    --rk-bg: #0f1119;
+    --rk-surface: rgba(27, 31, 46, 0.72);
+    --rk-surface-raised: rgba(36, 42, 64, 0.78);
+    --rk-surface-solid: #1b1f2e;
+    --rk-border: #333a54;
+    --rk-border-soft: rgba(255, 255, 255, 0.08);
+    --rk-text: #eef1fa;
+    --rk-text-muted: #9aa3c4;
+    --rk-accent-start: #7c5cff;
+    --rk-accent-end: #22e6c8;
+    --rk-danger: #ff6b6b;
+    --rk-success: #3ddc97;
+
+    --rk-tile-bg: linear-gradient(160deg, #fbf7ec 0%, #f0e9d6 100%);
+    --rk-tile-bg-solid: #f4eddc;
+    --rk-tile-border: #cabf9c;
+    --rk-tile-black: #1c1c1c;
+    --rk-tile-red: #d1392c;
+    --rk-tile-blue: #2153b0;
+    --rk-tile-orange: #d9821f;
+    --rk-tile-joker: #b8891f;
+
+    --rk-radius-sm: 8px;
+    --rk-radius-md: 14px;
+    --rk-radius-lg: 22px;
+
+    --rk-avatar-colors: var(--rk-accent-start), var(--rk-accent-end);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* `.rk-button` sets `display` unconditionally, which otherwise beats the
+   `hidden` attribute's UA-stylesheet `display: none` in cascade order. */
+[hidden] {
+    display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Outfit", "Segoe UI", system-ui, -apple-system, sans-serif;
+    background:
+        radial-gradient(1100px 600px at 15% -10%, #2a2050 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #16233f 0%, transparent 50%),
+        var(--rk-bg);
+    background-attachment: fixed;
+    color: var(--rk-text);
+    line-height: 1.5;
+}
+
+a {
+    color: var(--rk-accent-end);
+}
+
+.rk-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 18px 40px;
+    animation: rk-fade-in 0.35s ease;
+}
+
+.rk-back-link {
+    display: inline-block;
+    margin-bottom: 18px;
+    font-size: 0.9rem;
+    color: var(--rk-text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.rk-back-link:hover {
+    color: var(--rk-text);
+}
+
+.rk-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+}
+
+.rk-subtitle {
+    color: var(--rk-text-muted);
+    margin: 0 0 24px;
+}
+
+.rk-panel {
+    background: var(--rk-surface);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--rk-border-soft);
+    border-radius: var(--rk-radius-lg);
+    padding: 24px;
+    box-shadow: 0 20px 50px -30px rgba(0, 0, 0, 0.6);
+}
+
+.rk-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.rk-field label {
+    font-size: 0.85rem;
+    color: var(--rk-text-muted);
+}
+
+.rk-field input {
+    background: rgba(10, 12, 20, 0.4);
+    border: 1px solid var(--rk-border);
+    border-radius: var(--rk-radius-sm);
+    padding: 12px 14px;
+    color: var(--rk-text);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rk-field input:focus {
+    outline: none;
+    border-color: var(--rk-accent-end);
+    box-shadow: 0 0 0 3px rgba(34, 230, 200, 0.18);
+}
+
+.rk-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: var(--rk-radius-sm);
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.rk-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rk-button--primary {
+    background: linear-gradient(120deg, var(--rk-accent-start), var(--rk-accent-end));
+    color: #0d0f16;
+    box-shadow: 0 8px 24px -10px rgba(124, 92, 255, 0.55);
+}
+
+.rk-button--primary:not(:disabled):hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+}
+
+.rk-button--primary:not(:disabled):active {
+    transform: translateY(0) scale(0.98);
+}
+
+.rk-button--soft {
+    background: var(--rk-surface-raised);
+    color: var(--rk-text);
+    border: 1px solid var(--rk-border);
+}
+
+.rk-button--soft:not(:disabled):hover {
+    border-color: var(--rk-accent-end);
+}
+
+.rk-button--soft:not(:disabled):active {
+    transform: scale(0.97);
+}
+
+.rk-button--danger {
+    background: transparent;
+    color: var(--rk-danger);
+    border: 1px solid var(--rk-danger);
+}
+
+.rk-button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.rk-error-message {
+    color: var(--rk-danger);
+    font-size: 0.9rem;
+    min-height: 1.2em;
+}
+
+.rk-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border: 1px solid var(--rk-border);
+    border-radius: 50%;
+    background: var(--rk-surface-raised);
+    color: var(--rk-text);
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.rk-icon-button:hover {
+    border-color: var(--rk-accent-end);
+    transform: translateY(-1px);
+}
+
+.rk-icon-button:active {
+    transform: scale(0.94);
+}
+
+/* ---------- Waiting room ---------- */
+
+.rk-room-code-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 10px 0 8px;
+}
+
+.rk-room-code {
+    font-family: "Courier New", monospace;
+    font-size: 2.4rem;
+    letter-spacing: 0.3em;
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(120deg, var(--rk-accent-start), var(--rk-accent-end));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.rk-copy-code-button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+#waiting-player-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 18px;
+}
+
+#waiting-player-list li {
+    padding: 12px 14px;
+    background: var(--rk-surface-raised);
+    border: 1px solid var(--rk-border-soft);
+    border-radius: var(--rk-radius-sm);
+    margin-bottom: 8px;
+    animation: rk-slide-up 0.25s ease both;
+}
+
+.rk-hint {
+    color: var(--rk-text-muted);
+    font-size: 0.9rem;
+}
+
+/* ---------- Game view ---------- */
+
+#view-game {
+    max-width: none;
+    padding: 0;
+}
+
+#game-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.rk-game-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--rk-border-soft);
+    background: var(--rk-surface);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    flex-wrap: wrap;
+}
+
+.rk-game-topbar-status {
+    min-width: 120px;
+}
+
+#turn-status {
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#turn-status::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rk-text-muted);
+}
+
+.rummikub-turn-status--mine {
+    color: var(--rk-success);
+}
+
+.rummikub-turn-status--mine::before {
+    background: var(--rk-success);
+    box-shadow: 0 0 0 0 rgba(61, 220, 151, 0.55);
+    animation: rk-turn-pulse 1.6s ease-in-out infinite;
+}
+
+#pool-count {
+    color: var(--rk-text-muted);
+    font-size: 0.85rem;
+}
+
+#opponents-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.rummikub-opponent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 6px;
+    border-radius: 999px;
+    background: var(--rk-surface-raised);
+    border: 1px solid var(--rk-border);
+    font-size: 0.8rem;
+    transition: border-color 0.2s ease;
+}
+
+.rummikub-opponent-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--rk-avatar-colors));
+    color: #0d0f16;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex: 0 0 auto;
+}
+
+.rummikub-opponent-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.25;
+}
+
+.rummikub-opponent--active {
+    border-color: var(--rk-accent-end);
+    box-shadow: 0 0 0 3px rgba(34, 230, 200, 0.12);
+}
+
+.rummikub-opponent--disconnected {
+    opacity: 0.5;
+}
+
+.rummikub-opponent-name {
+    font-weight: 600;
+}
+
+.rummikub-opponent-count {
+    color: var(--rk-text-muted);
+}
+
+#board-zone {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 12px;
+    padding: 20px;
+    overflow-y: auto;
+    touch-action: pan-y;
+}
+
+.rummikub-set {
+    display: flex;
+    gap: 4px;
+    padding: 10px;
+    min-height: 52px;
+    min-width: 90px;
+    background: var(--rk-surface);
+    border: 1.5px solid var(--rk-border-soft);
+    border-radius: var(--rk-radius-md);
+    align-items: center;
+    box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.7);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rummikub-set--invalid {
+    border-color: var(--rk-danger);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.14);
+}
+
+.rummikub-set--new-placeholder {
+    color: var(--rk-text-muted);
+    font-size: 0.85rem;
+    justify-content: center;
+    border-style: dashed;
+    border-color: var(--rk-border);
+    background: transparent;
+    box-shadow: none;
+    animation: rk-placeholder-pulse 2.4s ease-in-out infinite;
+}
+
+.rk-action-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 18px;
+    border-top: 1px solid var(--rk-border-soft);
+    background: var(--rk-surface);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.rk-action-bar--shake {
+    animation: rk-shake 0.4s ease;
+}
+
+#action-message {
+    flex: 1;
+    min-width: 200px;
+    font-size: 0.85rem;
+    color: var(--rk-text-muted);
+}
+
+.rk-hand-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px 0;
+    background: var(--rk-surface-raised);
+}
+
+.rk-hand-header-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--rk-text-muted);
+}
+
+.rk-sort-toggle {
+    display: inline-flex;
+    background: rgba(10, 12, 20, 0.35);
+    border: 1px solid var(--rk-border);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.rk-sort-button {
+    border: none;
+    background: transparent;
+    color: var(--rk-text-muted);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.rk-sort-button--active {
+    background: linear-gradient(120deg, var(--rk-accent-start), var(--rk-accent-end));
+    color: #0d0f16;
+}
+
+#hand-zone {
+    display: flex;
+    gap: 6px;
+    padding: 12px 18px 24px;
+    overflow-x: auto;
+    background: var(--rk-surface-raised);
+    touch-action: pan-x;
+}
+
+/* ---------- Tiles ---------- */
+
+.rummikub-tile {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--rk-tile-bg);
+    border: 1px solid var(--rk-tile-border);
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--rk-tile-black);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 3px 0 rgba(0, 0, 0, 0.28),
+        0 8px 14px -8px rgba(0, 0, 0, 0.5);
+    user-select: none;
+    cursor: grab;
+    transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease;
+}
+
+/* Tiles used to block ALL native touch gestures (touch-action: none) so the
+   custom pointer-drag wouldn't fight the browser over a touch move — but
+   that also blocked swipe-scrolling the hand row and the board area on
+   mobile. Restricting the blocked axis to the one each row doesn't scroll
+   along lets the browser handle swipes natively while pointer events still
+   fire for drags (a scroll gesture just cancels the in-progress drag via
+   the pointercancel handler in drag-drop.js). */
+#hand-zone .rummikub-tile {
+    touch-action: pan-x;
+}
+
+#board-zone .rummikub-tile {
+    touch-action: pan-y;
+}
+
+.rummikub-tile-joker-icon {
+    width: 65%;
+    height: 65%;
+    color: var(--rk-tile-joker);
+}
+
+.rummikub-tile:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 3px 0 rgba(0, 0, 0, 0.28),
+        0 12px 18px -8px rgba(0, 0, 0, 0.55);
+}
+
+.rummikub-tile[data-color="red"] {
+    color: var(--rk-tile-red);
+}
+
+.rummikub-tile[data-color="blue"] {
+    color: var(--rk-tile-blue);
+}
+
+.rummikub-tile[data-color="orange"] {
+    color: var(--rk-tile-orange);
+}
+
+.rummikub-tile[data-color="joker"] {
+    color: var(--rk-tile-joker);
+}
+
+.rummikub-tile--selected {
+    outline: 3px solid var(--rk-accent-end);
+    outline-offset: 1px;
+    transform: translateY(-5px);
+}
+
+.rummikub-tile--dragging {
+    opacity: 0.3;
+}
+
+.rummikub-tile--pop-in {
+    /* `backwards` only (not `both`) — see the identical note in uno.css.
+       Rummikub tiles don't currently have a competing opacity state, but
+       keeping this consistent avoids the same trap if one's added later. */
+    animation: rk-tile-pop-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.rummikub-tile--ghost {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    pointer-events: none;
+    transform: scale(1.08) rotate(-2deg);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Game over ---------- */
+
+.rk-game-over-winner {
+    font-size: 1.6rem;
+    font-weight: 800;
+    background: linear-gradient(120deg, var(--rk-accent-start), var(--rk-accent-end));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rk-slide-up 0.4s ease both;
+}
+
+#game-over-summary ul {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 24px;
+}
+
+#game-over-summary li {
+    padding: 10px 14px;
+    background: var(--rk-surface-raised);
+    border: 1px solid var(--rk-border-soft);
+    border-radius: var(--rk-radius-sm);
+    margin-bottom: 6px;
+    animation: rk-slide-up 0.3s ease both;
+}
+
+.rk-leaderboard-title {
+    font-size: 1rem;
+    color: var(--rk-text-muted);
+    margin: 24px 0 8px;
+}
+
+#leaderboard-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#leaderboard-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rk-border-soft);
+}
+
+.rummikub-leaderboard-empty {
+    color: var(--rk-text-muted);
+    justify-content: flex-start !important;
+}
+
+/* ---------- Animations ---------- */
+
+@keyframes rk-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes rk-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes rk-tile-pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.4) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes rk-turn-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(61, 220, 151, 0.55);
+    }
+    70% {
+        box-shadow: 0 0 0 7px rgba(61, 220, 151, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(61, 220, 151, 0);
+    }
+}
+
+@keyframes rk-placeholder-pulse {
+    0%,
+    100% {
+        border-color: var(--rk-border);
+        opacity: 0.75;
+    }
+    50% {
+        border-color: var(--rk-accent-end);
+        opacity: 1;
+    }
+}
+
+@keyframes rk-shake {
+    10%,
+    90% {
+        transform: translateX(-2px);
+    }
+    20%,
+    80% {
+        transform: translateX(4px);
+    }
+    30%,
+    50%,
+    70% {
+        transform: translateX(-7px);
+    }
+    40%,
+    60% {
+        transform: translateX(7px);
+    }
+}
+
+@media (max-width: 560px) {
+    .rk-room-code {
+        font-size: 1.9rem;
+    }
+
+    .rummikub-tile {
+        width: 38px;
+        height: 52px;
+        font-size: 1.05rem;
+    }
+}
