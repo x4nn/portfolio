@@ -282,17 +282,13 @@ async function loadLeaderboardFromFirebase() {
     }
 }
 
-// Keyed by name (not a Firebase push id) so saving under a name that's
-// already on the board overwrites that entry instead of adding a duplicate.
-function normalizeLeaderboardNameKey(name) {
-    return name.trim().toLowerCase().replace(/[.#$[\]/]/g, "_");
-}
-
+// Each round is saved as its own entry (Firebase push id), even if the same
+// name already has one on the board — that way a later, lower-scoring round
+// under the same name never overwrites/deletes a previous high score.
 async function saveLeaderboardEntryToFirebase(entry) {
     try {
-        const entryKey = normalizeLeaderboardNameKey(entry.name);
-        await fetch(`${LUNA_LEADERBOARD_DATABASE_URL}/scores/${entryKey}.json`, {
-            method: "PUT",
+        await fetch(`${LUNA_LEADERBOARD_DATABASE_URL}/scores.json`, {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(entry)
         });

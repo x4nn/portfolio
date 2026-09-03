@@ -27,6 +27,7 @@
 
 body {
     margin: 0;
+    overflow-x: hidden;
     font-family: "Inter", "Segoe UI", sans-serif;
     background:
         radial-gradient(circle at top left, var(--accent-soft), transparent 24%),
@@ -57,6 +58,77 @@ select {
 
 .access-overlay.is-hidden {
     display: none;
+}
+
+/* ---------- Floating navigation dock (glass-style, always docked at the bottom) ---------- */
+
+.nav-dock {
+    position: fixed;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    max-width: calc(100vw - 24px);
+    background: color-mix(in srgb, var(--surface) 55%, transparent);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid color-mix(in srgb, white 45%, var(--line) 55%);
+    border-radius: 999px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    padding: 8px;
+}
+
+.nav-dock-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.nav-dock-link svg {
+    flex-shrink: 0;
+}
+
+/* Small vertical separator stripe between nav items, in the page's accent color */
+.nav-dock-link:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -8px;
+    width: 1.5px;
+    height: 55%;
+    background: var(--accent);
+    opacity: 0.4;
+    transform: translateY(-50%);
+}
+
+.nav-dock-link:hover,
+.nav-dock-link:focus-visible {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+    outline: none;
+}
+
+.nav-dock-link:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 420px) {
+    .nav-dock-link {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
 }
 
 .access-card {
@@ -117,7 +189,7 @@ select {
 .page-shell {
     max-width: 900px;
     margin: 0 auto;
-    padding: 28px 18px 48px;
+    padding: 28px 18px 104px;
 }
 
 .hero-card,
@@ -397,7 +469,7 @@ select {
 
 @media (max-width: 640px) {
     .page-shell {
-        padding: 16px 12px 32px;
+        padding: 16px 12px 104px;
     }
 
     .hero-card,

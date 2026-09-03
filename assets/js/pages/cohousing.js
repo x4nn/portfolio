@@ -10,8 +10,7 @@ const defaultState = {
     assignments: {},
     assignmentMeta: {},
     users: structuredClone(DEFAULT_USERS),
-    monthlyChequesAmounts: {},
-    singlePayerTracking: {}
+    paymentRecords: {}
 };
 
 let state = structuredClone(defaultState);
@@ -72,8 +71,7 @@ function normalizeState(parsedState) {
         assignments: parsedState.assignments || {},
         assignmentMeta: parsedState.assignmentMeta || {},
         users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS),
-        monthlyChequesAmounts: parsedState.monthlyChequesAmounts || {},
-        singlePayerTracking: parsedState.singlePayerTracking || {}
+        paymentRecords: parsedState.paymentRecords || {}
     };
 }
 
@@ -109,7 +107,7 @@ async function saveState() {
     updateSyncStatus("Opslaan…");
 
     try {
-        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta, state.weeklyBudget, state.monthlyChequesAmounts, state.singlePayerTracking);
+        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta, state.weeklyBudget, state.paymentRecords);
         await saveDashboardData(payload);
         await refreshRemoteState();
         updateSyncStatus("Opgeslagen in gedeelde database");
@@ -533,25 +531,31 @@ function renderHistory() {
         .join("");
 }
 
-// A gray dot means "still owed"; green means either nothing was ever owed for that month (0
-// days on the calendar) or the netto amount has actually been brought down to €0 on the
-// cheques/betalingen page.
+// A gray dot means "still owed" (nothing filled in yet, or filled in but nothing paid), orange
+// means partially paid, and green means either nothing was ever owed for that month (0 days on
+// the calendar) or the netto amount has actually been brought down to €0 on the cheques page.
 function buildPaymentStatusBadgeHtml(role, monthKey) {
     const personLabel = getRoleLabel(role, state.users);
-    const isTracked = isSinglePayerRoleTrackedForMonth(state.singlePayerTracking, monthKey, role);
     const paymentBreakdown = getPaymentBreakdown(state.assignments, monthKey, state.weeklyBudget);
-    const tracking = getSinglePayerTrackingForMonth(state.singlePayerTracking, monthKey)[role];
-    const nettoRemaining = getSinglePayerNettoRemaining(paymentBreakdown, role, tracking);
-    const isPaid = nettoRemaining <= 0;
-    const detailLabel = isPaid
+    const carriedCredit = getCarriedCreditForRole(state.assignments, state.weeklyBudget, state.paymentRecords, monthKey, role);
+    const remaining = getPaymentRemainingForRole(paymentBreakdown, state.paymentRecords, monthKey, role, carriedCredit);
+    const paymentStatus = getPaymentStatusForRole(paymentBreakdown, state.paymentRecords, monthKey, role, carriedCredit);
+
+    const detailLabel = paymentStatus === PAYMENT_STATUS.PAID
         ? "Volledig betaald"
-        : !isTracked
+        : paymentStatus === PAYMENT_STATUS.NOT_TRACKED
             ? "Nog niet ingevuld"
-            : `Nog ${formatCurrency(nettoRemaining)} netto te betalen`;
+            : `${PAYMENT_STATUS_LABELS[paymentStatus]}, nog ${formatCurrency(remaining)} te betalen`;
+
+    const dotModifierClass = paymentStatus === PAYMENT_STATUS.PAID
+        ? " is-paid"
+        : paymentStatus === PAYMENT_STATUS.PARTIAL
+            ? " is-partial"
+            : "";
 
     return `
         <div class="payment-status-badge" title="${personLabel}: ${detailLabel}">
-            <span class="payment-status-dot${isPaid ? " is-paid" : ""}" aria-hidden="true"></span>
+            <span class="payment-status-dot${dotModifierClass}" aria-hidden="true"></span>
             <span class="payment-status-badge-label">${personLabel}</span>
         </div>
     `;

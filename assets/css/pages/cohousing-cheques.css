@@ -14,6 +14,9 @@
     --dad-color: #9ed8bf;
     --accent: #1f8a76;
     --accent-soft: rgba(31, 138, 118, 0.15);
+    --payment-paid-color: #3fa66b;
+    --payment-unpaid-color: #c3d6d1;
+    --payment-partial-color: #e2a13c;
 }
 
 /* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
@@ -32,6 +35,7 @@ html {
 
 body {
     margin: 0;
+    overflow-x: hidden;
     font-family: "Inter", "Segoe UI", sans-serif;
     background:
         radial-gradient(circle at top left, var(--accent-soft), transparent 24%),
@@ -62,6 +66,77 @@ select {
 
 .access-overlay.is-hidden {
     display: none;
+}
+
+/* ---------- Floating navigation dock (glass-style, always docked at the bottom) ---------- */
+
+.nav-dock {
+    position: fixed;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    max-width: calc(100vw - 24px);
+    background: color-mix(in srgb, var(--surface) 55%, transparent);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid color-mix(in srgb, white 45%, var(--line) 55%);
+    border-radius: 999px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    padding: 8px;
+}
+
+.nav-dock-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.nav-dock-link svg {
+    flex-shrink: 0;
+}
+
+/* Small vertical separator stripe between nav items, in the page's accent color */
+.nav-dock-link:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -8px;
+    width: 1.5px;
+    height: 55%;
+    background: var(--accent);
+    opacity: 0.4;
+    transform: translateY(-50%);
+}
+
+.nav-dock-link:hover,
+.nav-dock-link:focus-visible {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+    outline: none;
+}
+
+.nav-dock-link:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 420px) {
+    .nav-dock-link {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
 }
 
 .access-card {
@@ -122,7 +197,7 @@ select {
 .page-shell {
     max-width: 780px;
     margin: 0 auto;
-    padding: 28px 18px 48px;
+    padding: 28px 18px 104px;
 }
 
 .hero-card,
@@ -238,298 +313,15 @@ select {
     color: var(--text);
 }
 
-/* ---------- Mode tabs ---------- */
+/* ---------- Payment cards (Mama and Papa each log their own maaltijdcheque/netto records) ---------- */
 
-.mode-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 18px;
-}
-
-.mode-tab-button {
-    border: 1px solid var(--line);
-    background: #fff;
-    border-radius: 999px;
-    padding: 10px 18px;
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--text-soft);
-    cursor: pointer;
-}
-
-.mode-tab-button:hover {
-    border-color: var(--accent);
-}
-
-.mode-tab-button.is-active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-}
-
-.mode-tab-panel.is-hidden {
-    display: none;
-}
-
-.mode-tab-intro {
-    margin: 0 0 18px;
-    color: var(--text-soft);
-    font-size: 0.94rem;
-    line-height: 1.5;
-}
-
-/* ---------- Single payer tracking (one parent gets all the cheques) ---------- */
-
-.single-payer-card-list {
+.payment-card-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
 
-.single-payer-card {
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 20px;
-    background: var(--surface-strong);
-}
-
-.single-payer-card.is-mom {
-    background: color-mix(in srgb, var(--mom-color) 25%, white);
-    border-color: color-mix(in srgb, var(--mom-color) 50%, transparent);
-}
-
-.single-payer-card.is-dad {
-    background: color-mix(in srgb, var(--dad-color) 25%, white);
-    border-color: color-mix(in srgb, var(--dad-color) 50%, transparent);
-}
-
-.single-payer-card h3 {
-    margin: 0 0 8px;
-    font-size: 1.15rem;
-}
-
-.single-payer-owed-hint {
-    margin: 0 0 16px;
-    color: var(--text-soft);
-    font-size: 0.86rem;
-    line-height: 1.45;
-}
-
-.single-payer-computed-stat {
-    margin: 0 0 14px;
-    font-size: 0.86rem;
-    color: var(--text-soft);
-}
-
-.single-payer-computed-stat strong {
-    color: var(--text);
-}
-
-.single-payer-field {
-    display: block;
-    margin-bottom: 10px;
-}
-
-.single-payer-field-label {
-    display: block;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-soft);
-}
-
-.single-payer-field-label > span {
-    display: block;
-    margin-bottom: 6px;
-}
-
-.single-payer-mark-paid-button {
-    display: inline-block;
-    margin-top: 6px;
-    border: 1px solid var(--accent);
-    background: transparent;
-    border-radius: 999px;
-    padding: 5px 14px;
-    font-size: 0.76rem;
-    font-weight: 700;
-    color: var(--accent);
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.single-payer-mark-paid-button:hover {
-    background: var(--accent);
-    color: #fff;
-}
-
-.single-payer-computed-stat--netto {
-    font-size: 0.95rem;
-}
-
-.single-payer-field-input-wrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #fff;
-    padding: 8px 12px;
-}
-
-.single-payer-field-input-wrap span {
-    font-weight: 800;
-    color: var(--accent);
-}
-
-.single-payer-field-input-wrap input {
-    flex: 1;
-    border: 0;
-    background: transparent;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text);
-    min-width: 0;
-}
-
-.single-payer-field-input-wrap input:focus {
-    outline: none;
-}
-
-.single-payer-field--netto {
-    margin-bottom: 0;
-}
-
-.single-payer-field--netto .single-payer-field-input-wrap {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 8%, white);
-}
-
-.single-payer-field--netto .single-payer-field-input-wrap input {
-    font-size: 1.2rem;
-}
-
-/* ---------- Cheques ---------- */
-
-.cheques-amount-field {
-    display: block;
-    margin-bottom: 24px;
-    color: var(--text-soft);
-    font-weight: 600;
-}
-
-.cheques-amount-field > span {
-    display: block;
-    margin-bottom: 8px;
-}
-
-.cheques-amount-input-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    background: #fff;
-    padding: 10px 18px;
-}
-
-.cheques-amount-currency {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--accent);
-}
-
-.cheques-amount-input-wrap input {
-    flex: 1;
-    border: 0;
-    background: transparent;
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--text);
-    min-width: 0;
-}
-
-.cheques-amount-input-wrap input:focus {
-    outline: none;
-}
-
-.cheques-share-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 18px;
-}
-
-.cheques-share-card {
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 20px 16px;
-    text-align: center;
-    background: var(--surface-strong);
-}
-
-.cheques-share-card.is-mom {
-    background: color-mix(in srgb, var(--mom-color) 30%, white);
-    border-color: color-mix(in srgb, var(--mom-color) 55%, transparent);
-}
-
-.cheques-share-card.is-dad {
-    background: color-mix(in srgb, var(--dad-color) 30%, white);
-    border-color: color-mix(in srgb, var(--dad-color) 55%, transparent);
-}
-
-.cheques-share-name {
-    margin: 0 0 6px;
-    font-size: 1.15rem;
-    font-weight: 700;
-}
-
-.cheques-share-amount {
-    margin: 0 0 6px;
-    font-size: 2.6rem;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.cheques-share-days {
-    margin: 0 0 14px;
-    color: var(--text-soft);
-    font-size: 0.95rem;
-}
-
-.cheques-coverage-bar {
-    height: 10px;
-    border-radius: 999px;
-    background: rgba(36, 21, 35, 0.1);
-    overflow: hidden;
-    margin: 0 0 8px;
-}
-
-.cheques-coverage-bar-fill {
-    height: 100%;
-    border-radius: 999px;
-    background: var(--accent);
-    transition: width 0.25s ease;
-}
-
-.cheques-coverage-label {
-    margin: 0 0 10px;
-    color: var(--text-soft);
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.cheques-remaining-amount {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--accent);
-}
-
-.cheques-remaining-amount.is-outstanding {
-    color: #c35252;
-}
-
-.cheques-empty-message {
+.payment-empty-message {
     grid-column: 1 / -1;
     margin: 0;
     padding: 18px;
@@ -539,12 +331,316 @@ select {
     border-radius: 18px;
 }
 
-.cheques-explainer {
+.payment-person-card {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 20px;
+    background: var(--surface-strong);
+}
+
+.payment-person-card.is-mom {
+    background: color-mix(in srgb, var(--mom-color) 25%, white);
+    border-color: color-mix(in srgb, var(--mom-color) 50%, transparent);
+}
+
+.payment-person-card.is-dad {
+    background: color-mix(in srgb, var(--dad-color) 25%, white);
+    border-color: color-mix(in srgb, var(--dad-color) 50%, transparent);
+}
+
+.payment-person-card h3 {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+}
+
+.payment-status-badge {
+    display: inline-block;
+    margin: 0 0 14px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--payment-unpaid-color);
+    color: var(--text-soft);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.payment-status-badge.is-partial {
+    background: var(--payment-partial-color);
+    color: #5c3d0a;
+}
+
+.payment-status-badge.is-paid {
+    background: var(--payment-paid-color);
+    color: #fff;
+}
+
+.payment-owed-hint {
+    margin: 0 0 16px;
+    color: var(--text-soft);
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.payment-carry-note {
+    margin: -8px 0 16px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--accent) 12%, white);
+    color: var(--accent);
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+.payment-totals {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.payment-totals-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
     margin: 0;
+    padding: 4px 0;
+    font-size: 0.86rem;
+    color: var(--text-soft);
+}
+
+.payment-totals-line strong {
+    color: var(--text);
+}
+
+.payment-totals-line--remaining {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    font-size: 0.95rem;
+}
+
+.payment-totals-line--remaining.is-outstanding strong {
+    color: #c35252;
+}
+
+.payment-totals-line--surplus {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+    font-size: 0.8rem;
+}
+
+.payment-totals-line--surplus strong {
+    color: var(--accent);
+}
+
+.payment-type-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.payment-type-toggle-button {
+    flex: 1 1 auto;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-soft);
+    cursor: pointer;
+}
+
+.payment-type-toggle-button:hover {
+    border-color: var(--accent);
+}
+
+.payment-type-toggle-button.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.payment-type-fixed-label {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-soft);
+}
+
+.payment-record-form {
+    margin-bottom: 16px;
+}
+
+.payment-record-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.payment-amount-field,
+.payment-description-field {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-soft);
+}
+
+.payment-amount-field > span,
+.payment-description-field > span {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.payment-amount-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    padding: 8px 12px;
+}
+
+.payment-amount-input-wrap span {
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.payment-amount-input-wrap input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.payment-amount-input-wrap input:focus {
+    outline: none;
+}
+
+.payment-description-field input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    padding: 8px 12px;
+    font-size: 0.92rem;
+    color: var(--text);
+}
+
+.payment-description-field input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.payment-add-button {
+    border: 0;
+    border-radius: 999px;
+    padding: 9px 14px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.payment-add-button:hover,
+.payment-add-button:focus-visible {
+    background: color-mix(in srgb, var(--accent) 85%, black);
+    outline: none;
+}
+
+.payment-history-empty {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+    font-style: italic;
+}
+
+.payment-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.payment-history-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    padding: 8px 10px;
+}
+
+.payment-history-item-badge {
+    flex-shrink: 0;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: var(--payment-unpaid-color);
+    color: var(--text-soft);
+}
+
+.payment-history-item-badge.is-maaltijd {
+    background: color-mix(in srgb, var(--accent) 20%, white);
+    color: var(--accent);
+}
+
+.payment-history-item-badge.is-netto {
+    background: color-mix(in srgb, var(--dad-color) 45%, white);
+    color: var(--text);
+}
+
+.payment-history-item-amount {
+    flex-shrink: 0;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.payment-history-item-description {
+    flex: 1 1 140px;
+    min-width: 0;
+    color: var(--text-soft);
+    font-size: 0.88rem;
+    overflow-wrap: break-word;
+}
+
+.payment-history-delete-button {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: #fff;
     color: var(--text-soft);
     font-size: 1rem;
-    line-height: 1.5;
-    text-align: center;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.payment-history-delete-button:hover,
+.payment-history-delete-button:focus-visible {
+    border-color: #c35252;
+    color: #c35252;
+    outline: none;
 }
 
 @media (max-width: 640px) {
@@ -553,7 +649,7 @@ select {
     }
 
     .page-shell {
-        padding: 16px 12px 32px;
+        padding: 16px 12px 104px;
     }
 
     .hero-card,
@@ -569,15 +665,7 @@ select {
         flex-direction: column;
     }
 
-    .cheques-share-list {
-        grid-template-columns: 1fr;
-    }
-
-    .cheques-share-amount {
-        font-size: 2.2rem;
-    }
-
-    .single-payer-card-list {
+    .payment-card-list {
         grid-template-columns: 1fr;
     }
 }

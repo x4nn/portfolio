@@ -1,8 +1,7 @@
-const STORAGE_KEY = "cohousing-cheques-state-v1";
+const STORAGE_KEY = "cohousing-cheques-state-v2";
 const ACCESS_IDENTITY_STORAGE_KEY = "cohousing-access-identity";
-const MODE_TAB_STORAGE_KEY = "cohousing-cheques-active-mode-tab";
-const DEFAULT_MODE_TAB = "single-payer";
 const MONTH_QUERY_PARAM_PATTERN = /^\d{4}-\d{2}$/;
+const PAYMENT_TYPE_LABELS = { maaltijd: "Maaltijdcheque", netto: "Netto" };
 
 const defaultState = {
     selectedMonthKey: getMonthKey(new Date()),
@@ -10,12 +9,14 @@ const defaultState = {
     assignments: {},
     assignmentMeta: {},
     users: structuredClone(DEFAULT_USERS),
-    monthlyChequesAmounts: {},
-    singlePayerTracking: {}
+    paymentRecords: {}
 };
 
 let state = structuredClone(defaultState);
-let activeModeTab = localStorage.getItem(MODE_TAB_STORAGE_KEY) || DEFAULT_MODE_TAB;
+
+// Which payment type is currently selected in each person's "add a record" form - not part of
+// the saved state, just the in-progress form choice.
+const selectedFormType = { mom: "maaltijd", dad: "netto" };
 
 const monthSelect = document.querySelector("[data-month-select]");
 const accessOverlay = document.querySelector("[data-access-overlay]");
@@ -24,12 +25,7 @@ const accessInput = document.querySelector("[data-access-input]");
 const accessError = document.querySelector("[data-access-error]");
 const roleStatus = document.querySelector("[data-role-status]");
 const syncStatus = document.querySelector("[data-sync-status]");
-const chequesAmountInput = document.querySelector("[data-cheques-amount-input]");
-const chequesShareList = document.querySelector("[data-cheques-share-list]");
-const chequesExplainerText = document.querySelector("[data-cheques-explainer]");
-const modeTabButtons = document.querySelectorAll("[data-mode-tab]");
-const modeTabPanels = document.querySelectorAll("[data-mode-panel]");
-const singlePayerCardList = document.querySelector("[data-single-payer-card-list]");
+const paymentCardList = document.querySelector("[data-payment-card-list]");
 
 let pageInitialized = false;
 let loggedInIdentityRoleKey = null;
@@ -81,8 +77,7 @@ function normalizeState(parsedState) {
         assignments: parsedState.assignments || {},
         assignmentMeta: parsedState.assignmentMeta || {},
         users: Array.isArray(parsedState.users) && parsedState.users.length ? parsedState.users : structuredClone(DEFAULT_USERS),
-        monthlyChequesAmounts: parsedState.monthlyChequesAmounts || {},
-        singlePayerTracking: parsedState.singlePayerTracking || {}
+        paymentRecords: parsedState.paymentRecords || {}
     };
 }
 
@@ -115,12 +110,12 @@ async function saveState() {
     updateSyncStatus("Opslaan…");
 
     try {
-        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta, state.weeklyBudget, state.monthlyChequesAmounts, state.singlePayerTracking);
+        const payload = buildRemotePayload(state.assignments, state.users, state.assignmentMeta, state.weeklyBudget, state.paymentRecords);
         await saveDashboardData(payload);
         await refreshRemoteState();
         updateSyncStatus("Opgeslagen in gedeelde database");
     } catch (error) {
-        console.warn("Could not save cheques amount", error);
+        console.warn("Could not save payment record", error);
         updateSyncStatus("Lokaal opgeslagen, synchronisatie in behandeling");
     }
 }
@@ -216,48 +211,14 @@ function bindEvents() {
     monthSelect.addEventListener("change", () => {
         state.selectedMonthKey = monthSelect.value;
         persistLocalState();
-        renderSinglePayerCards();
-        renderChequesShare();
-    });
-
-    chequesAmountInput.addEventListener("input", () => {
-        state.monthlyChequesAmounts[state.selectedMonthKey] = Number(chequesAmountInput.value) || 0;
-        persistLocalState();
-        renderSinglePayerCards();
-        renderChequesShare();
-    });
-
-    chequesAmountInput.addEventListener("change", async () => {
-        await saveState();
-    });
-
-    modeTabButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            activeModeTab = button.getAttribute("data-mode-tab");
-            localStorage.setItem(MODE_TAB_STORAGE_KEY, activeModeTab);
-            renderModeTabs();
-        });
+        renderPaymentCards();
     });
 }
 
 function renderAll() {
     renderActiveIdentity();
     renderMonthSelector();
-    renderModeTabs();
-    renderSinglePayerCards();
-    renderChequesShare();
-}
-
-function renderModeTabs() {
-    modeTabButtons.forEach((button) => {
-        const isActive = button.getAttribute("data-mode-tab") === activeModeTab;
-        button.classList.toggle("is-active", isActive);
-        button.setAttribute("aria-selected", isActive ? "true" : "false");
-    });
-
-    modeTabPanels.forEach((panel) => {
-        panel.classList.toggle("is-hidden", panel.getAttribute("data-mode-panel") !== activeModeTab);
-    });
+    renderPaymentCards();
 }
 
 function renderActiveIdentity() {
@@ -280,165 +241,199 @@ function renderMonthSelector() {
         .join("");
 }
 
-function renderChequesShare() {
+function renderPaymentCards() {
     const monthKey = state.selectedMonthKey;
     const paymentBreakdown = getPaymentBreakdown(state.assignments, monthKey, state.weeklyBudget);
-    const monthlyChequesAmount = getMonthlyChequesAmount(state.monthlyChequesAmounts, monthKey);
-
-    if (chequesAmountInput && document.activeElement !== chequesAmountInput) {
-        chequesAmountInput.value = monthlyChequesAmount;
-    }
 
     if (!paymentBreakdown.totalPaidDays) {
-        chequesShareList.innerHTML = `
-            <p class="cheques-empty-message">
+        paymentCardList.innerHTML = `
+            <p class="payment-empty-message">
                 Voor ${formatMonthLabel(monthKey)} staan er nog geen dagen bij Mama of Papa op de kalender.
                 Vul dit eerst in op de kalenderpagina.
             </p>
         `;
-        chequesExplainerText.textContent = "";
         return;
     }
 
-    const momBreakdown = getChequesShareForRole(paymentBreakdown, monthlyChequesAmount, "mom");
-    const dadBreakdown = getChequesShareForRole(paymentBreakdown, monthlyChequesAmount, "dad");
+    paymentCardList.innerHTML =
+        buildPersonPaymentCardHtml("mom", monthKey, paymentBreakdown) +
+        buildPersonPaymentCardHtml("dad", monthKey, paymentBreakdown);
 
-    chequesShareList.innerHTML = [momBreakdown, dadBreakdown].map(buildChequesShareCardHtml).join("");
-
-    const totalAmountOwed = momBreakdown.amountOwed + dadBreakdown.amountOwed;
-    const totalRemaining = Math.max(totalAmountOwed - monthlyChequesAmount, 0);
-
-    chequesExplainerText.textContent =
-        `Van de ${formatCurrency(monthlyChequesAmount)} aan cheques voor ${formatMonthLabel(monthKey)} was je ${paymentBreakdown.counts.mom} dag${paymentBreakdown.counts.mom === 1 ? "" : "en"} bij Mama ` +
-        `en ${paymentBreakdown.counts.dad} dag${paymentBreakdown.counts.dad === 1 ? "" : "en"} bij Papa, dus wordt het zo verdeeld. In totaal is er ${formatCurrency(totalAmountOwed)} verschuldigd op basis ` +
-        `van het wekelijks budget${totalRemaining > 0 ? `, dus blijft er ${formatCurrency(totalRemaining)} over om buiten de cheques te betalen.` : ", en de cheques dekken dit volledig."}`;
+    bindPaymentCardEvents();
 }
 
-function renderSinglePayerCards() {
-    const monthKey = state.selectedMonthKey;
-    const paymentBreakdown = getPaymentBreakdown(state.assignments, monthKey, state.weeklyBudget);
-    const monthlyChequesAmount = getMonthlyChequesAmount(state.monthlyChequesAmounts, monthKey);
-    const tracking = getSinglePayerTrackingForMonth(state.singlePayerTracking, monthKey);
-
-    singlePayerCardList.innerHTML =
-        buildMomSinglePayerCardHtml(monthKey, paymentBreakdown, monthlyChequesAmount, tracking.mom) +
-        buildDadSinglePayerCardHtml(monthKey, paymentBreakdown, tracking.dad);
-
-    bindSinglePayerInputEvents();
-}
-
-function buildMomSinglePayerCardHtml(monthKey, paymentBreakdown, monthlyChequesAmount, momTracking) {
-    const dayCount = paymentBreakdown.counts.mom;
-    const chequesLeft = roundToCents(Math.max(monthlyChequesAmount - momTracking.chequesUsed, 0));
-    const nettoRemaining = getSinglePayerNettoRemaining(paymentBreakdown, "mom", momTracking);
+function buildPersonPaymentCardHtml(role, monthKey, paymentBreakdown) {
+    const personLabel = role === "mom" ? "Mama" : "Papa";
+    const dayCount = paymentBreakdown.counts[role];
+    const amountOwed = role === "mom" ? paymentBreakdown.momShare : paymentBreakdown.dadShare;
+    const { records, chequesPaid, nettoPaid, totalPaid } = getPaymentTotalsForRole(state.paymentRecords, monthKey, role);
+    const carriedCredit = getCarriedCreditForRole(state.assignments, state.weeklyBudget, state.paymentRecords, monthKey, role);
+    const amountOwedAfterCredit = roundToCents(Math.max(amountOwed - carriedCredit, 0));
+    const remaining = getPaymentRemainingForRole(paymentBreakdown, state.paymentRecords, monthKey, role, carriedCredit);
+    const surplusForNextMonth = roundToCents(Math.max(totalPaid - amountOwedAfterCredit, 0));
+    const paymentStatus = getPaymentStatusForRole(paymentBreakdown, state.paymentRecords, monthKey, role, carriedCredit);
+    const availableTypes = PAYMENT_TYPES_BY_ROLE[role];
+    const dadCannotUseChequesHint = role === "dad" ? " Papa kan geen cheques gebruiken, dus dit is altijd netto." : "";
 
     return `
-        <article class="single-payer-card is-mom">
-            <h3>Mama</h3>
-            <p class="single-payer-owed-hint">
-                Volgens de kalender heeft ze recht op ${formatCurrency(paymentBreakdown.momShare)} voor ${formatMonthLabel(monthKey)}
-                (${dayCount} dag${dayCount === 1 ? "" : "en"}).
+        <article class="payment-person-card is-${role}" data-payment-card data-role="${role}">
+            <h3>${personLabel}</h3>
+            <span class="payment-status-badge is-${paymentStatus}">${PAYMENT_STATUS_LABELS[paymentStatus]}</span>
+            <p class="payment-owed-hint">
+                Volgens de kalender heeft ${role === "mom" ? "ze" : "hij"} recht op ${formatCurrency(amountOwed)} voor ${formatMonthLabel(monthKey)}
+                (${dayCount} dag${dayCount === 1 ? "" : "en"}).${dadCannotUseChequesHint}
             </p>
-            ${buildSinglePayerFieldHtml("mom", "chequesUsed", "Cheques al gebruikt", momTracking.chequesUsed, {
-                markPaidLabel: "Volledig gebruikt",
-                markPaidValue: roundToCents(Math.min(monthlyChequesAmount, paymentBreakdown.momShare))
-            })}
-            <p class="single-payer-computed-stat">Cheques nog te gebruiken: <strong>${formatCurrency(chequesLeft)}</strong></p>
-            ${buildSinglePayerFieldHtml("mom", "nettoPaid", "Netto al betaald", momTracking.nettoPaid, {
-                markPaidLabel: "Volledig betaald",
-                markPaidValue: roundToCents(momTracking.nettoPaid + nettoRemaining),
-                isEmphasized: true
-            })}
-            <p class="single-payer-computed-stat single-payer-computed-stat--netto">Netto nog te betalen: <strong>${formatCurrency(nettoRemaining)}</strong></p>
+            ${carriedCredit > 0 ? `<p class="payment-carry-note">Vooruitbetaald van vorige maand: <strong>${formatCurrency(carriedCredit)}</strong> (al verrekend met deze maand)</p>` : ""}
+
+            <div class="payment-totals">
+                ${availableTypes.includes("maaltijd") ? `<p class="payment-totals-line">Cheques betaald: <strong>${formatCurrency(chequesPaid)}</strong></p>` : ""}
+                <p class="payment-totals-line">Netto betaald: <strong>${formatCurrency(nettoPaid)}</strong></p>
+                <p class="payment-totals-line payment-totals-line--remaining${remaining > 0 ? " is-outstanding" : ""}">
+                    Nog te betalen: <strong>${formatCurrency(remaining)}</strong>
+                </p>
+                ${surplusForNextMonth > 0 ? `<p class="payment-totals-line payment-totals-line--surplus">Extra betaald: <strong>${formatCurrency(surplusForNextMonth)}</strong> (telt automatisch mee voor volgende maand)</p>` : ""}
+            </div>
+
+            ${buildPaymentRecordFormHtml(role, availableTypes)}
+            ${buildPaymentHistoryHtml(role, records)}
         </article>
     `;
 }
 
-function buildDadSinglePayerCardHtml(monthKey, paymentBreakdown, dadTracking) {
-    const dayCount = paymentBreakdown.counts.dad;
-    const nettoRemaining = getSinglePayerNettoRemaining(paymentBreakdown, "dad", dadTracking);
+function buildPaymentRecordFormHtml(role, availableTypes) {
+    const activeType = availableTypes.includes(selectedFormType[role]) ? selectedFormType[role] : availableTypes[0];
+    selectedFormType[role] = activeType;
+
+    const typeToggleHtml = availableTypes.length > 1
+        ? `
+            <div class="payment-type-toggle" role="tablist" aria-label="Kies het type betaling">
+                ${availableTypes
+                    .map(
+                        (type) => `
+                            <button type="button" class="payment-type-toggle-button${type === activeType ? " is-active" : ""}"
+                                data-payment-type-button data-role="${role}" data-type="${type}" role="tab" aria-selected="${type === activeType}">
+                                ${PAYMENT_TYPE_LABELS[type]}
+                            </button>
+                        `
+                    )
+                    .join("")}
+            </div>
+        `
+        : `<p class="payment-type-fixed-label">${PAYMENT_TYPE_LABELS[activeType]}</p>`;
 
     return `
-        <article class="single-payer-card is-dad">
-            <h3>Papa</h3>
-            <p class="single-payer-owed-hint">
-                Volgens de kalender heeft hij recht op ${formatCurrency(paymentBreakdown.dadShare)} voor ${formatMonthLabel(monthKey)}
-                (${dayCount} dag${dayCount === 1 ? "" : "en"}). Papa kan geen cheques gebruiken, dus dit is volledig netto.
-            </p>
-            ${buildSinglePayerFieldHtml("dad", "nettoPaid", "Netto al betaald", dadTracking.nettoPaid, {
-                markPaidLabel: "Volledig betaald",
-                markPaidValue: roundToCents(dadTracking.nettoPaid + nettoRemaining),
-                isEmphasized: true
-            })}
-            <p class="single-payer-computed-stat single-payer-computed-stat--netto">Netto nog te betalen: <strong>${formatCurrency(nettoRemaining)}</strong></p>
-        </article>
+        <form class="payment-record-form" data-payment-record-form data-role="${role}">
+            ${typeToggleHtml}
+            <div class="payment-record-form-fields">
+                <label class="payment-amount-field" for="payment-amount-${role}">
+                    <span>Bedrag</span>
+                    <div class="payment-amount-input-wrap">
+                        <span aria-hidden="true">&euro;</span>
+                        <input id="payment-amount-${role}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" data-payment-amount-input required>
+                    </div>
+                </label>
+                <label class="payment-description-field" for="payment-description-${role}">
+                    <span>Omschrijving</span>
+                    <input id="payment-description-${role}" type="text" placeholder="Bijv. boodschappen 12 maart" data-payment-description-input required>
+                </label>
+                <button type="submit" class="payment-add-button">Toevoegen</button>
+            </div>
+        </form>
     `;
 }
 
-function buildSinglePayerFieldHtml(role, field, label, value, options = {}) {
-    const { markPaidLabel, markPaidValue, isEmphasized = false } = options;
+function buildPaymentHistoryHtml(role, records) {
+    if (!records.length) {
+        return `<p class="payment-history-empty">Nog geen betalingen ingevoerd deze maand.</p>`;
+    }
 
     return `
-        <div class="single-payer-field${isEmphasized ? " single-payer-field--netto" : ""}">
-            <label class="single-payer-field-label" for="single-payer-${role}-${field}">
-                <span>${label}</span>
-                <div class="single-payer-field-input-wrap">
-                    <span aria-hidden="true">&euro;</span>
-                    <input id="single-payer-${role}-${field}" type="number" min="0" step="1" inputmode="numeric" data-single-payer-input data-role="${role}" data-field="${field}" value="${value}">
-                </div>
-            </label>
-            ${markPaidLabel
-                ? `<button type="button" class="single-payer-mark-paid-button" data-single-payer-mark-paid data-role="${role}" data-field="${field}" data-value="${markPaidValue}">${markPaidLabel}</button>`
-                : ""}
-        </div>
+        <ul class="payment-history-list">
+            ${records
+                .map(
+                    (record) => `
+                        <li class="payment-history-item">
+                            <span class="payment-history-item-badge is-${record.type}">${PAYMENT_TYPE_LABELS[record.type]}</span>
+                            <span class="payment-history-item-amount">${formatCurrency(record.amount)}</span>
+                            <span class="payment-history-item-description">${escapeHtml(record.description)}</span>
+                            <button type="button" class="payment-history-delete-button" data-payment-delete-button data-role="${role}" data-record-id="${record.id}" aria-label="Verwijder deze betaling">&times;</button>
+                        </li>
+                    `
+                )
+                .join("")}
+        </ul>
     `;
 }
 
-function bindSinglePayerInputEvents() {
-    singlePayerCardList.querySelectorAll("[data-single-payer-input]").forEach((input) => {
-        input.addEventListener("change", async () => {
-            await updateSinglePayerField(input.getAttribute("data-role"), input.getAttribute("data-field"), Number(input.value) || 0);
-            renderSinglePayerCards();
+function escapeHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value || "";
+    return div.innerHTML;
+}
+
+function bindPaymentCardEvents() {
+    paymentCardList.querySelectorAll("[data-payment-type-button]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const role = button.getAttribute("data-role");
+            selectedFormType[role] = button.getAttribute("data-type");
+            renderPaymentCards();
         });
     });
 
-    singlePayerCardList.querySelectorAll("[data-single-payer-mark-paid]").forEach((button) => {
+    paymentCardList.querySelectorAll("[data-payment-record-form]").forEach((form) => {
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const role = form.getAttribute("data-role");
+            const amountInput = form.querySelector("[data-payment-amount-input]");
+            const descriptionInput = form.querySelector("[data-payment-description-input]");
+            const amount = roundToCents(amountInput.value);
+
+            if (!amount || !descriptionInput.value.trim()) {
+                return;
+            }
+
+            await addPaymentRecord(role, selectedFormType[role], amount, descriptionInput.value.trim());
+            renderPaymentCards();
+        });
+    });
+
+    paymentCardList.querySelectorAll("[data-payment-delete-button]").forEach((button) => {
         button.addEventListener("click", async () => {
-            await updateSinglePayerField(button.getAttribute("data-role"), button.getAttribute("data-field"), Number(button.getAttribute("data-value")) || 0);
-            renderSinglePayerCards();
+            await deletePaymentRecord(button.getAttribute("data-role"), button.getAttribute("data-record-id"));
+            renderPaymentCards();
         });
     });
 }
 
-async function updateSinglePayerField(role, field, value) {
+async function addPaymentRecord(role, type, amount, description) {
     const monthKey = state.selectedMonthKey;
 
-    if (!state.singlePayerTracking[monthKey]) {
-        state.singlePayerTracking[monthKey] = {};
+    if (!state.paymentRecords[monthKey]) {
+        state.paymentRecords[monthKey] = {};
     }
-    if (!state.singlePayerTracking[monthKey][role]) {
-        state.singlePayerTracking[monthKey][role] = {};
+    if (!Array.isArray(state.paymentRecords[monthKey][role])) {
+        state.paymentRecords[monthKey][role] = [];
     }
 
-    state.singlePayerTracking[monthKey][role][field] = roundToCents(value);
+    state.paymentRecords[monthKey][role].push({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        type,
+        amount,
+        description,
+        createdAt: Date.now()
+    });
+
     await saveState();
 }
 
-function buildChequesShareCardHtml(entry) {
-    const personLabel = entry.role === "mom" ? "Mama" : "Papa";
+async function deletePaymentRecord(role, recordId) {
+    const monthKey = state.selectedMonthKey;
+    const records = state.paymentRecords?.[monthKey]?.[role];
 
-    return `
-        <article class="cheques-share-card is-${entry.role}">
-            <p class="cheques-share-name">${personLabel} krijgt</p>
-            <p class="cheques-share-amount">${formatCurrency(entry.chequesShare)}</p>
-            <p class="cheques-share-days">${entry.days} dag${entry.days === 1 ? "" : "en"} bij ${personLabel}</p>
-            <div class="cheques-coverage-bar" role="img" aria-label="${entry.coveragePercentage}% van het verschuldigde bedrag gedekt door de cheques">
-                <div class="cheques-coverage-bar-fill" style="width: ${entry.coveragePercentage}%"></div>
-            </div>
-            <p class="cheques-coverage-label">${entry.coveragePercentage}% gedekt door cheques</p>
-            <p class="cheques-remaining-amount${entry.remaining > 0 ? " is-outstanding" : ""}">
-                ${entry.remaining > 0 ? `Nog ${formatCurrency(entry.remaining)} te betalen buiten de cheques` : "Volledig gedekt door de cheques"}
-            </p>
-        </article>
-    `;
+    if (!Array.isArray(records)) {
+        return;
+    }
+
+    state.paymentRecords[monthKey][role] = records.filter((record) => record.id !== recordId);
+    await saveState();
 }
