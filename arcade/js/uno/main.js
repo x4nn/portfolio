@@ -116,6 +116,14 @@ function clearSession() {
     localStorage.removeItem(SESSION_STORAGE_KEY);
 }
 
+// Drops only the persisted copy, keeping the in-memory `session` intact so
+// the current tab can still finish rendering the game-over screen (winner
+// name, leaderboard write). A later page load then starts at the landing
+// view instead of re-attaching to this now-finished room.
+function forgetStoredSessionOnly() {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+}
+
 function isMyTurn(room) {
     return room && room.turnOrder[room.currentTurnIndex] === session.playerId;
 }
@@ -129,12 +137,14 @@ function setActionMessage(message) {
 // ---------------------------------------------------------------
 
 elements.showJoinFormButton.addEventListener("click", () => {
+    elements.joinNameInput.value = elements.createNameInput.value;
     elements.createSection.hidden = true;
     elements.joinSection.hidden = false;
     elements.landingErrorMessage.textContent = "";
 });
 
 elements.showCreateFormButton.addEventListener("click", () => {
+    elements.createNameInput.value = elements.joinNameInput.value;
     elements.joinSection.hidden = true;
     elements.createSection.hidden = false;
     elements.landingErrorMessage.textContent = "";
@@ -237,6 +247,7 @@ function onRoomChanged(room) {
     }
 
     if (room.status === "finished") {
+        forgetStoredSessionOnly();
         renderGameOver(room);
         showView("gameOver");
     }

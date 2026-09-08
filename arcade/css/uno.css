@@ -819,4 +819,23 @@ a {
     .uno-pile-row {
         gap: 22px;
     }
+
+    /* Touch targets under ~44px are hard to tap reliably, and the catch
+       button in particular is used for a time-pressured action. */
+    .uno-catch-button {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 14px;
+    }
+
+    .rk-icon-button {
+        width: 44px;
+        height: 44px;
+    }
+
+    .rk-copy-code-button {
+        min-height: 44px;
+        padding: 0 18px;
+    }
 }
