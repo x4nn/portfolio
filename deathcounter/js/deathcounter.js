@@ -8,19 +8,32 @@ function showSyncStatus(message, isError = false) {
     syncStatusMessage.classList.toggle('death-counter-sync-status--error', isError);
 }
 
+// How often the page checks the database on its own, so deaths tapped on
+// other phones (and their "last death" time) show up without pressing refresh.
+const AUTO_REFRESH_INTERVAL_MS = 5000;
+
+// What's currently on screen, so an auto-refresh with no changes doesn't redraw
+// the cards (a redraw mid-tap could swallow that tap).
+let renderedPlayersJson = '';
+
 // Fetches the latest counts from the database and redraws, without a page reload.
-async function refreshPlayers() {
-    refreshButton.disabled = true;
+// Automatic checks leave the refresh button alone so it doesn't flicker.
+async function refreshPlayers({ isAutomatic = false } = {}) {
+    if (!isAutomatic) refreshButton.disabled = true;
     try {
         const players = await loadPlayers();
-        renderActivePlayers(players);
+        const playersJson = JSON.stringify(players);
+        if (playersJson !== renderedPlayersJson) {
+            renderActivePlayers(players);
+            renderedPlayersJson = playersJson;
+        }
         const refreshedTime = new Date().toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         showSyncStatus(`Bijgewerkt om ${refreshedTime}`);
     } catch (error) {
         console.error('Kon spelers niet laden uit de database', error);
         showSyncStatus('Kon niet laden. Probeer opnieuw.', true);
     } finally {
-        refreshButton.disabled = false;
+        if (!isAutomatic) refreshButton.disabled = false;
     }
 }
 
@@ -119,7 +132,16 @@ function renderActivePlayers(players) {
     });
 }
 
-refreshButton.addEventListener('click', refreshPlayers);
+refreshButton.addEventListener('click', () => refreshPlayers());
 setInterval(updateTimeSinceLastDeathLabels, MILLISECONDS_PER_SECOND);
+
+// Only check while the page is actually open on screen, and catch up right
+// away when someone switches back to it.
+setInterval(() => {
+    if (document.visibilityState === 'visible') refreshPlayers({ isAutomatic: true });
+}, AUTO_REFRESH_INTERVAL_MS);
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshPlayers({ isAutomatic: true });
+});
 
 refreshPlayers();
