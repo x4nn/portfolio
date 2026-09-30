@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Spelers toevoegen, op actief/inactief zetten of verwijderen voor de death counter.">
+    <title>Spelers beheren — Death Counter</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/deathcounter.css">
+</head>
+<body>
+
+    <div class="player-management-page-shell">
+        <a class="player-management-back-link" href="../deathcounter.html">&larr; Terug naar death counter</a>
+
+        <header class="death-counter-hero" style="text-align:left; margin-bottom: 28px;">
+            <div class="death-counter-eyebrow">&lt;deathcounter/&gt;</div>
+            <h1 class="death-counter-title" style="font-size: clamp(1.6rem, 5vw, 2.2rem);">Spelers beheren</h1>
+            <p class="death-counter-subtitle" style="margin: 0;">Voeg spelers toe, zet ze op inactief of verwijder ze.</p>
+        </header>
+
+        <form class="player-management-form" data-add-player-form>
+            <label for="new-player-name-input" class="sr-only" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Naam van de speler</label>
+            <input
+                type="text"
+                id="new-player-name-input"
+                class="player-management-name-input"
+                data-new-player-name-input
+                placeholder="Naam van de speler"
+                maxlength="30"
+                required
+            >
+            <button type="submit" class="death-counter-button death-counter-button--primary">Toevoegen</button>
+        </form>
+
+        <div class="player-management-list" data-player-list></div>
+
+        <p class="player-management-empty-state" data-empty-player-list hidden>Nog geen spelers toegevoegd.</p>
+    </div>
+
+    <script src="js/deathcounter-data.js"></script>
+    <script src="js/spelers.js"></script>
+</body>
+</html>

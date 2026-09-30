@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Death counter om per speler bij te houden hoe vaak die dood is gegaan.">
+    <title>Death Counter</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="deathcounter/css/deathcounter.css">
+</head>
+<body>
+
+    <header class="death-counter-hero">
+        <div class="death-counter-eyebrow">&lt;deathcounter/&gt;</div>
+        <h1 class="death-counter-title">Death Counter</h1>
+        <p class="death-counter-subtitle">Tik op een speler om er een dood bij te tellen.</p>
+    </header>
+
+    <div class="death-counter-active-players-grid" data-active-players-grid></div>
+
+    <div class="death-counter-empty-state" data-empty-state hidden>
+        <p>Nog geen actieve spelers.</p>
+        <a class="death-counter-button death-counter-button--primary" href="deathcounter/spelers.html">Spelers toevoegen</a>
+    </div>
+
+    <a class="death-counter-footer-link" href="deathcounter/spelers.html">Spelers beheren &rarr;</a>
+
+    <script src="deathcounter/js/deathcounter-data.js"></script>
+    <script src="deathcounter/js/deathcounter.js"></script>
+</body>
+</html>
