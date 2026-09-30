@@ -1,34 +1,21 @@
+import {
+    subscribeToPlayers,
+    addPlayer,
+    setPlayerActive,
+    deletePlayer,
+    escapeHtml,
+} from './deathcounter-data.js';
+
 const addPlayerForm = document.querySelector('[data-add-player-form]');
 const newPlayerNameInput = document.querySelector('[data-new-player-name-input]');
 const playerListContainer = document.querySelector('[data-player-list]');
 const emptyPlayerListMessage = document.querySelector('[data-empty-player-list]');
 
-function addPlayer(name) {
-    const trimmedName = name.trim();
-    if (!trimmedName) return;
-    const players = loadPlayers();
-    players.push(createPlayer(trimmedName, players.length));
-    savePlayers(players);
-    renderPlayerList();
-}
+// Latest players from the database, used to pick the next player's color.
+let currentPlayers = [];
 
-function togglePlayerActive(playerId, isActive) {
-    const players = loadPlayers();
-    const player = players.find((currentPlayer) => currentPlayer.id === playerId);
-    if (!player) return;
-    player.active = isActive;
-    savePlayers(players);
-}
-
-function deletePlayer(playerId) {
-    const players = loadPlayers();
-    const remainingPlayers = players.filter((player) => player.id !== playerId);
-    savePlayers(remainingPlayers);
-    renderPlayerList();
-}
-
-function renderPlayerList() {
-    const players = loadPlayers();
+function renderPlayerList(players) {
+    currentPlayers = players;
     playerListContainer.innerHTML = '';
 
     if (players.length === 0) {
@@ -54,7 +41,7 @@ function renderPlayerList() {
         `;
 
         playerRow.querySelector('[data-active-toggle]').addEventListener('change', (changeEvent) => {
-            togglePlayerActive(player.id, changeEvent.target.checked);
+            setPlayerActive(player.id, changeEvent.target.checked);
         });
 
         playerRow.querySelector('[data-delete-button]').addEventListener('click', () => {
@@ -68,9 +55,11 @@ function renderPlayerList() {
 
 addPlayerForm.addEventListener('submit', (submitEvent) => {
     submitEvent.preventDefault();
-    addPlayer(newPlayerNameInput.value);
+    const trimmedName = newPlayerNameInput.value.trim();
+    if (!trimmedName) return;
+    addPlayer(trimmedName, currentPlayers.length);
     newPlayerNameInput.value = '';
     newPlayerNameInput.focus();
 });
 
-renderPlayerList();
+subscribeToPlayers(renderPlayerList);

@@ -1,26 +1,14 @@
+import {
+    subscribeToPlayers,
+    incrementPlayerDeaths,
+    decrementPlayerDeaths,
+    escapeHtml,
+} from './deathcounter-data.js';
+
 const activePlayersGrid = document.querySelector('[data-active-players-grid]');
 const emptyStateMessage = document.querySelector('[data-empty-state]');
 
-function incrementPlayerDeaths(playerId) {
-    const players = loadPlayers();
-    const player = players.find((currentPlayer) => currentPlayer.id === playerId);
-    if (!player) return;
-    player.deaths += 1;
-    savePlayers(players);
-    renderActivePlayers();
-}
-
-function decrementPlayerDeaths(playerId) {
-    const players = loadPlayers();
-    const player = players.find((currentPlayer) => currentPlayer.id === playerId);
-    if (!player || player.deaths <= 0) return;
-    player.deaths -= 1;
-    savePlayers(players);
-    renderActivePlayers();
-}
-
-function renderActivePlayers() {
-    const players = loadPlayers();
+function renderActivePlayers(players) {
     const activePlayers = players.filter((player) => player.active);
 
     activePlayersGrid.innerHTML = '';
@@ -60,4 +48,5 @@ function renderActivePlayers() {
     });
 }
 
-renderActivePlayers();
+// Re-renders for every change, including taps from other people's phones.
+subscribeToPlayers(renderActivePlayers);
