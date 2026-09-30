@@ -221,6 +221,42 @@ body {
     box-shadow: 0 14px 30px -16px rgba(34, 230, 200, 0.5);
 }
 
+.death-counter-button--secondary {
+    background: var(--dc-surface);
+    color: var(--dc-text);
+    border: 1px solid var(--dc-border);
+}
+
+.death-counter-button--secondary:hover,
+.death-counter-button--secondary:focus-visible {
+    border-color: var(--dc-accent-end);
+}
+
+.death-counter-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* ---------- Refresh bar + sync status ---------- */
+
+.death-counter-refresh-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.death-counter-sync-status {
+    color: var(--dc-text-muted);
+    font-size: 0.85rem;
+}
+
+.death-counter-sync-status--error {
+    color: var(--dc-danger);
+}
+
 /* ---------- Manage players screen ---------- */
 
 .player-management-page-shell {

@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/deathcounter.css">
+    <link rel="stylesheet" href="css/deathcounter.css?v=2">
 </head>
 <body>
 
@@ -22,6 +22,11 @@
             <h1 class="death-counter-title" style="font-size: clamp(1.6rem, 5vw, 2.2rem);">Spelers beheren</h1>
             <p class="death-counter-subtitle" style="margin: 0;">Voeg spelers toe, zet ze op inactief of verwijder ze.</p>
         </header>
+
+        <div class="death-counter-refresh-bar">
+            <button type="button" class="death-counter-button death-counter-button--secondary" data-refresh-button>&#x21bb; Vernieuwen</button>
+            <span class="death-counter-sync-status" data-sync-status aria-live="polite">Laden…</span>
+        </div>
 
         <form class="player-management-form" data-add-player-form>
             <label for="new-player-name-input" class="sr-only" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Naam van de speler</label>
@@ -41,6 +46,7 @@
 
         <p class="player-management-empty-state" data-empty-player-list hidden>Nog geen spelers toegevoegd.</p>
     </div>
-    <script type="module" src="js/spelers.js"></script>
+    <script src="js/deathcounter-data.js?v=2"></script>
+    <script src="js/spelers.js?v=2"></script>
 </body>
 </html>

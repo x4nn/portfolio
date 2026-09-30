@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="deathcounter/css/deathcounter.css">
+    <link rel="stylesheet" href="deathcounter/css/deathcounter.css?v=2">
 </head>
 <body>
 
@@ -20,6 +20,11 @@
         <p class="death-counter-subtitle">Tik op een speler om er een dood bij te tellen.</p>
     </header>
 
+    <div class="death-counter-refresh-bar">
+        <button type="button" class="death-counter-button death-counter-button--secondary" data-refresh-button>&#x21bb; Vernieuwen</button>
+        <span class="death-counter-sync-status" data-sync-status aria-live="polite">Laden…</span>
+    </div>
+
     <div class="death-counter-active-players-grid" data-active-players-grid></div>
 
     <div class="death-counter-empty-state" data-empty-state hidden>
@@ -28,6 +33,7 @@
     </div>
 
     <a class="death-counter-footer-link" href="deathcounter/spelers.html">Spelers beheren &rarr;</a>
-    <script type="module" src="deathcounter/js/deathcounter.js"></script>
+    <script src="deathcounter/js/deathcounter-data.js?v=2"></script>
+    <script src="deathcounter/js/deathcounter.js?v=2"></script>
 </body>
 </html>
