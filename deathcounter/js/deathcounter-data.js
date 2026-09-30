@@ -5,7 +5,8 @@
 // so nothing else is touched. Same approach as those pages: plain fetch()
 // calls to Firebase's REST API, no SDK.
 //
-// Data shape: deathcounter-players/{playerId} → { name, deaths, active, color, createdAt }
+// Data shape: deathcounter-players/{playerId} → { name, deaths, deathTimestamps, active, color, createdAt }
+// deathTimestamps is a list of Date.now() values, one per death, oldest first.
 
 const DEATH_COUNTER_DATABASE_URL = "https://co-housing-e2c00-default-rtdb.europe-west1.firebasedatabase.app/deathcounter-players";
 
@@ -43,7 +44,16 @@ async function loadPlayers() {
     return Object.entries(playersById)
         // Skip leftovers without a name, e.g. a tap that landed on a player someone just deleted.
         .filter(([, player]) => player && player.name)
-        .map(([playerId, player]) => ({ ...player, id: playerId, deaths: player.deaths || 0 }))
+        .map(([playerId, player]) => {
+            const deathTimestamps = player.deathTimestamps || [];
+            return {
+                ...player,
+                id: playerId,
+                deaths: player.deaths || 0,
+                // null when there's no recorded death yet (or only deaths from before timestamps existed).
+                lastDeathAt: deathTimestamps.length > 0 ? deathTimestamps[deathTimestamps.length - 1] : null,
+            };
+        })
         .sort((firstPlayer, secondPlayer) => firstPlayer.createdAt - secondPlayer.createdAt);
 }
 
@@ -67,24 +77,20 @@ function waitBeforeRetry() {
     return new Promise((resolve) => setTimeout(resolve, Math.random() * MAX_RETRY_DELAY_MS));
 }
 
-// Always starts from the live count in the database, never the (possibly stale)
+// Always starts from the live player in the database, never the (possibly stale)
 // number on screen:
-//   1. read the current count plus its ETag (a fingerprint of that exact value)
-//   2. save the new count with `if-match: <ETag>`, so Firebase only accepts it
-//      if nobody changed the count in between
+//   1. read the current player plus its ETag
+//   2. save the updated player with `if-match: <ETag>`, so Firebase only accepts
+//      it if nobody changed that player in between
 //   3. if someone did (status 412), start over from the new live value
 // That way two people tapping at the same moment both get counted, and -1
 // never takes a count below 0 even if the screen was out of date.
-async function loadLiveDeaths(deathsUrl) {
-    const response = await fetch(deathsUrl, { cache: 'no-store', headers: { 'X-Firebase-ETag': 'true' } });
+// Reads the full player plus its ETag (a fingerprint of that exact data).
+// Returns null for the player if someone deleted it.
+async function loadLivePlayer(playerId) {
+    const response = await fetch(playerUrl(playerId), { cache: 'no-store', headers: { 'X-Firebase-ETag': 'true' } });
     if (!response.ok) throw new Error(`Database gaf status ${response.status}`);
-    return { count: (await response.json()) || 0, etag: response.headers.get('ETag') };
-}
-
-async function playerExists(playerId) {
-    const response = await fetch(playerUrl(playerId, 'name'), { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Database gaf status ${response.status}`);
-    return Boolean(await response.json());
+    return { player: await response.json(), etag: response.headers.get('ETag') };
 }
 
 // Taps from this phone wait in line and save one after another, so quick
@@ -93,31 +99,42 @@ async function playerExists(playerId) {
 let queuedDeathChanges = Promise.resolve();
 
 function changePlayerDeaths(playerId, deathsChange) {
-    const thisDeathChange = queuedDeathChanges.then(() => saveDeathChangeFromLiveCount(playerId, deathsChange));
+    const thisDeathChange = queuedDeathChanges.then(() => saveDeathChangeFromLivePlayer(playerId, deathsChange));
     // Keep the line moving even if this change fails.
     queuedDeathChanges = thisDeathChange.catch(() => {});
     return thisDeathChange;
 }
 
-async function saveDeathChangeFromLiveCount(playerId, deathsChange) {
-    const deathsUrl = playerUrl(playerId, 'deaths');
+// Each death also stores when it happened (deathTimestamps, oldest first), so
+// "time since last death" can be shown and -1 can put it back to the previous one.
+function applyDeathChange(player, deathsChange) {
+    const deathTimestamps = [...(player.deathTimestamps || [])];
+    if (deathsChange > 0) {
+        deathTimestamps.push(Date.now());
+    } else {
+        deathTimestamps.pop();
+    }
+    return {
+        ...player,
+        deaths: Math.max((player.deaths || 0) + deathsChange, 0),
+        deathTimestamps,
+    };
+}
 
+async function saveDeathChangeFromLivePlayer(playerId, deathsChange) {
     for (let attempt = 1; attempt <= MAX_DEATH_SAVE_ATTEMPTS; attempt += 1) {
-        const [liveDeaths, playerStillExists] = await Promise.all([
-            loadLiveDeaths(deathsUrl),
-            playerExists(playerId),
-        ]);
+        const livePlayer = await loadLivePlayer(playerId);
 
         // Someone deleted this player in the meantime: nothing to count.
-        if (!playerStillExists) return;
+        if (!livePlayer.player || !livePlayer.player.name) return;
 
-        const newDeaths = Math.max(liveDeaths.count + deathsChange, 0);
-        if (newDeaths === liveDeaths.count) return;
+        // -1 on a count that is already 0: nothing to undo.
+        if (deathsChange < 0 && !livePlayer.player.deaths) return;
 
-        const saveResponse = await fetch(deathsUrl, {
+        const saveResponse = await fetch(playerUrl(playerId), {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'if-match': liveDeaths.etag },
-            body: JSON.stringify(newDeaths),
+            headers: { 'Content-Type': 'application/json', 'if-match': livePlayer.etag },
+            body: JSON.stringify(applyDeathChange(livePlayer.player, deathsChange)),
         });
         if (saveResponse.ok) return;
         if (saveResponse.status !== HTTP_STATUS_PRECONDITION_FAILED) {

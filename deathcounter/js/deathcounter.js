@@ -36,6 +36,48 @@ async function changeDeathsAndRefresh(playerId, deathsChange) {
     await refreshPlayers();
 }
 
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE;
+const SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
+
+// e.g. "45s", "12m 03s", "2u 05m", "3d 4u"
+function formatDuration(totalSeconds) {
+    const days = Math.floor(totalSeconds / SECONDS_PER_DAY);
+    const hours = Math.floor((totalSeconds % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
+    const minutes = Math.floor((totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
+    const seconds = totalSeconds % SECONDS_PER_MINUTE;
+    const padToTwoDigits = (number) => String(number).padStart(2, '0');
+
+    if (days > 0) return `${days}d ${hours}u`;
+    if (hours > 0) return `${hours}u ${padToTwoDigits(minutes)}m`;
+    if (minutes > 0) return `${minutes}m ${padToTwoDigits(seconds)}s`;
+    return `${seconds}s`;
+}
+
+function describeTimeSinceLastDeath(lastDeathAt) {
+    // Phones' clocks can differ a little; never show a negative time.
+    const secondsSinceLastDeath = Math.max(Math.floor((Date.now() - lastDeathAt) / MILLISECONDS_PER_SECOND), 0);
+    return `Laatste dood: ${formatDuration(secondsSinceLastDeath)} geleden`;
+}
+
+// Only labels with a known time get data-last-death-at, so the ticker leaves the others alone.
+function renderLastDeathLabel(player) {
+    if (player.lastDeathAt) {
+        return `<span class="death-counter-player-last-death" data-last-death-at="${player.lastDeathAt}">${describeTimeSinceLastDeath(player.lastDeathAt)}</span>`;
+    }
+    // Deaths counted before timestamps existed have no known time.
+    const labelText = player.deaths > 0 ? 'Laatste dood: onbekend' : 'Nog geen dood';
+    return `<span class="death-counter-player-last-death">${labelText}</span>`;
+}
+
+// Ticks every "time since last death" label on screen once per second, without re-fetching.
+function updateTimeSinceLastDeathLabels() {
+    document.querySelectorAll('[data-last-death-at]').forEach((lastDeathLabel) => {
+        lastDeathLabel.textContent = describeTimeSinceLastDeath(Number(lastDeathLabel.dataset.lastDeathAt));
+    });
+}
+
 function renderActivePlayers(players) {
     const activePlayers = players.filter((player) => player.active);
 
@@ -60,6 +102,7 @@ function renderActivePlayers(players) {
             <span class="death-counter-player-name">${escapeHtml(player.name)}</span>
             <span class="death-counter-player-death-count">${player.deaths}</span>
             <span class="death-counter-player-death-label">doden</span>
+            ${renderLastDeathLabel(player)}
         `;
         incrementButton.addEventListener('click', () => changeDeathsAndRefresh(player.id, 1));
 
@@ -77,5 +120,6 @@ function renderActivePlayers(players) {
 }
 
 refreshButton.addEventListener('click', refreshPlayers);
+setInterval(updateTimeSinceLastDeathLabels, MILLISECONDS_PER_SECOND);
 
 refreshPlayers();
