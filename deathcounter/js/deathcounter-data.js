@@ -57,10 +57,76 @@ function addPlayer(name, existingPlayerCount) {
     });
 }
 
-// Firebase adds this on the server itself, so two people tapping at the same
-// moment both get counted instead of one overwriting the other.
+// How often to retry when someone else changed the same count between our read and write.
+const MAX_DEATH_SAVE_ATTEMPTS = 15;
+const HTTP_STATUS_PRECONDITION_FAILED = 412;
+// Random short pause before a retry, so simultaneous taps don't keep colliding in lockstep.
+const MAX_RETRY_DELAY_MS = 250;
+
+function waitBeforeRetry() {
+    return new Promise((resolve) => setTimeout(resolve, Math.random() * MAX_RETRY_DELAY_MS));
+}
+
+// Always starts from the live count in the database, never the (possibly stale)
+// number on screen:
+//   1. read the current count plus its ETag (a fingerprint of that exact value)
+//   2. save the new count with `if-match: <ETag>`, so Firebase only accepts it
+//      if nobody changed the count in between
+//   3. if someone did (status 412), start over from the new live value
+// That way two people tapping at the same moment both get counted, and -1
+// never takes a count below 0 even if the screen was out of date.
+async function loadLiveDeaths(deathsUrl) {
+    const response = await fetch(deathsUrl, { cache: 'no-store', headers: { 'X-Firebase-ETag': 'true' } });
+    if (!response.ok) throw new Error(`Database gaf status ${response.status}`);
+    return { count: (await response.json()) || 0, etag: response.headers.get('ETag') };
+}
+
+async function playerExists(playerId) {
+    const response = await fetch(playerUrl(playerId, 'name'), { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Database gaf status ${response.status}`);
+    return Boolean(await response.json());
+}
+
+// Taps from this phone wait in line and save one after another, so quick
+// repeated tapping never collides with itself. Retries are only needed when
+// another phone saves at the same moment.
+let queuedDeathChanges = Promise.resolve();
+
 function changePlayerDeaths(playerId, deathsChange) {
-    return sendToDatabase(playerUrl(playerId, 'deaths'), 'PUT', { '.sv': { increment: deathsChange } });
+    const thisDeathChange = queuedDeathChanges.then(() => saveDeathChangeFromLiveCount(playerId, deathsChange));
+    // Keep the line moving even if this change fails.
+    queuedDeathChanges = thisDeathChange.catch(() => {});
+    return thisDeathChange;
+}
+
+async function saveDeathChangeFromLiveCount(playerId, deathsChange) {
+    const deathsUrl = playerUrl(playerId, 'deaths');
+
+    for (let attempt = 1; attempt <= MAX_DEATH_SAVE_ATTEMPTS; attempt += 1) {
+        const [liveDeaths, playerStillExists] = await Promise.all([
+            loadLiveDeaths(deathsUrl),
+            playerExists(playerId),
+        ]);
+
+        // Someone deleted this player in the meantime: nothing to count.
+        if (!playerStillExists) return;
+
+        const newDeaths = Math.max(liveDeaths.count + deathsChange, 0);
+        if (newDeaths === liveDeaths.count) return;
+
+        const saveResponse = await fetch(deathsUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'if-match': liveDeaths.etag },
+            body: JSON.stringify(newDeaths),
+        });
+        if (saveResponse.ok) return;
+        if (saveResponse.status !== HTTP_STATUS_PRECONDITION_FAILED) {
+            throw new Error(`Database gaf status ${saveResponse.status}`);
+        }
+        await waitBeforeRetry();
+    }
+
+    throw new Error('Te veel gelijktijdige wijzigingen, probeer opnieuw.');
 }
 
 function setPlayerActive(playerId, isActive) {

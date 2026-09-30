@@ -68,9 +68,7 @@ function renderActivePlayers(players) {
         undoButton.className = 'death-counter-undo-button';
         undoButton.textContent = '-1';
         undoButton.setAttribute('aria-label', `Laatste dood van ${player.name} ongedaan maken`);
-        undoButton.addEventListener('click', () => {
-            if (player.deaths > 0) changeDeathsAndRefresh(player.id, -1);
-        });
+        undoButton.addEventListener('click', () => changeDeathsAndRefresh(player.id, -1));
 
         playerCard.appendChild(incrementButton);
         playerCard.appendChild(undoButton);
