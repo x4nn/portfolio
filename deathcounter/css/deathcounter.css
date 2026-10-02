@@ -75,16 +75,28 @@ body {
 
 /* ---------- Main screen: active player buttons ---------- */
 
+/* Flex + wrap (instead of an auto-fill grid) so the cards always sit centered,
+   also when there are only one or two of them. */
 .death-counter-active-players-grid {
+    --player-card-gap: 18px;
     width: 100%;
     max-width: 720px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--player-card-gap);
 }
 
 .death-counter-player-card {
     position: relative;
+    flex: 0 0 200px;
+}
+
+/* Phones: two cards side by side. */
+@media (max-width: 480px) {
+    .death-counter-player-card {
+        flex-basis: calc(50% - var(--player-card-gap) / 2);
+    }
 }
 
 .death-counter-increment-button {
@@ -99,6 +111,7 @@ body {
     border-radius: 18px;
     padding: 28px 16px 22px;
     color: #14161f;
+    font-family: inherit;
     cursor: pointer;
     box-shadow: 0 14px 30px -16px var(--dc-shadow);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -168,6 +181,188 @@ body {
 .death-counter-undo-button:hover,
 .death-counter-undo-button:focus-visible {
     background: rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Main screen: deaths over time graph ---------- */
+
+.death-counter-graph-section {
+    --graph-surface: var(--dc-surface);
+    --graph-gridline: #2a3045;
+    width: 100%;
+    max-width: 720px;
+    margin-top: 40px;
+    background: var(--graph-surface);
+    border: 1px solid var(--dc-border);
+    border-radius: 18px;
+    padding: 22px 20px 18px;
+}
+
+.death-counter-graph-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.death-counter-graph-subtitle {
+    color: var(--dc-text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+.death-counter-graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-bottom: 8px;
+    list-style: none;
+    font-size: 0.85rem;
+    color: var(--dc-text);
+}
+
+.death-counter-graph-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.death-counter-graph-line-key {
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--player-accent-color);
+}
+
+.death-counter-graph-canvas {
+    position: relative;
+}
+
+.death-counter-graph-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: pan-y;
+}
+
+.death-counter-graph-svg:focus-visible {
+    outline: 2px solid var(--dc-accent-end);
+    outline-offset: 4px;
+    border-radius: 8px;
+}
+
+.death-counter-graph-gridline {
+    stroke: var(--graph-gridline);
+    stroke-width: 1;
+}
+
+/* A cut-out pause: a darker strip that breaks the gridlines, lines run straight across it. */
+.death-counter-graph-pause-band {
+    fill: var(--dc-bg);
+    opacity: 0.55;
+}
+
+.death-counter-graph-axis-label {
+    fill: var(--dc-text-muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.death-counter-graph-line {
+    fill: none;
+    stroke: var(--player-accent-color);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.death-counter-graph-end-dot {
+    fill: var(--player-accent-color);
+    stroke: var(--graph-surface);
+    stroke-width: 2;
+}
+
+.death-counter-graph-end-label {
+    fill: var(--dc-text);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.death-counter-graph-crosshair {
+    stroke: var(--dc-text-muted);
+    stroke-width: 1;
+}
+
+.death-counter-graph-tooltip {
+    position: absolute;
+    top: 0;
+    pointer-events: none;
+    min-width: 140px;
+    background: #0f121a;
+    border: 1px solid var(--dc-border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    box-shadow: 0 10px 24px -12px var(--dc-shadow);
+}
+
+.death-counter-graph-tooltip-time {
+    color: var(--dc-text-muted);
+    margin-bottom: 4px;
+}
+
+.death-counter-graph-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.death-counter-graph-tooltip-value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    min-width: 1.5em;
+}
+
+.death-counter-graph-tooltip-name {
+    color: var(--dc-text-muted);
+}
+
+.death-counter-graph-empty-message {
+    color: var(--dc-text-muted);
+    font-size: 0.9rem;
+    padding: 24px 0;
+    text-align: center;
+}
+
+.death-counter-graph-table-toggle {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: var(--dc-text-muted);
+}
+
+.death-counter-graph-table-toggle summary {
+    cursor: pointer;
+}
+
+.death-counter-graph-table {
+    width: 100%;
+    margin-top: 8px;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+}
+
+.death-counter-graph-table th,
+.death-counter-graph-table td {
+    text-align: left;
+    padding: 4px 8px 4px 0;
+    border-bottom: 1px solid var(--graph-gridline);
+}
+
+.death-counter-graph-table th {
+    color: var(--dc-text-muted);
+    font-weight: 600;
+}
+
+.death-counter-graph-table td {
+    color: var(--dc-text);
 }
 
 .death-counter-empty-state {

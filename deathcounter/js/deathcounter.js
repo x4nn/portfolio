@@ -94,6 +94,7 @@ function updateTimeSinceLastDeathLabels() {
 function renderActivePlayers(players) {
     const activePlayers = players.filter((player) => player.active);
 
+    renderDeathGraph(activePlayers);
     activePlayersGrid.innerHTML = '';
 
     if (activePlayers.length === 0) {

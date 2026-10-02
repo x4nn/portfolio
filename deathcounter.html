@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="deathcounter/css/deathcounter.css?v=6">
+    <link rel="stylesheet" href="deathcounter/css/deathcounter.css?v=7">
 </head>
 <body>
 
@@ -27,13 +27,25 @@
 
     <div class="death-counter-active-players-grid" data-active-players-grid></div>
 
+    <section class="death-counter-graph-section" data-death-graph-section aria-labelledby="death-graph-title" hidden>
+        <h2 class="death-counter-graph-title" id="death-graph-title">Doden over tijd</h2>
+        <p class="death-counter-graph-subtitle">Totaal per speler. Pauzes van meer dan een uur zijn weggelaten. Alleen doden met een bekende tijd.</p>
+        <ul class="death-counter-graph-legend" data-death-graph-legend></ul>
+        <div class="death-counter-graph-canvas" data-death-graph-canvas></div>
+        <details class="death-counter-graph-table-toggle">
+            <summary>Doden per dag</summary>
+            <div data-death-graph-table></div>
+        </details>
+    </section>
+
     <div class="death-counter-empty-state" data-empty-state hidden>
         <p>Nog geen actieve spelers.</p>
         <a class="death-counter-button death-counter-button--primary" href="deathcounter/spelers.html">Spelers toevoegen</a>
     </div>
 
     <a class="death-counter-footer-link" href="deathcounter/spelers.html">Spelers beheren &rarr;</a>
-    <script src="deathcounter/js/deathcounter-data.js?v=6"></script>
-    <script src="deathcounter/js/deathcounter.js?v=6"></script>
+    <script src="deathcounter/js/deathcounter-data.js?v=7"></script>
+    <script src="deathcounter/js/death-graph.js?v=7"></script>
+    <script src="deathcounter/js/deathcounter.js?v=7"></script>
 </body>
 </html>
