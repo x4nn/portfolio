@@ -97,10 +97,10 @@ const reunionReachedMessage = "Ik ben er. Kom hier. 💚";
 // below generates as many scattered copies as SCATTERED_COVER_COUNT, cycling
 // through this list, instead of one hardcoded element per copy.
 const ALBUM_COVER_IMAGE_PATHS = [
-    "/luna/images/covers/The_Joshua_Tree.png",
-    "/luna/images/covers/GNR.png",
-    "/luna/images/covers/linkin-park.png",
-    "/luna/images/covers/romeo-and-juliet.png",
+    "images/covers/The_Joshua_Tree.png",
+    "images/covers/GNR.png",
+    "images/covers/linkin-park.png",
+    "images/covers/romeo-and-juliet.png",
 ];
 const SCATTERED_COVER_COUNT = 36;
 
@@ -109,14 +109,14 @@ const SCATTERED_COVER_COUNT = 36;
 // taps a mix of these and the note emojis below. Leave this empty to fall
 // back to emoji-only.
 const SELFIE_IMAGE_PATHS = [
-    "/luna/images/click-game/selfie-1.jpeg",
-    "/luna/images/click-game/selfie-2.jpeg",
-    "/luna/images/click-game/selfie-3.jpeg",
-    "/luna/images/click-game/selfie-4.jpeg",
-    "/luna/images/click-game/selfie-5.jpeg",
-    "/luna/images/click-game/selfie-6.jpeg",
-    "/luna/images/click-game/selfie-7.jpeg",
-    "/luna/images/click-game/selfie-8.jpeg",
+    "images/click-game/selfie-1.jpeg",
+    "images/click-game/selfie-2.jpeg",
+    "images/click-game/selfie-3.jpeg",
+    "images/click-game/selfie-4.jpeg",
+    "images/click-game/selfie-5.jpeg",
+    "images/click-game/selfie-6.jpeg",
+    "images/click-game/selfie-7.jpeg",
+    "images/click-game/selfie-8.jpeg",
 ];
 
 // ---------------------------------------------------------------

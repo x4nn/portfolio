@@ -1,7 +1,7 @@
 /* ================================================================
    Brieven — Luna's "open when…" letters page
    Shares the same pastel green / warm palette as the rest of the
-   luna/ sub-project (see luna.html, mixtape.css, dagboek.css,
+   luna/ sub-project (see luna/index.html, mixtape.css, dagboek.css,
    avonturen.css) — kept as separate `--sage`/`--forest`/etc. tokens
    per page rather than a shared stylesheet, so each luna/ page stays
    a fully standalone file.
