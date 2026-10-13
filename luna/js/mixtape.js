@@ -97,26 +97,26 @@ const reunionReachedMessage = "Ik ben er. Kom hier. 💚";
 // below generates as many scattered copies as SCATTERED_COVER_COUNT, cycling
 // through this list, instead of one hardcoded element per copy.
 const ALBUM_COVER_IMAGE_PATHS = [
-    "/assets/images/luna/covers/The_Joshua_Tree.png",
-    "/assets/images/luna/covers/GNR.png",
-    "/assets/images/luna/covers/linkin-park.png",
-    "/assets/images/luna/covers/romeo-and-juliet.png",
+    "/luna/images/covers/The_Joshua_Tree.png",
+    "/luna/images/covers/GNR.png",
+    "/luna/images/covers/linkin-park.png",
+    "/luna/images/covers/romeo-and-juliet.png",
 ];
 const SCATTERED_COVER_COUNT = 36;
 
 // ✏️ EDIT: selfies for Track 03 (the catch game). Drop more image files into
-// assets/images/luna/click-game/ and add their filenames here any time — she
+// luna/images/click-game/ and add their filenames here any time — she
 // taps a mix of these and the note emojis below. Leave this empty to fall
 // back to emoji-only.
 const SELFIE_IMAGE_PATHS = [
-    "/assets/images/luna/click-game/selfie-1.jpeg",
-    "/assets/images/luna/click-game/selfie-2.jpeg",
-    "/assets/images/luna/click-game/selfie-3.jpeg",
-    "/assets/images/luna/click-game/selfie-4.jpeg",
-    "/assets/images/luna/click-game/selfie-5.jpeg",
-    "/assets/images/luna/click-game/selfie-6.jpeg",
-    "/assets/images/luna/click-game/selfie-7.jpeg",
-    "/assets/images/luna/click-game/selfie-8.jpeg",
+    "/luna/images/click-game/selfie-1.jpeg",
+    "/luna/images/click-game/selfie-2.jpeg",
+    "/luna/images/click-game/selfie-3.jpeg",
+    "/luna/images/click-game/selfie-4.jpeg",
+    "/luna/images/click-game/selfie-5.jpeg",
+    "/luna/images/click-game/selfie-6.jpeg",
+    "/luna/images/click-game/selfie-7.jpeg",
+    "/luna/images/click-game/selfie-8.jpeg",
 ];
 
 // ---------------------------------------------------------------
