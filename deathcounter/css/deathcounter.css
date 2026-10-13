@@ -476,6 +476,51 @@ body {
     cursor: wait;
 }
 
+/* ---------- Theme toggle (switch) ---------- */
+
+.death-counter-theme-toggle {
+    --theme-toggle-width: 68px;
+    --theme-toggle-height: 36px;
+    --theme-toggle-padding: 4px;
+    --theme-toggle-thumb-size: calc(var(--theme-toggle-height) - 2 * var(--theme-toggle-padding) - 2px);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: var(--theme-toggle-width);
+    height: var(--theme-toggle-height);
+    padding: 0 10px;
+    background: var(--dc-surface);
+    border: 1px solid var(--dc-border);
+    border-radius: 999px;
+    color: var(--dc-text-muted);
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.death-counter-theme-toggle:hover,
+.death-counter-theme-toggle:focus-visible {
+    border-color: var(--dc-accent-end);
+}
+
+.death-counter-theme-toggle__thumb {
+    position: absolute;
+    top: var(--theme-toggle-padding);
+    left: var(--theme-toggle-padding);
+    width: var(--theme-toggle-thumb-size);
+    height: var(--theme-toggle-thumb-size);
+    border-radius: 999px;
+    background: linear-gradient(120deg, var(--dc-accent-start), var(--dc-accent-end));
+    transition: transform 0.2s ease;
+}
+
+/* Dark theme = switch on: the thumb sits on the moon side. */
+.death-counter-theme-toggle[aria-checked="true"] .death-counter-theme-toggle__thumb {
+    transform: translateX(calc(var(--theme-toggle-width) - var(--theme-toggle-thumb-size) - 2 * var(--theme-toggle-padding) - 2px));
+}
+
 /* ---------- Refresh bar + sync status ---------- */
 
 .death-counter-refresh-bar {

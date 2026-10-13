@@ -36,7 +36,7 @@
     }
 
     function updateToggleButton(toggleButton, theme) {
-        toggleButton.setAttribute('aria-pressed', theme === THEME_DARK ? 'true' : 'false');
+        toggleButton.setAttribute('aria-checked', theme === THEME_DARK ? 'true' : 'false');
     }
 
     applyTheme(readSavedTheme() || detectSystemTheme());

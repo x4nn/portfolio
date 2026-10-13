@@ -6,7 +6,7 @@ This file gives Claude Code context on this project. Read it before making chang
 
 > **Let op — actuele stand van deze repo:** dit is geen Astro-project. Het is een statische site met plain HTML/CSS/JS (`index.html`, `deathcounter.html`, `arcade/`, `luna/`, `assets/`, ...), zonder buildstap of `src/`. De Astro-secties hieronder (tech stack, commands, project structure, central config) gelden hier dus niet en zijn nog niet herschreven.
 >
-> **Death counter** (`deathcounter.html`, `deathcounter/spelers.html`, `deathcounter/css/deathcounter.css`, `deathcounter/js/`): alle kleuren zijn `--dc-*` variabelen. `:root` is het donkere thema, `:root[data-theme="light"]` het lichte. `deathcounter/js/theme.js` (laadt in `<head>`) zet `data-theme` op `<html>` uit localStorage (key `deathcounter-theme`) of anders uit `prefers-color-scheme`, en bedient de knop `[data-theme-toggle]`. Nieuwe kleuren altijd als variabele in beide thema's toevoegen. Na wijzigingen het `?v=` nummer op de CSS/JS-links ophogen (nu 8).
+> **Death counter** (`deathcounter.html`, `deathcounter/spelers.html`, `deathcounter/css/deathcounter.css`, `deathcounter/js/`): alle kleuren zijn `--dc-*` variabelen. `:root` is het donkere thema, `:root[data-theme="light"]` het lichte. `deathcounter/js/theme.js` (laadt in `<head>`) zet `data-theme` op `<html>` uit localStorage (key `deathcounter-theme`) of anders uit `prefers-color-scheme`, en bedient de knop `[data-theme-toggle]`. Nieuwe kleuren altijd als variabele in beide thema's toevoegen. Na wijzigingen het `?v=` nummer op de CSS/JS-links ophogen (nu 9).
 
 ## About me
 
