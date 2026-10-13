@@ -18,7 +18,7 @@
 }
 
 /* The theme above is only the pre-load/fallback look. Once the app knows who's active, JS
-   (see assets/js/user-theme.js) overrides these same custom properties, computed from that
+   (see js/user-theme.js) overrides these same custom properties, computed from that
    user's `color` field in the database - so there's no separate per-role block to keep in sync. */
 
 * {

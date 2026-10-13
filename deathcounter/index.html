@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Death counter om per speler bij te houden hoe vaak die dood is gegaan.">
+    <title>Death Counter</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/deathcounter.css?v=10">
+    <script src="js/theme.js?v=10"></script>
+</head>
+<body>
+
+    <header class="death-counter-hero">
+        <div class="death-counter-eyebrow">&lt;deathcounter/&gt;</div>
+        <h1 class="death-counter-title">Death Counter</h1>
+        <p class="death-counter-subtitle">Tik op een speler om er een dood bij te tellen.</p>
+    </header>
+
+    <div class="death-counter-refresh-bar">
+        <button type="button" class="death-counter-button death-counter-button--secondary" data-refresh-button>&#x21bb; Vernieuwen</button>
+        <button type="button" class="death-counter-theme-toggle" role="switch" aria-checked="true" aria-label="Donker thema" data-theme-toggle>
+            <span class="death-counter-theme-toggle__icon" aria-hidden="true">&#x2600;</span>
+            <span class="death-counter-theme-toggle__icon" aria-hidden="true">&#x263E;</span>
+            <span class="death-counter-theme-toggle__thumb" aria-hidden="true"></span>
+        </button>
+        <span class="death-counter-sync-status" data-sync-status aria-live="polite">Laden…</span>
+    </div>
+
+    <div class="death-counter-active-players-grid" data-active-players-grid></div>
+
+    <section class="death-counter-graph-section" data-death-graph-section aria-labelledby="death-graph-title" hidden>
+        <h2 class="death-counter-graph-title" id="death-graph-title">Doden over tijd</h2>
+        <p class="death-counter-graph-subtitle">Totaal per speler. Pauzes van meer dan een uur zijn weggelaten. Alleen doden met een bekende tijd.</p>
+        <ul class="death-counter-graph-legend" data-death-graph-legend></ul>
+        <div class="death-counter-graph-canvas" data-death-graph-canvas></div>
+        <details class="death-counter-graph-table-toggle">
+            <summary>Doden per dag</summary>
+            <div data-death-graph-table></div>
+        </details>
+    </section>
+
+    <div class="death-counter-empty-state" data-empty-state hidden>
+        <p>Nog geen actieve spelers.</p>
+        <a class="death-counter-button death-counter-button--primary" href="spelers.html">Spelers toevoegen</a>
+    </div>
+
+    <a class="death-counter-footer-link" href="spelers.html">Spelers beheren &rarr;</a>
+    <script src="js/deathcounter-data.js?v=10"></script>
+    <script src="js/death-graph.js?v=10"></script>
+    <script src="js/deathcounter.js?v=10"></script>
+</body>
+</html>

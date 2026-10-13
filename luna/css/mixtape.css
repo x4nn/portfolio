@@ -60,7 +60,7 @@ body {
 
 /* ---------- Scattered album covers (background decoration) ---------- */
 /* #luna-cover-layer is filled in at runtime by scatterAlbumCovers() in
-   assets/js/pages/luna.js — each .luna-cover gets its top/left/rotation/size
+   luna/js/mixtape.js — each .luna-cover gets its top/left/rotation/size
    set inline there, generated from just the 4 image paths + a count instead
    of one CSS rule per image. Positioned as a % of .luna-wrap's own height
    (not fixed px against the whole document) so they always land inside the

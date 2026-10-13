@@ -562,7 +562,7 @@ function buildPaymentStatusBadgeHtml(role, monthKey) {
 }
 
 function buildPaymentsPageUrl(monthKey) {
-    return `cohousing-cheques.html?month=${encodeURIComponent(monthKey)}`;
+    return `cheques.html?month=${encodeURIComponent(monthKey)}`;
 }
 
 function formatDateTime(timestampMs) {

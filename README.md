@@ -8,14 +8,16 @@ Moderne single-page portfolio van Xander, gebouwd met een onderhoudbare structuu
 .
 ├── CNAME
 ├── htaccess
-├── index.html
-├── README.md
-└── assets/
-		├── css/
-		│   └── style.css
-		└── js/
-				└── main.js
+├── index.html, projects.html, blog.html   # portfolio-pagina's
+├── assets/                                # alleen portfolio (css, js, blog-afbeeldingen, video's)
+├── arcade/         # zelfstandig subproject (index.html, rummikub, uno, css/, js/)
+├── cohousing/      # zelfstandig subproject (index.html, cheques, notes, css/, js/)
+├── deathcounter/   # zelfstandig subproject (index.html, spelers, css/, js/)
+├── luna/           # zelfstandig subproject (index.html, 4 pagina's, css/, js/, images/)
+└── arcade.html, cohousing.html, ...       # redirect-stubs naar de nieuwe locaties
 ```
+
+Elk subproject heeft zijn eigen assets en deelt niets met het portfolio. Alleen de Firebase-database (project `co-housing-e2c00`) wordt door de subprojecten gedeeld; de URL's staan in hun eigen JS.
 
 ## Architectuur
 
