@@ -1,4 +1,4 @@
-// Shared data layer for the Death Counter pages (deathcounter.html + deathcounter/spelers.html).
+// Shared data layer for the Death Counter pages (deathcounter/index.html + deathcounter/spelers.html).
 //
 // Players live in the same Firebase Realtime Database the rest of this site
 // already uses (cohousing, luna/), under their own "deathcounter-players" key
