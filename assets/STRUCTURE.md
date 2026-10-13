@@ -1,6 +1,7 @@
 # Portfolio Asset Structure
 
-Overzichtelijke organisatie van CSS en JavaScript per pagina.
+Overzichtelijke organisatie van CSS en JavaScript per pagina van het **portfolio** (index, projects, blog).
+De subprojecten (`arcade/`, `cohousing/`, `deathcounter/`, `luna/`) hebben elk een eigen map met eigen `css/`, `js/` en eventueel `images/`; ze gebruiken niets uit deze `assets/`-map.
 
 ## 📁 Folder Opbouw
 
