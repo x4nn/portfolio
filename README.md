@@ -14,6 +14,7 @@ Moderne single-page portfolio van Xander, gebouwd met een onderhoudbare structuu
 ├── cohousing/      # zelfstandig subproject (index.html, cheques, notes, css/, js/)
 ├── deathcounter/   # zelfstandig subproject (index.html, spelers, css/, js/)
 ├── luna/           # zelfstandig subproject (index.html, 4 pagina's, css/, js/, images/)
+├── x/              # geheime navigatiepagina (/x/): knoppen naar alle subprojecten, noindex, niet gelinkt
 └── arcade.html, cohousing.html, ...       # redirect-stubs naar de nieuwe locaties
 ```
 
