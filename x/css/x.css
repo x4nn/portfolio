@@ -8,6 +8,20 @@
     --x-accent-start: #7c5cff;
     --x-accent-end: #22e6c8;
     --x-radius: 14px;
+    color-scheme: dark;
+}
+
+/* Light theme: theme.js sets data-theme="light" on <html>. Only colors change here. */
+:root[data-theme="light"] {
+    --x-bg: #f4f6fb;
+    --x-surface: #ffffff;
+    --x-surface-hover: #e9ecf8;
+    --x-border: #cfd5e8;
+    --x-text: #1a1d2b;
+    --x-text-muted: #545c7a;
+    --x-accent-start: #6a46f0;
+    --x-accent-end: #0a8f7c;
+    color-scheme: light;
 }
 
 * {
@@ -34,6 +48,66 @@ body {
     margin-bottom: 40px;
     text-align: center;
 }
+
+/* ---------- Theme toggle (switch) ---------- */
+
+.x-theme-toggle {
+    --theme-toggle-width: 68px;
+    --theme-toggle-height: 36px;
+    --theme-toggle-padding: 4px;
+    --theme-toggle-border-width: 1px;
+    --theme-toggle-thumb-size: calc(var(--theme-toggle-height) - 2 * var(--theme-toggle-padding) - 2 * var(--theme-toggle-border-width));
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: var(--theme-toggle-width);
+    height: var(--theme-toggle-height);
+    margin-top: 16px;
+    padding: 0 10px;
+    background: var(--x-surface);
+    border: var(--theme-toggle-border-width) solid var(--x-border);
+    border-radius: 999px;
+    color: var(--x-text-muted);
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.x-theme-toggle:hover,
+.x-theme-toggle:focus-visible {
+    border-color: var(--x-accent-start);
+}
+
+.x-theme-toggle:focus-visible {
+    outline: 2px solid var(--x-accent-end);
+    outline-offset: 2px;
+}
+
+.x-theme-toggle__icon {
+    position: relative;
+    z-index: 1;
+}
+
+.x-theme-toggle__thumb {
+    position: absolute;
+    top: calc(var(--theme-toggle-padding) - var(--theme-toggle-border-width));
+    left: calc(var(--theme-toggle-padding) - var(--theme-toggle-border-width));
+    width: var(--theme-toggle-thumb-size);
+    height: var(--theme-toggle-thumb-size);
+    border-radius: 999px;
+    background: linear-gradient(120deg, var(--x-accent-start), var(--x-accent-end));
+    opacity: 0.35;
+    transition: transform 0.2s ease;
+}
+
+/* Dark theme = switch on: the thumb sits on the moon side. */
+.x-theme-toggle[aria-checked="true"] .x-theme-toggle__thumb {
+    transform: translateX(calc(var(--theme-toggle-width) - var(--theme-toggle-thumb-size) - 2 * var(--theme-toggle-padding)));
+}
+
+/* ---------- Navigation ---------- */
 
 .x-title {
     font-size: 2rem;
