@@ -1,26 +1,26 @@
 :root {
-    --x-bg: #12141c;
-    --x-surface: #1b1f2e;
-    --x-surface-hover: #242a40;
-    --x-border: #333a54;
-    --x-text: #eef1fa;
-    --x-text-muted: #9aa3c4;
-    --x-accent-start: #7c5cff;
-    --x-accent-end: #22e6c8;
+    --x-bg: #111a14;
+    --x-surface: #1a2a1f;
+    --x-surface-hover: #233b2b;
+    --x-border: #335040;
+    --x-text: #eef8f1;
+    --x-text-muted: #9ec4ab;
+    --x-accent-start: #34d27b;
+    --x-accent-end: #8be04a;
     --x-radius: 14px;
     color-scheme: dark;
 }
 
 /* Light theme: theme.js sets data-theme="light" on <html>. Only colors change here. */
 :root[data-theme="light"] {
-    --x-bg: #f4f6fb;
+    --x-bg: #f2f8f4;
     --x-surface: #ffffff;
-    --x-surface-hover: #e9ecf8;
-    --x-border: #cfd5e8;
-    --x-text: #1a1d2b;
-    --x-text-muted: #545c7a;
-    --x-accent-start: #6a46f0;
-    --x-accent-end: #0a8f7c;
+    --x-surface-hover: #e4f2e9;
+    --x-border: #c3dccb;
+    --x-text: #14231a;
+    --x-text-muted: #4a6455;
+    --x-accent-start: #1f8a4c;
+    --x-accent-end: #0f6b3a;
     color-scheme: light;
 }
 
